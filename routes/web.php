@@ -95,7 +95,7 @@ Route::prefix('api')->group(function () {
 
 	Route::post('search_offer', 'ApiController@search_offer');
 	Route::post('search_offer_list', 'ApiController@search_offer_list');
-
+	Route::post('set_need', 'ApiController@set_need');
 });
 
 Route::get('home/big/{filename}', array(function ($filename)

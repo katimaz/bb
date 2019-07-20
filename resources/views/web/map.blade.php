@@ -124,9 +124,18 @@
         </div>
         <div class="modal-body">
           <p><span class="text-success">關鍵字：</span>加壓馬逹安裝</p>
-          <p><span class="text-success"><i class="fa fa-map-marker" aria-hidden="true"></i> 所需服務地點：</span>目前地點</p>
-          <p><span class="text-success"><i class="fa fa-adjust" aria-hidden="true"></i> 搜尋半徑：</span>10 公里</p>
-          <p><span class="text-success"><i class="fa fa-check-square-o" aria-hidden="true"></i> 服務類別：</span>水電工程</p>
+          <p>
+            <span class="text-success"><i class="fa fa-map-marker" aria-hidden="true"></i> 所需服務地點：</span>
+            <span id="need_location">目前地點</span>
+          </p>
+          <p>
+            <span class="text-success"><i class="fa fa-adjust" aria-hidden="true"></i> 搜尋半徑：</span>
+            <span id="need_distance"> 10 公里 </span>
+          </p>
+          <p>
+            <span class="text-success"><i class="fa fa-check-square-o" aria-hidden="true"></i> 服務類別：</span>
+            <span id="need_service_type"> 水電工程 </span>
+          </p>
 
 
             <!-- 設計選項
@@ -177,78 +186,78 @@
 
             <div class="form-group">
               <label for="location"><i class="fa fa-usd" aria-hidden="true"></i> 預算</label>
-              <input type="text" class="form-control" id="location" placeholder="請輸入金額">
+              <input type="text" class="form-control" id="budget" placeholder="請輸入金額">
               <span>元</span>
             </div>
             <div class="form-group">
-              <input id='day' type="radio" name='group-1' checked='checked' />
+              <input id='day' type="radio" class="need_budget_type" name='group-1' value="每件" checked='checked' />
               <label for="day">每件</label>
-              <input id='hour' type="radio" name='group-1' />
+              <input id='hour' type="radio" class="need_budget_type" name='group-1' value="每小時" />
               <label for="hour">每小時</label>
             </div>
             <div class="form-group">
               <label for="location"><i class="fa fa-calendar" aria-hidden="true"></i> 週期</label>
               <div class="cy-arr">
-                <input id='once' type="radio" name='group-2' data-toggle-select-hide=".cycle"
-                  data-toggle-select-show="#cy-a" checked />
+                <input id='once' type="radio" class="need_frequency" name='group-2' data-toggle-select-hide=".cycle"
+                  data-toggle-select-show="#cy-a" value="一次" checked />
                 <label for="once">一次</label>
-                <input id='daily' type="radio" name='group-2' data-toggle-select-hide=".cycle"
-                  data-toggle-select-show="#cy-b" />
+                <input id='daily' type="radio" class="need_frequency" name='group-2' data-toggle-select-hide=".cycle"
+                  data-toggle-select-show="#cy-b" value="每日" />
                 <label for="daily">每日</label>
-                <input id='weekly' type="radio" name='group-2' data-toggle-select-hide=".cycle"
-                  data-toggle-select-show="#cy-c" />
+                <input id='weekly' type="radio" class="need_frequency" name='group-2' data-toggle-select-hide=".cycle"
+                  data-toggle-select-show="#cy-c" value="每週" />
                 <label for="weekly">每週</label>
-                <input id='month' type="radio" name='group-2' data-toggle-select-hide=".cycle"
-                  data-toggle-select-show="#cy-d" />
+                <input id='month' type="radio" class="need_frequency" name='group-2' data-toggle-select-hide=".cycle"
+                  data-toggle-select-show="#cy-d" value="每月" />
                 <label for="month">每月</label>
               </div>
               <div class="cycle active" id="cy-a">
-                <label>預約日期：</label><input type="date" class="form-control">
-                <label>預約時間：</label><input type="time" class="form-control">
+                <label>預約日期：</label><input type="date" class="form-control s_dt e_dt">
+                <label>預約時間：</label><input type="time" class="form-control time">
                 <label id="number">工作時間/小時：</label>
                 <div class="input-group" id="number-picker">
                   <div class="input-group-button">
                     <button class="button minus" value="-" for="break">-</button>
                   </div>
-                  <input class="input-group-field form-control" id="break" type="number" value="" min="1" max="24">
+                  <input class="input-group-field form-control need_available_daytime_enum" id="break" type="number" value="" min="1" max="24">
                   <div class="input-group-button">
                     <button class="button plus" value="+" for="break">+</button>
                   </div>
                 </div>
               </div>
               <div class="cycle" id="cy-b">
-                <label>預約日期：</label><input type="date" id="start" class="form-control">
-                <label>結束日期：</label><input type="date" id="end" class="form-control">
-                <label>預約時間：</label><input type="time" class="form-control">
+                <label>預約日期：</label><input type="date" id="start" class="form-control s_dt">
+                <label>結束日期：</label><input type="date" id="end" class="form-control e_dt">
+                <label>預約時間：</label><input type="time" class="form-control time">
                 <label id="number">工作時間/小時：</label>
                 <div class="input-group" id="number-picker">
                   <div class="input-group-button">
                     <button class="button minus" value="-" for="break-1">-</button>
                   </div>
-                  <input class="input-group-field form-control" id="break-1" type="number" value="" min="1" max="24">
+                  <input class="input-group-field form-control need_available_daytime_enum" id="break-1" type="number" value="" min="1" max="24">
                   <div class="input-group-button">
                     <button class="button plus" value="+" for="break-1">+</button>
                   </div>
                 </div>
               </div>
               <div class="cycle" id="cy-c">
-                <label>預約日期：</label><input type="date" id="start" class="form-control">
-                <label>結束日期：</label><input type="date" id="end" class="form-control">
+                <label>預約日期：</label><input type="date" id="start" class="form-control s_dt">
+                <label>結束日期：</label><input type="date" id="end" class="form-control e_dt">
                 <label>星期：</label>
                 <div>
-                  <input id='week-1' type="checkbox" name='week' />
+                  <input id='week-1' type="checkbox" class="week" name='week' value="星期一" data-w="1" />
                   <label for="week-1">星期一</label>
-                  <input id='week-2' type="checkbox" name='week' />
+                  <input id='week-2' type="checkbox" class="week" name='week' value="星期二" data-w="2" />
                   <label for="week-2">星期二</label>
-                  <input id='week-3' type="checkbox" name='week' />
+                  <input id='week-3' type="checkbox" class="week" name='week' value="星期三" data-w="3" />
                   <label for="week-3">星期三</label>
-                  <input id='week-4' type="checkbox" name='week' />
+                  <input id='week-4' type="checkbox" class="week" name='week' value="星期四" data-w="4" />
                   <label for="week-4">星期四</label>
-                  <input id='week-5' type="checkbox" name='week' />
+                  <input id='week-5' type="checkbox" class="week" name='week' value="星期五" data-w="5" />
                   <label for="week-5">星期五</label>
-                  <input id='week-6' type="checkbox" name='week' />
+                  <input id='week-6' type="checkbox" class="week" name='week' value="星期六" data-w="6" />
                   <label for="week-6">星期六</label>
-                  <input id='week-7' type="checkbox" name='week' />
+                  <input id='week-7' type="checkbox" class="week" name='week' value="星期日" data-w="0" />
                   <label for="week-7">星期日</label>
                 </div>
                 <label>預約時間：</label><input type="time" class="form-control">
@@ -257,7 +266,7 @@
                   <div class="input-group-button">
                     <button class="button minus" value="-" for="break-2">-</button>
                   </div>
-                  <input class="input-group-field form-control" id="break-2" type="number" value="" min="1" max="24">
+                  <input class="input-group-field form-control need_available_daytime_enum" id="break-2" type="number" value="" min="1" max="24">
                   <div class="input-group-button">
                     <button class="button plus" value="+" for="break-2">+</button>
                   </div>
@@ -265,16 +274,16 @@
 
               </div>
               <div class="cycle" id="cy-d">
-                <label>預約日期：</label><input type="date" id="start" class="form-control">
-                <label>結束日期：</label><input type="date" id="end" class="form-control">
-                <label>每月幾號：</label><input type="text" class="form-control" placeholder="多個日期以＇，＇分隔">
+                <label>預約日期：</label><input type="date" id="start" class="form-control s_dt">
+                <label>結束日期：</label><input type="date" id="end" class="form-control e_dt">
+                <label>每月幾號：</label><input type="text" id="need_monthday_enum" class="form-control" placeholder="多個日期以','分隔">
                 <label>預約時間：</label><input type="time" class="form-control">
                 <label id="number">工作時間/小時：</label>
                 <div class="input-group" id="number-picker">
                   <div class="input-group-button">
                     <button class="button minus" value="-" for="break-3">-</button>
                   </div>
-                  <input class="input-group-field form-control" id="break-3" type="number" value="" min="1" max="24">
+                  <input class="input-group-field form-control need_available_daytime_enum" id="break-3" type="number" value="" min="1" max="24">
                   <div class="input-group-button">
                     <button class="button plus" value="+" for="break-3">+</button>
                   </div>
@@ -290,15 +299,14 @@
             </label>
           <textarea name="" 　class="form-control" placeholder="需求描述"></textarea>
           <div class="summary">
-            <p> 預算：500元/小時 </p>
-            <p>時間週期：每週三、五，2019/05/01 至 20/05/10，下午1-5點</p>
-            <p>2019/05/01 下午1-5點4小時、2019/05/01 下午1-5點4小時、2019/05/01 下午1-5點4小時、2019/05/01 下午1-5點4小時</p>
-            <p> 總金額：8000元 </p>
+            <p> 預算：<span id="smr-budget"></span>元/<span id="smr-budget_type">每件</span> </p>
+            <p>時間週期：<span id="smr-week"></span>，<span id="smr-s_dt"></span> 至 <span id="smr-e_dt"></span>，<span id="smr-time"><span>-<span id="smr-e_t"></span>點</p>
+            <p> 總金額：<span id="smr-total"></span>元 </p>
           </div>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
-          <button type="button" class="btn btn-success">確認配對</button>
+          <button type="button" class="btn btn-success" id="btn-need-list">確認配對</button>
         </div>
       </div>
     </div>
@@ -479,6 +487,525 @@
       });
     }
 
+    var budget = 0;
+    var budget_type = '每件';
+    var frequency = '一次';
+    var date = '';
+    var s_dt = '';
+    var e_dt = '';
+    var time = '';
+    var available_daytime_enum = '';
+    var week = '';
+    var monthday_enum = '';
+    var total = 0;
+    $('#budget').on('keyup', function (){
+      budget = $(this).val();
+      $('#smr-budget').text(budget);
+      if(budget_type == '每件') {
+        switch(frequency) {
+          case '一次':
+            cal_one_case();
+            break;
+          case '每日':
+            cal_day_case();
+            break;
+          case '每週':
+            cal_week_case();
+            break;
+          case '每月':
+            cal_month_case();
+            break;
+        }
+      } else if(budget_type == '每小時'){
+        switch(frequency) {
+          case '一次':
+            cal_one_hour();
+            break;
+          case '每日':
+            cal_day_hour();
+            break;
+          case '每週':
+            cal_week_hour();
+            break;
+          case '每月':
+            cal_month_hour();
+            break;
+        }
+      }
+      $('#smr-total').text(total);
+    })
+    $('.need_budget_type').on('click', function (){
+      budget_type = $(this).val();
+      $('#smr-budget_type').text(budget_type);
+      $('.need_available_daytime_enum').val('');
+      if(budget_type == '每件') {
+        switch(frequency) {
+          case '一次':
+            cal_one_case();
+            break;
+          case '每日':
+            cal_day_case();
+            break;
+          case '每週':
+            cal_week_case();
+            break;
+          case '每月':
+            cal_month_case();
+            break;
+        }
+      } else if(budget_type == '每小時'){
+        switch(frequency) {
+          case '一次':
+            cal_one_hour();
+            break;
+          case '每日':
+            cal_day_hour();
+            break;
+          case '每週':
+            cal_week_hour();
+            break;
+          case '每月':
+            cal_month_hour();
+            break;
+        }
+      }
+      $('#smr-total').text(total);
+    })
+    $('.need_frequency').on('click', function (){
+      frequency = $(this).val();
+
+      $('.s_dt').val('');
+      $('.e_dt').val('');
+      $('.time').val('');
+      $('.week').prop('checked', false);
+      $('#need_monthday_enum').val('');
+    })
+    $('.date').on('change', function () {
+      date = $(this).val();
+      // 修改 summary
+
+      // 計算金額
+      if(budget_type == '每件') {
+        switch(frequency) {
+          case '一次':
+            cal_one_case();
+            break;
+          case '每日':
+            cal_day_case();
+            break;
+          case '每週':
+            cal_week_case();
+            break;
+          case '每月':
+            cal_month_case();
+            break;
+        }
+      } else if(budget_type == '每小時'){
+        switch(frequency) {
+          case '一次':
+            cal_one_hour();
+            break;
+          case '每日':
+            cal_day_hour();
+            break;
+          case '每週':
+            cal_week_hour();
+            break;
+          case '每月':
+            cal_month_hour();
+            break;
+        }
+      }
+      $('#smr-total').text(total);
+    })
+    $('.s_dt').on('change', function () {
+      s_dt = $(this).val();
+      $('#smr-s_dt').text(s_dt);
+
+      // 計算金額
+      if(budget_type == '每件') {
+        switch(frequency) {
+          case '一次':
+            cal_one_case();
+            break;
+          case '每日':
+            cal_day_case();
+            break;
+          case '每週':
+            cal_week_case();
+            break;
+          case '每月':
+            cal_month_case();
+            break;
+        }
+      } else if(budget_type == '每小時'){
+        switch(frequency) {
+          case '一次':
+            cal_one_hour();
+            break;
+          case '每日':
+            cal_day_hour();
+            break;
+          case '每週':
+            cal_week_hour();
+            break;
+          case '每月':
+            cal_month_hour();
+            break;
+        }
+      }
+      $('#smr-total').text(total);
+    })
+    $('.e_dt').on('change', function () {
+      e_dt = $(this).val();
+      $('#smr-e_dt').text(e_dt);
+
+      // 計算金額
+      if(budget_type == '每件') {
+        switch(frequency) {
+          case '一次':
+            cal_one_case();
+            break;
+          case '每日':
+            cal_day_case();
+            break;
+          case '每週':
+            cal_week_case();
+            break;
+          case '每月':
+            cal_month_case();
+            break;
+        }
+      } else if(budget_type == '每小時'){
+        switch(frequency) {
+          case '一次':
+            cal_one_hour();
+            break;
+          case '每日':
+            cal_day_hour();
+            break;
+          case '每週':
+            cal_week_hour();
+            break;
+          case '每月':
+            cal_month_hour();
+            break;
+        }
+      }
+      $('#smr-total').text(total);
+    })
+    $('.time').on('change', function () {
+      time = $(this).val();
+      $('#smr-time').text(time);
+    })
+    $('.need_available_daytime_enum').on('keyup', function () {
+      available_daytime_enum = $(this).val();
+      if(time != '') {
+        var time_arr = time.split(':');
+        var e_t = parseInt(time[0]) + available_daytime_enum;
+        $('#smr-e_t').text(e_t);
+      }
+      // 計算金額
+      switch(frequency) {
+        case '一次':
+          cal_one_hour();
+          break;
+        case '每日':
+          cal_day_hour();
+          break;
+        case '每週':
+          cal_week_hour();
+          break;
+        case '每月':
+          cal_month_hour();
+          break;
+      }
+      $('#smr-total').text(total);
+    })
+    $('.week').on('click', function () {
+      week = '';
+      $('.week').each(function (){
+        if($(this).prop('checked') == true) {
+          week = week + $(this).val() + ',';
+        }
+      })
+      $('#smr-week').text(week);
+
+      // 計算金額
+      if(budget_type == '每件') {
+        switch(frequency) {
+          case '一次':
+            cal_one_case();
+            break;
+          case '每日':
+            cal_day_case();
+            break;
+          case '每週':
+            cal_week_case();
+            break;
+          case '每月':
+            cal_month_case();
+            break;
+        }
+      } else if(budget_type == '每小時'){
+        switch(frequency) {
+          case '一次':
+            cal_one_hour();
+            break;
+          case '每日':
+            cal_day_hour();
+            break;
+          case '每週':
+            cal_week_hour();
+            break;
+          case '每月':
+            cal_month_hour();
+            break;
+        }
+      }
+      $('#smr-total').text(total);
+    })
+    $('#need_monthday_enum').on('keyup', function () {
+      monthday_enum = $(this).val();
+
+      // 計算金額
+      if(budget_type == '每件') {
+        switch(frequency) {
+          case '一次':
+            cal_one_case();
+            break;
+          case '每日':
+            cal_day_case();
+            break;
+          case '每週':
+            cal_week_case();
+            break;
+          case '每月':
+            cal_month_case();
+            break;
+        }
+      } else if(budget_type == '每小時'){
+        switch(frequency) {
+          case '一次':
+            cal_one_hour();
+            break;
+          case '每日':
+            cal_day_hour();
+            break;
+          case '每週':
+            cal_week_hour();
+            break;
+          case '每月':
+            cal_month_hour();
+            break;
+        }
+      }
+      $('#smr-total').text(total);
+    })
+
+    $('#btn-need-list').on('click', function () {
+      $.ajax({
+        type: "post",
+        url: "{{url('/api/set_need')}}",
+        data: {
+          budget: budget,
+          budget_type: budget_type,
+          frequency: frequency,
+          // date: date,
+          s_dt: s_dt,
+          e_dt: e_dt,
+          time: time,
+          available_daytime_enum: available_daytime_enum,
+          week: week,
+          monthday_enum: monthday_enum,
+          total: total
+        },
+        dataType: "json",
+        success: function (response) {
+          alert(response.msg);
+        }
+      });
+    })
+
+    // 每件
+    function cal_one_case() {
+      total = parseInt(budget) * 1;
+    }
+    function cal_day_case() {
+      var start = new Date(s_dt);
+      var end = new Date(e_dt);
+      var num = (end.getTime() - start.getTime()) / 86400000 + 1;
+      total = parseInt(budget) * parseInt(num);
+    }
+    function cal_week_case() {
+      var start = new Date(s_dt);
+      var end = new Date(e_dt);
+      var week_num = ((end.getTime() - start.getTime()) / 86400000 + 1) / 7;
+      var week_num = Math.ceil(week_num);
+      var w = [];
+      w[0] = w[1] = w[2] = w[3] = w[4] = w[5] = w[6] = 0;
+      $('.week').each(function () {
+        if($(this).prop('checked') == true) {
+          var j = $(this).data('w');
+          w[j] = week_num;
+        }
+      })
+
+      // 起始日的星期
+      var s_w = start.getDay();
+      // 結束日的星期
+      var e_w = end.getDay();
+      for(var i = 0; i < 7; i++) {
+        if(s_w > i) {
+          w[i] = w[i] - 1;
+        }
+        if(e_w < i) {
+          w[i] = w[i] - 1;
+        }
+      }
+      var num = 0;
+      for(var i = 0; i < 7; i++) {
+        if(w[i] > 0) {
+          num = num + w[i];
+        }
+      }
+      total = parseInt(budget) * parseInt(num);
+    }
+    function cal_month_case() {
+      var start = new Date(s_dt);
+      var end = new Date(e_dt);
+      // 每月幾號
+      var monthday = $('#need_monthday_enum').val();
+      var monthday_array = monthday.split(',');
+      // 年/月
+      var year_num = end.getFullYear() - start.getFullYear();
+      var month_num = 0;
+      var start_month_num = 0;
+      var end_month_num = 0;
+      // 跨年將開始年跟結束年的月份各自計算+跨年月份
+      if(year_num > 0) {
+        start_month_num = 12 - start.getMonth();
+        end_month_num = end.getMonth() + 1;
+        month_num = start_month_num + end_month_num + 12 * (year_num - 1);
+      } else {
+        month_num = end.getMonth() - start.getMonth() + 1;
+      }
+      // 先簡單計算，有要求再細算
+      // var day_num = monthday_array.length;
+      // var tmp_num = parseInt(day_num) * parseInt(month_num);
+      var day_num = [];
+      $.each(monthday_array, function (k, v) {
+        day_num[v] = parseInt(month_num);
+      })
+      var start_day = start.getDate();
+      var end_day = end.getDate();
+      $.each(day_num, function (k, v) {
+        if(start_day > k) {
+          day_num[k] = day_num[k] - 1;
+        }
+        if(end_day < k) {
+          day_num[k] = day_num[k] - 1;
+        }
+      })
+      var num = 0;
+      $.each(day_num, function (k, v) {
+        if(v > 0) {
+          num = num + v;
+        }
+      })
+      total = parseInt(budget) * parseInt(num);
+    }
+
+    // 每小時
+    function cal_one_hour() {
+      var hour = available_daytime_enum;
+      total = parseInt(budget) * hour;
+    }
+    function cal_day_hour() {
+      var hour = available_daytime_enum;
+      var start = new Date(s_dt);
+      var end = new Date(e_dt);
+      var num = (end.getTime() - start.getTime()) / 86400000 + 1;
+      total = parseInt(budget) * parseInt(num) * hour;
+    }
+    function cal_week_hour() {
+      var hour = available_daytime_enum;
+      var start = new Date(s_dt);
+      var end = new Date(e_dt);
+      var week_num = ((end.getTime() - start.getTime()) / 86400000 + 1) / 7;
+      var week_num = Math.ceil(week_num);
+      var w = [];
+      w[0] = w[1] = w[2] = w[3] = w[4] = w[5] = w[6] = 0;
+      $('.week').each(function () {
+        if($(this).prop('checked') == true) {
+          var j = $(this).data('w');
+          w[j] = week_num;
+        }
+      })
+
+      // 起始日的星期
+      var s_w = start.getDay();
+      // 結束日的星期
+      var e_w = end.getDay();
+      for(var i = 0; i < 7; i++) {
+        if(s_w > i) {
+          w[i] = w[i] - 1;
+        }
+        if(e_w < i) {
+          w[i] = w[i] - 1;
+        }
+      }
+      var num = 0;
+      for(var i = 0; i < 7; i++) {
+        if(w[i] > 0) {
+          num = num + w[i];
+        }
+      }
+      total = parseInt(budget) * parseInt(num) * hour;
+    }
+    function cal_month_hour() {
+      var hour = available_daytime_enum;
+      var start = new Date(s_dt);
+      var end = new Date(e_dt);
+      // 每月幾號
+      var monthday = $('#need_monthday_enum').val();
+      var monthday_array = monthday.split(',');
+      // 年/月
+      var year_num = end.getFullYear() - start.getFullYear();
+      var month_num = 0;
+      var start_month_num = 0;
+      var end_month_num = 0;
+      // 跨年將開始年跟結束年的月份各自計算+跨年月份
+      if(year_num > 0) {
+        start_month_num = 12 - start.getMonth();
+        end_month_num = end.getMonth() + 1;
+        month_num = start_month_num + end_month_num + 12 * (year_num - 1);
+      } else {
+        month_num = end.getMonth() - start.getMonth() + 1;
+      }
+      // 先簡單計算，有要求再細算
+      var day_num = [];
+      $.each(monthday_array, function (k, v) {
+        day_num[v] = parseInt(month_num);
+      })
+      var start_day = start.getDate();
+      var end_day = end.getDate();
+      $.each(day_num, function (k, v) {
+        if(start_day > k) {
+          day_num[k] = day_num[k] - 1;
+        }
+        if(end_day < k) {
+          day_num[k] = day_num[k] - 1;
+        }
+      })
+      var num = 0;
+      $.each(day_num, function (k, v) {
+        if(v > 0) {
+          num = num + v;
+        }
+      })
+      total = parseInt(budget) * parseInt(num) * hour;
+    }
   </script>
   @endsection
 @stop

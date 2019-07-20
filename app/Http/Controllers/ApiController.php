@@ -12,6 +12,7 @@ use App\Models\Setting;
 use App\Models\Video;
 use App\Models\Pic_table;
 use App\Models\Member_addr_recode;
+use App\Models\NeedListObj;
 use Session;
 use App\User;
 use Auth;
@@ -186,5 +187,28 @@ class ApiController extends Controller
 		}
 		$response['loc'] = $loc;
 		return response()->json($response);
+	}
+
+	public function set_need(Request $request)
+	{
+		$need_list_obj = new NeedListObj;
+
+		$need_list_obj->mem_id = session()->get('uID');
+		$need_list_obj->budget =  $request->budget;
+		$need_list_obj->budget_type =  $request->budget_type;
+		$need_list_obj->frequency =  $request->frequency;
+		// $need_list_obj->date =  $request->date;
+		$need_list_obj->datetime_from =  $request->s_dt . ' ' . $request->time;
+		$need_list_obj->datetime_end =  $request->e_dt . ' ' . $request->time;
+		$need_list_obj->available_daytime_enum =  $request->available_daytime_enum;
+		$need_list_obj->weekday_enum =  $request->week;
+		$need_list_obj->monthday_enum =  $request->monthday_enum;
+		$need_list_obj->total =  $request->total;
+
+		$need_list_obj->save();
+
+		// email
+
+		return response()->json(['msg' => '已發送請求']);
 	}
 }

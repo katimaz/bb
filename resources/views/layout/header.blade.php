@@ -82,9 +82,9 @@
                 <a href="javascript:void(0)">基本設定<i class="fa fa-angle-down" aria-hidden="true"></i></a>
                 <div class="user-sub">
                     <a class="sub-item" href="{{url('/web/profile')}}">個人資訊</a>
-                    <a class="sub-item" href="payment.html">收付款設定</a>
-                    <a class="sub-item" href="invoice.html">發票設定</a>
-                    <a class="sub-item" href="notification.html">通知設定</a>
+                    <a class="sub-item" href="{{url('/web/collection_info')}}">收付款設定</a>
+                    <a class="sub-item" href="{{url('/web/einvoice_info')}}">發票設定</a>
+                    <a class="sub-item" href="{{url('/web/set_notify')}}">通知設定</a>
                 </div>
             </div>
             <a class="user-item" href="coupon.html">我的優惠劵</a>

@@ -21,6 +21,9 @@ use App\Models\Invoice;
 use App\Models\Invoice_allowance;
 use App\Models\OfferListObj;
 use App\Models\Users;
+use App\Models\einvoice_info;
+use App\Models\collection_info;
+use App\Models\member_notify_setting;
 use Session;
 use App\User;
 use Auth;
@@ -434,6 +437,26 @@ class WebController extends Controller
 		return View('web/helper_detail', ['distance' => $distance, 'user' => $user[0], 'olo' => $olo]);
 	}
 
+	public function einvoice_info()
+	{
+		$mem_id = session()->get('uID');
+		$rs = einvoice_info::where('mem_id', '=', $mem_id)->get();
+		return View('web/invoice', array('datalist' => $rs));
+	}
+
+	public function collection_info()
+	{
+		$mem_id = session()->get('uID');
+		$rs = collection_info::where('mem_id', '=', $mem_id)->get();
+		return View('web/payment', array('collection' => $rs));
+	}
+
+	public function set_notify()
+	{
+		$mem_id = session()->get('uID');
+		$rs = member_notify_setting::where('mem_id', '=', $mem_id)->get();
+		return View('web/notification', array('datalist' => $rs));
+	}
 
 	public function veri_mail(Request $request)
     {
@@ -460,10 +483,15 @@ class WebController extends Controller
 		{
 			$setting = Setting::select('email_veri_comp_subj','email_veri_comp_body')->first();
 			$btn = json_encode(array('url'=>env('APP_URL'),'name'=>'連結幫棒'));
-			Mail::to($data->email)->queue(new toMail(env('APP_URL'),$btn,$user->last_name.$user->first_name,((isset($setting) && $setting->email_veri_comp_subj)?$setting->email_veri_comp_subj:'BounBang 幫棒 – 您已完成註冊驗證信'),((isset($setting) && $setting->email_veri_comp_body)?$setting->email_veri_comp_body:'歡迎加入 BounBang 幫棒家族，您已完成電子郵件信箱設定<br />歡迎您由此進入幫棒')));
+			Mail::to($data->email)->queue(new toMail(env('APP_URL'), $btn,$user->last_name.$user->first_name, ((isset($setting) && $setting->email_veri_comp_subj) ? $setting->email_veri_comp_subj : 'BounBang 幫棒 – 您已完成註冊驗證信'), ((isset($setting) && $setting->email_veri_comp_body) ? $setting->email_veri_comp_body : '歡迎加入 BounBang 幫棒家族，您已完成電子郵件信箱設定<br />歡迎您由此進入幫棒')));
 		}
 		return redirect('/web/profile');
 
+	}
+
+	public function test()
+	{
+		Mail::to('iamgodc@gmail.com')->queue(new toMail(env('APP_URL'), 'test', 'BounBang 幫棒 – 您已完成註冊驗證信', '歡迎加入 BounBang 幫棒家族，您已完成電子郵件信箱設定<br />歡迎您由此進入幫棒'));
 	}
 
 	public function set_forgot_passwd(Request $request)

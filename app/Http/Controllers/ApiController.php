@@ -13,6 +13,10 @@ use App\Models\Video;
 use App\Models\Pic_table;
 use App\Models\Member_addr_recode;
 use App\Models\NeedListObj;
+use App\Models\Users;
+use App\Models\einvoice_info;
+use App\Models\collection_info;
+use App\Models\member_notify_setting;
 use Session;
 use App\User;
 use Auth;
@@ -200,15 +204,85 @@ class ApiController extends Controller
 		// $need_list_obj->date =  $request->date;
 		$need_list_obj->datetime_from =  $request->s_dt . ' ' . $request->time;
 		$need_list_obj->datetime_end =  $request->e_dt . ' ' . $request->time;
-		$need_list_obj->available_daytime_enum =  $request->available_daytime_enum;
-		$need_list_obj->weekday_enum =  $request->week;
-		$need_list_obj->monthday_enum =  $request->monthday_enum;
-		$need_list_obj->total =  $request->total;
+		$need_list_obj->available_daytime_enum =  ($request->available_daytime_enum == null) ? '0' : $request->available_daytime_enum;
+		$need_list_obj->weekday_enum =  ($request->week == null) ? '0' : $request->week;
+		$need_list_obj->monthday_enum =  ($request->monthday_enum == null) ? '0' : $request->monthday_enum;
+		// $need_list_obj->total =  $request->total;
 
 		$need_list_obj->save();
 
 		// email
+		$users = Users::where('id', '=', session()->get('uID'))->get();
+		$user = $users[0];
 
+		$btn = json_encode(array('url'=>env('APP_URL'),'name'=>'連結幫棒'));
+		Mail::to($user->email)->queue(new toMail(env('APP_URL'), $btn, $user->nickname, 'BounBang幫棒 – 服務鈴(配對)送出通知 - [' . $need_list_obj->id . ' , <項目名稱> ' . $need_list_obj->budget . ']', $user->nickname . ' 您好，<br> 您的服務鈴(配對)工作已刊登 - [' . $need_list_obj->id . ' , <項目名稱> ' . $need_list_obj->budget . ']。 合適的好幫手們很快會跟您聯絡。您也可到管理我的需求 – 配對做查詢與管理。
+		'));
 		return response()->json(['msg' => '已發送請求']);
+	}
+
+	public function set_invoice(Request $request)
+	{
+		$einvoice = new einvoice_info;
+		$einvoice->title = $request->title;
+		$einvoice->number = $request->number;
+		$einvoice->corp_or_personal = $request->crop_or_personal;
+		$einvoice->mem_id = session()->get('uID');
+		$einvoice->save();
+
+		return response()->json([]);
+	}
+
+	public function del_invoice(Request $request)
+	{
+		$id = $request->id;
+		$deletedRows = einvoice_info::find($id)->delete();
+
+		return response()->json([]);
+	}
+
+	public function set_bank(Request $request)
+	{
+		$collection_info = new collection_info;
+		$collection_info->bank_title = $request->bank_title;
+		$collection_info->bank_id = $request->bank_id;
+		$collection_info->account_name = $request->account_name;
+		$collection_info->account_no = $request->account_no;
+		$collection_info->mem_id = session()->get('uID');
+		$collection_info->save();
+
+		return response()->json([]);
+	}
+
+	public function del_bank(Request $request)
+	{
+		$id = $request->id;
+		$deletedRows = collection_info::find($id)->delete();
+
+		return response()->json([]);
+	}
+
+	public function set_notify(Request $request)
+	{
+		$member_notify_setting = member_notify_setting::where('mem_id', '=', session()->get('uID'))->get();
+		if($member_notify_setting->first()) {
+			$set = [
+				'setting_email_notify1' => $request->setting_email_notify1,
+				'setting_email_notify2' => $request->setting_email_notify2,
+				'setting_email_notify3' => $request->setting_email_notify3,
+				'setting_email_notify4' => $request->setting_email_notify4,
+			];
+			member_notify_setting::where('mem_id', '=', session()->get('uID'))->update($set);
+		} else {
+			$member_notify_setting = new member_notify_setting;
+			$member_notify_setting->setting_email_notify1 = $request->setting_email_notify1;
+			$member_notify_setting->setting_email_notify2 = $request->setting_email_notify2;
+			$member_notify_setting->setting_email_notify3 = $request->setting_email_notify3;
+			$member_notify_setting->setting_email_notify4 = $request->setting_email_notify4;
+			$member_notify_setting->mem_id = session()->get('uID');
+			$member_notify_setting->save();
+		}
+
+		return response()->json([]);
 	}
 }

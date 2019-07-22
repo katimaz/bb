@@ -28,6 +28,8 @@ Route::any('/newebPay_customer_url', 'WebController@newebPay_customer_url');
 Route::any('/newebPay_back_url', 'WebController@newebPay_back_url');
 Route::any('/newebPay_creditCancel_url', 'WebController@newebPay_creditCancel_url');
 
+Route::get('/test', 'WebController@test');
+
 Route::post('/set_latlng', 'ApiController@set_latlng');
 
 Route::prefix('web')->group(function () {
@@ -43,6 +45,9 @@ Route::prefix('web')->group(function () {
 	Route::post( 'set_forgot_passwd_pt', 'WebController@set_forgot_passwd_pt' );
 
 	Route::get('helper_detail/{u_id}/{distance}', 'WebController@helper_detail');
+	Route::get('einvoice_info', 'WebController@einvoice_info');
+	Route::get('collection_info', 'WebController@collection_info');
+	Route::get('set_notify', 'WebController@set_notify');
 });
 
 Route::prefix('admin')->group(function () {
@@ -96,6 +101,11 @@ Route::prefix('api')->group(function () {
 	Route::post('search_offer', 'ApiController@search_offer');
 	Route::post('search_offer_list', 'ApiController@search_offer_list');
 	Route::post('set_need', 'ApiController@set_need');
+	Route::post('set_invoice', 'ApiController@set_invoice');
+	Route::post('del_invoice', 'ApiController@del_invoice');
+	Route::post('set_bank', 'ApiController@set_bank');
+	Route::post('del_bank', 'ApiController@del_bank');
+	Route::post('set_notify', 'ApiController@set_notify');
 });
 
 Route::get('home/big/{filename}', array(function ($filename)

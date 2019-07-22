@@ -21,7 +21,7 @@
         <input type="hidden" name="count" id="count" value="1" />
         <div class="containers">
             <div class="imageWrapper">
-                <img class="image" :src="((user.usr_photo)?'/avatar/small/'+user.usr_photo:'/images/person-icon.jpg')">
+                <img class="image" :src="((user.usr_photo)? '/avatar/small/' + user.usr_photo : '{{asset("/images/person-icon.jpg")}}')">
                 <div class="file-upload">
                     <input type="file" name="avatar" id="avatar" class="file-input">
                     <i class="fa fa-camera" aria-hidden="true"></i>

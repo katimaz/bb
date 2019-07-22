@@ -219,7 +219,7 @@
                   <div class="input-group-button">
                     <button class="button minus" value="-" for="break">-</button>
                   </div>
-                  <input class="input-group-field form-control need_available_daytime_enum" id="break" type="number" value="" min="1" max="24">
+                  <input class="input-group-field form-control need_available_daytime_enum" id="break" type="number" value="1" min="1" max="24">
                   <div class="input-group-button">
                     <button class="button plus" value="+" for="break">+</button>
                   </div>
@@ -234,7 +234,7 @@
                   <div class="input-group-button">
                     <button class="button minus" value="-" for="break-1">-</button>
                   </div>
-                  <input class="input-group-field form-control need_available_daytime_enum" id="break-1" type="number" value="" min="1" max="24">
+                  <input class="input-group-field form-control need_available_daytime_enum" id="break-1" type="number" value="1" min="1" max="24">
                   <div class="input-group-button">
                     <button class="button plus" value="+" for="break-1">+</button>
                   </div>
@@ -266,7 +266,7 @@
                   <div class="input-group-button">
                     <button class="button minus" value="-" for="break-2">-</button>
                   </div>
-                  <input class="input-group-field form-control need_available_daytime_enum" id="break-2" type="number" value="" min="1" max="24">
+                  <input class="input-group-field form-control need_available_daytime_enum" id="break-2" type="number" value="1" min="1" max="24">
                   <div class="input-group-button">
                     <button class="button plus" value="+" for="break-2">+</button>
                   </div>
@@ -283,7 +283,7 @@
                   <div class="input-group-button">
                     <button class="button minus" value="-" for="break-3">-</button>
                   </div>
-                  <input class="input-group-field form-control need_available_daytime_enum" id="break-3" type="number" value="" min="1" max="24">
+                  <input class="input-group-field form-control need_available_daytime_enum" id="break-3" type="number" value="1" min="1" max="24">
                   <div class="input-group-button">
                     <button class="button plus" value="+" for="break-3">+</button>
                   </div>
@@ -537,7 +537,7 @@
     $('.need_budget_type').on('click', function (){
       budget_type = $(this).val();
       $('#smr-budget_type').text(budget_type);
-      $('.need_available_daytime_enum').val('');
+      $('.need_available_daytime_enum').val('1');
       if(budget_type == '每件') {
         switch(frequency) {
           case '一次':
@@ -818,7 +818,8 @@
           available_daytime_enum: available_daytime_enum,
           week: week,
           monthday_enum: monthday_enum,
-          total: total
+          total: total,
+          _token: '{{ csrf_token() }}'
         },
         dataType: "json",
         success: function (response) {

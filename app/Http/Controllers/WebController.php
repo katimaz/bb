@@ -376,19 +376,41 @@ class WebController extends Controller
 		$lat = Session::get('lat');
 		$lng = Session::get('lng');
 
-		if($keyword != '') {
-			$offer = DB::table('OfferListObj AS olo')->select(DB::raw('olo.id, ( 6371 * acos( cos( radians('.$lat.') ) * cos( radians( lat ) ) * cos( radians( lng ) - radians('.$lng.') ) + sin( radians('.$lat.') )* sin( radians( lat ) ) ) ) AS distance, lat, lng, usr_photo, last_name, first_name, u.usr_id'))->join('users AS u', 'olo.mem_id', '=', 'u.id')->where('offer_title', 'like', "%$keyword%")->having('distance','<', $distance)->orderBy('distance')->get();
+		// 用戶
+		if($user->open_offer_setting == "0") {
+			// 如果有輸入關鍵字搜尋
+			if($keyword != '') {
+				$offer = DB::table('OfferListObj AS olo')->select(DB::raw('olo.id, ( 6371 * acos( cos( radians('.$lat.') ) * cos( radians( lat ) ) * cos( radians( lng ) - radians('.$lng.') ) + sin( radians('.$lat.') )* sin( radians( lat ) ) ) ) AS distance, lat, lng, usr_photo, last_name, first_name, u.usr_id'))->join('users AS u', 'olo.mem_id', '=', 'u.id')->where('offer_title', 'like', "%$keyword%")->having('distance','<', $distance)->orderBy('distance')->get();
+			} else {
+				$offer = DB::table('OfferListObj AS olo')->select(DB::raw('olo.id, ( 6371 * acos( cos( radians('.$lat.') ) * cos( radians( lat ) ) * cos( radians( lng ) - radians('.$lng.') ) + sin( radians('.$lat.') )* sin( radians( lat ) ) ) ) AS distance, lat, lng, usr_photo, last_name, first_name, u.usr_id'))->join('users AS u', 'olo.mem_id', '=', 'u.id')->having('distance','<', $distance)->orderBy('distance')->get();
+			}
+
+			$loc = [];
+			foreach ($offer as $key => $value) {
+				$loc[$key]['addr'] = [$value->lat, $value->lng];
+				$loc[$key]['text'] = '<div  class="user_map"><div class="map-up"><div class="up-face"><img src="' . URL::to('/') . '/images/' . $value->usr_photo . '"></div><div class="up-left"><span class="user-name">' . $value->last_name . $value->first_name . '</span><span class="start"><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i> </span><span class="avg">4.9</span><div class="income"><i class="fa fa-map-marker" aria-hidden="true"></i><span class="text-success"> 距離：</span><span class="text-danger">' . (int)($value->distance * 1000) . '</span>公尺</div></div></div><div class="map-score"><div class="income"><span class="text-success"> 受雇次數：</span><span class="text-danger">21</span>次</div><div class="income"><span class="text-success"> 當地導遊：</span><span class="text-danger">500元</span>/小時</div><div class="income"><span class="text-success">其他服務：</span>居家清掃、水電工程、木工...<a href="' . URL::to('/') . '/web/helper_detail/' . $value->usr_id . '/' . (int)($value->distance * 1000) . '">詳細說明</a><div class="map-bt"><a href="#" class="lmbt" data-toggle="modal"              data-target="#exampleModalLong">線上諮詢</a><a href="#" class="rmbt" data-toggle="modal"              data-target="#exampleModalLong">雇用</a></div></div></div>';
+				$loc[$key]['icon'] = URL::to('/') . '/images/mark.png';
+				$loc[$key]['newLabel'] = '<img src="' . URL::to('/') . '/images/' . $value->usr_photo . '" style="border-radius:50%;width:30px;height:30px;margin-top: -95px;border: 2px solid #b30b06;">';
+			}
 		} else {
-			$offer = DB::table('OfferListObj AS olo')->select(DB::raw('olo.id, ( 6371 * acos( cos( radians('.$lat.') ) * cos( radians( lat ) ) * cos( radians( lng ) - radians('.$lng.') ) + sin( radians('.$lat.') )* sin( radians( lat ) ) ) ) AS distance, lat, lng, usr_photo, last_name, first_name, u.usr_id'))->join('users AS u', 'olo.mem_id', '=', 'u.id')->having('distance','<', $distance)->orderBy('distance')->get();
+			// 幫手
+			// 如果有輸入關鍵字搜尋
+			if($keyword != '') {
+				$offer = DB::table('NeedListObj AS nlo')->select(DB::raw('nlo.id, ( 6371 * acos( cos( radians('.$lat.') ) * cos( radians( lat ) ) * cos( radians( lng ) - radians('.$lng.') ) + sin( radians('.$lat.') )* sin( radians( lat ) ) ) ) AS distance, lat, lng, usr_photo, last_name, first_name, u.usr_id'))->join('users AS u', 'nlo.mem_id', '=', 'u.id')->where('need_title', 'like', "%$keyword%")->having('distance','<', $distance)->orderBy('distance')->get();
+			} else {
+				$offer = DB::table('NeedListObj AS nlo')->select(DB::raw('nlo.id, ( 6371 * acos( cos( radians('.$lat.') ) * cos( radians( lat ) ) * cos( radians( lng ) - radians('.$lng.') ) + sin( radians('.$lat.') )* sin( radians( lat ) ) ) ) AS distance, lat, lng, usr_photo, last_name, first_name, u.usr_id'))->join('users AS u', 'nlo.mem_id', '=', 'u.id')->having('distance','<', $distance)->orderBy('distance')->get();
+			}
+
+			$loc = [];
+			foreach ($offer as $key => $value) {
+				$loc[$key]['addr'] = [$value->lat, $value->lng];
+				$loc[$key]['text'] = '<div  class="user_map"><div class="map-up"><div class="up-face"><img src="' . URL::to('/') . '/images/' . $value->usr_photo . '"></div><div class="up-left"><span class="user-name">' . $value->last_name . $value->first_name . '</span><span class="start"><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i> </span><span class="avg">4.9</span><div class="income"><i class="fa fa-map-marker" aria-hidden="true"></i><span class="text-success"> 距離：</span><span class="text-danger">' . (int)($value->distance * 1000) . '</span>公尺</div></div></div><div class="map-score"><div class="income"><span class="text-success"> 受雇次數：</span><span class="text-danger">21</span>次</div><div class="income"><span class="text-success"> 當地導遊：</span><span class="text-danger">500元</span>/小時</div><div class="income"><span class="text-success">其他服務：</span>居家清掃、水電工程、木工...<a href="' . URL::to('/') . '/web/helper_detail/' . $value->usr_id . '/' . (int)($value->distance * 1000) . '">詳細說明</a><div class="map-bt"><a href="#" class="lmbt" data-toggle="modal"              data-target="#exampleModalLong">線上諮詢</a><a href="#" class="rmbt" data-toggle="modal"              data-target="#exampleModalLong">雇用</a></div></div></div>';
+				$loc[$key]['icon'] = URL::to('/') . '/images/mark.png';
+				$loc[$key]['newLabel'] = '<img src="' . URL::to('/') . '/images/' . $value->usr_photo . '" style="border-radius:50%;width:30px;height:30px;margin-top: -95px;border: 2px solid #b30b06;">';
+			}
 		}
 
-		$loc = [];
-		foreach ($offer as $key => $value) {
-			$loc[$key]['addr'] = [$value->lat, $value->lng];
-			$loc[$key]['text'] = '<div  class="user_map"><div class="map-up"><div class="up-face"><img src="' . URL::to('/') . '/images/' . $value->usr_photo . '"></div><div class="up-left"><span class="user-name">' . $value->last_name . $value->first_name . '</span><span class="start"><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i> </span><span class="avg">4.9</span><div class="income"><i class="fa fa-map-marker" aria-hidden="true"></i><span class="text-success"> 距離：</span><span class="text-danger">' . (int)($value->distance * 1000) . '</span>公尺</div></div></div><div class="map-score"><div class="income"><span class="text-success"> 受雇次數：</span><span class="text-danger">21</span>次</div><div class="income"><span class="text-success"> 當地導遊：</span><span class="text-danger">500元</span>/小時</div><div class="income"><span class="text-success">其他服務：</span>居家清掃、水電工程、木工...<a href="' . URL::to('/') . '/web/helper_detail/' . $value->usr_id . '/' . (int)($value->distance * 1000) . '">詳細說明</a><div class="map-bt"><a href="#" class="lmbt" data-toggle="modal"              data-target="#exampleModalLong">線上諮詢</a><a href="#" class="rmbt" data-toggle="modal"              data-target="#exampleModalLong">雇用</a></div></div></div>';
-			$loc[$key]['icon'] = URL::to('/') . '/images/mark.png';
-			$loc[$key]['newLabel'] = '<img src="' . URL::to('/') . '/images/' . $value->usr_photo . '" style="border-radius:50%;width:30px;height:30px;margin-top: -95px;border: 2px solid #b30b06;">';
-		}
+
 
 		return View('web/map', array('user'=>$user, 'loc' => $loc));
 
@@ -409,17 +431,32 @@ class WebController extends Controller
 		$lat = Session::get('lat');
 		$lng = Session::get('lng');
 
-		if($keyword != '') {
-			$offer = DB::table('OfferListObj AS olo')->select(DB::raw('olo.id, ( 6371 * acos( cos( radians('.$lat.') ) * cos( radians( lat ) ) * cos( radians( lng ) - radians('.$lng.') ) + sin( radians('.$lat.') )* sin( radians( lat ) ) ) ) AS distance, lat, lng, usr_photo, last_name, first_name, u.usr_id'))->join('users AS u', 'olo.mem_id', '=', 'u.id')->where('offer_title', 'like', "%$keyword%")->having('distance','<', $distance)->orderBy('distance')->get();
+		if($user->open_offer_setting == "0") {
+			if($keyword != '') {
+				$offer = DB::table('OfferListObj AS olo')->select(DB::raw('olo.id, ( 6371 * acos( cos( radians('.$lat.') ) * cos( radians( lat ) ) * cos( radians( lng ) - radians('.$lng.') ) + sin( radians('.$lat.') )* sin( radians( lat ) ) ) ) AS distance, lat, lng, usr_photo, last_name, first_name, u.usr_id'))->join('users AS u', 'olo.mem_id', '=', 'u.id')->where('offer_title', 'like', "%$keyword%")->having('distance','<', $distance)->orderBy('distance')->get();
+			} else {
+				$offer = DB::table('OfferListObj AS olo')->select(DB::raw('olo.id, ( 6371 * acos( cos( radians('.$lat.') ) * cos( radians( lat ) ) * cos( radians( lng ) - radians('.$lng.') ) + sin( radians('.$lat.') )* sin( radians( lat ) ) ) ) AS distance, lat, lng, usr_photo, last_name, first_name, u.usr_id, price, price_type'))->join('users AS u', 'olo.mem_id', '=', 'u.id')->having('distance','<', $distance)->orderBy('distance')->get();
+			}
+
+			$loc = [];
+			foreach ($offer as $key => $value) {
+				$loc[$key] = $value;
+				// $loc[$key] = '<div class="list-box"> <div class="list-left"> <span class="b-face"><img src="' . URL::to('/') . '/images/' . $value->usr_photo . '"></span> </div> <a href="' . URL::to('/') . '/web/helper_detail/' . $value->usr_id . '/' . (int)($value->distance * 1000) . '" class="list-right"> <div class="list-name">' . $value->last_name . $value->first_name . '</div> <div  class="list-comm"> <span class="list-start"> <i class="fa fa-star" aria-hidden="true"></i> <i class="fa fa-star" aria-hidden="true"></i> <i class="fa fa-star" aria-hidden="true"></i> <i class="fa fa-star" aria-hidden="true"></i> <i class="fa fa-star" aria-hidden="true"></i> </span> <span class="avg">4.9</span> </div> <div class="list-ds"><span class="show-m">距離：</span>' . (int)($value->distance * 1000) . '公尺</div> <div class="list-dl"><span class="show-m">受雇次數：</span>256次</div > <div class="list-dl"><span class="show-m">工作時數：</span>125/小時</div > <div class="list-dl"><span class="show-m">服務項目：</span>水電工程</div> <div class="list-dl"><span class="show-m">價格：</span>' . $value->price . '/' . $value->price_type . '</div> <div class="list-types"><img src="images/work1.jpg"><img src="images/works.jpg"></div> </a> <div class="list-bt"> <a href="#" class="lask" data-toggle="modal" data-target="#exampleModalLong">詢問</a> <a href="#" class="lhire"  data-toggle="modal" data-target="#exampleModalLong">雇用</a> </div> </div>';
+			}
 		} else {
-			$offer = DB::table('OfferListObj AS olo')->select(DB::raw('olo.id, ( 6371 * acos( cos( radians('.$lat.') ) * cos( radians( lat ) ) * cos( radians( lng ) - radians('.$lng.') ) + sin( radians('.$lat.') )* sin( radians( lat ) ) ) ) AS distance, lat, lng, usr_photo, last_name, first_name, u.usr_id, price, price_type'))->join('users AS u', 'olo.mem_id', '=', 'u.id')->having('distance','<', $distance)->orderBy('distance')->get();
+			if($keyword != '') {
+				$offer = DB::table('NeedListObj AS nlo')->select(DB::raw('nlo.id, ( 6371 * acos( cos( radians('.$lat.') ) * cos( radians( lat ) ) * cos( radians( lng ) - radians('.$lng.') ) + sin( radians('.$lat.') )* sin( radians( lat ) ) ) ) AS distance, lat, lng, usr_photo, last_name, first_name, u.usr_id'))->join('users AS u', 'nlo.mem_id', '=', 'u.id')->where('offer_title', 'like', "%$keyword%")->having('distance','<', $distance)->orderBy('distance')->get();
+			} else {
+				$offer = DB::table('NeedListObj AS nlo')->select(DB::raw('nlo.id, ( 6371 * acos( cos( radians('.$lat.') ) * cos( radians( lat ) ) * cos( radians( lng ) - radians('.$lng.') ) + sin( radians('.$lat.') )* sin( radians( lat ) ) ) ) AS distance, lat, lng, usr_photo, last_name, first_name, u.usr_id, price, price_type'))->join('users AS u', 'nlo.mem_id', '=', 'u.id')->having('distance','<', $distance)->orderBy('distance')->get();
+			}
+
+			$loc = [];
+			foreach ($offer as $key => $value) {
+				$loc[$key] = $value;
+				// $loc[$key] = '<div class="list-box"> <div class="list-left"> <span class="b-face"><img src="' . URL::to('/') . '/images/' . $value->usr_photo . '"></span> </div> <a href="' . URL::to('/') . '/web/helper_detail/' . $value->usr_id . '/' . (int)($value->distance * 1000) . '" class="list-right"> <div class="list-name">' . $value->last_name . $value->first_name . '</div> <div  class="list-comm"> <span class="list-start"> <i class="fa fa-star" aria-hidden="true"></i> <i class="fa fa-star" aria-hidden="true"></i> <i class="fa fa-star" aria-hidden="true"></i> <i class="fa fa-star" aria-hidden="true"></i> <i class="fa fa-star" aria-hidden="true"></i> </span> <span class="avg">4.9</span> </div> <div class="list-ds"><span class="show-m">距離：</span>' . (int)($value->distance * 1000) . '公尺</div> <div class="list-dl"><span class="show-m">受雇次數：</span>256次</div > <div class="list-dl"><span class="show-m">工作時數：</span>125/小時</div > <div class="list-dl"><span class="show-m">服務項目：</span>水電工程</div> <div class="list-dl"><span class="show-m">價格：</span>' . $value->price . '/' . $value->price_type . '</div> <div class="list-types"><img src="images/work1.jpg"><img src="images/works.jpg"></div> </a> <div class="list-bt"> <a href="#" class="lask" data-toggle="modal" data-target="#exampleModalLong">詢問</a> <a href="#" class="lhire"  data-toggle="modal" data-target="#exampleModalLong">雇用</a> </div> </div>';
+			}
 		}
 
-		$loc = [];
-		foreach ($offer as $key => $value) {
-			$loc[$key] = $value;
-			// $loc[$key] = '<div class="list-box"> <div class="list-left"> <span class="b-face"><img src="' . URL::to('/') . '/images/' . $value->usr_photo . '"></span> </div> <a href="' . URL::to('/') . '/web/helper_detail/' . $value->usr_id . '/' . (int)($value->distance * 1000) . '" class="list-right"> <div class="list-name">' . $value->last_name . $value->first_name . '</div> <div  class="list-comm"> <span class="list-start"> <i class="fa fa-star" aria-hidden="true"></i> <i class="fa fa-star" aria-hidden="true"></i> <i class="fa fa-star" aria-hidden="true"></i> <i class="fa fa-star" aria-hidden="true"></i> <i class="fa fa-star" aria-hidden="true"></i> </span> <span class="avg">4.9</span> </div> <div class="list-ds"><span class="show-m">距離：</span>' . (int)($value->distance * 1000) . '公尺</div> <div class="list-dl"><span class="show-m">受雇次數：</span>256次</div > <div class="list-dl"><span class="show-m">工作時數：</span>125/小時</div > <div class="list-dl"><span class="show-m">服務項目：</span>水電工程</div> <div class="list-dl"><span class="show-m">價格：</span>' . $value->price . '/' . $value->price_type . '</div> <div class="list-types"><img src="images/work1.jpg"><img src="images/works.jpg"></div> </a> <div class="list-bt"> <a href="#" class="lask" data-toggle="modal" data-target="#exampleModalLong">詢問</a> <a href="#" class="lhire"  data-toggle="modal" data-target="#exampleModalLong">雇用</a> </div> </div>';
-		}
 
 		return View('web/list', array('user'=>$user, 'loc' => $loc));
 
@@ -456,6 +493,91 @@ class WebController extends Controller
 		$mem_id = session()->get('uID');
 		$rs = member_notify_setting::where('mem_id', '=', $mem_id)->get();
 		return View('web/notification', array('datalist' => $rs));
+	}
+	// 幫手 身份認證
+	public function certification(Request $request)
+	{
+		if(count($request->all()) > 0) {
+			$user = User::where('usr_id',Session::get('usrID'))->select('usr_id')->first();
+
+			// 更新資料
+			if(!file_exists(storage_path()."/files"))
+				mkdir(storage_path()."/files", 0775);
+			if(!file_exists(storage_path()."/files/pic"))
+				mkdir(storage_path()."/files/pic", 0775);
+			if(!file_exists(storage_path()."/files/pic/avatar"))
+				mkdir(storage_path()."/files/pic/avatar", 0775);
+			if(!file_exists(storage_path()."/files/pic/avatar/photoBig"))
+				mkdir(storage_path()."/files/pic/avatar/photoBig", 0775);
+			if(!file_exists(storage_path()."/files/pic/avatar/photoSmall"))
+				mkdir(storage_path()."/files/pic/avatar/photoSmall", 0775);
+
+
+			$account = $user->usr_id;
+			if($request->file('id_photo'))
+			{
+				$time = strval(time());
+				$file = $request->file('id_photo');
+				$subDot = strtolower($request->id_photo->getClientOriginalExtension());
+				if($subDot=='jpeg' || $subDot=='jpg' || $subDot=='JPG')
+				{
+					$Fn_name = Utils::getAvatarFileName($account);
+					$path = storage_path()."/files/pic/avatar/photoBig/";
+					$request->file('id_photo')->move($path, $Fn_name);
+					//chmod($path.$Fn_name, 0775);
+					Utils::ImageResize($path.$Fn_name, $path.$Fn_name, 600,600,72);
+
+					copy($path.$Fn_name, storage_path()."/files/pic/avatar/photoSmall/".$Fn_name);
+					//chmod(storage_path()."/files/pic/avatar/photoSmall/".$Fn_name, 0775);
+					Utils::ImageResize(storage_path()."/files/pic/avatar/photoSmall/".$Fn_name, storage_path()."/files/pic/avatar/photoSmall/".$Fn_name, 200,200,72);
+					$input['id_photo'] = $Fn_name;
+				}else
+					return View('web/error_message', array('message' => '錯誤的影像格式，請使用JPG圖檔!', 'goUrl'=>'/register'));
+			}
+
+			if($request->file('id_photo2'))
+			{
+				$time = strval(time());
+				$file = $request->file('id_photo2');
+				$subDot = strtolower($request->id_photo2->getClientOriginalExtension());
+				if($subDot=='jpeg' || $subDot=='jpg' || $subDot=='JPG')
+				{
+					$Fn_name = Utils::getAvatarFileName($account);
+					$path = storage_path()."/files/pic/avatar/photoBig/";
+					$request->file('id_photo2')->move($path, $Fn_name);
+					//chmod($path.$Fn_name, 0775);
+					Utils::ImageResize($path.$Fn_name, $path.$Fn_name, 600,600,72);
+
+					copy($path.$Fn_name, storage_path()."/files/pic/avatar/photoSmall/".$Fn_name);
+					//chmod(storage_path()."/files/pic/avatar/photoSmall/".$Fn_name, 0775);
+					Utils::ImageResize(storage_path()."/files/pic/avatar/photoSmall/".$Fn_name, storage_path()."/files/pic/avatar/photoSmall/".$Fn_name, 200,200,72);
+					$input['id_photo2'] = $Fn_name;
+				}else
+					return View('web/error_message', array('message' => '錯誤的影像格式，請使用JPG圖檔!', 'goUrl'=>'/register'));
+			}
+
+			$set = [
+				'id_name' => $request->id_name,
+				'id_number' => $request->id_number,
+				'id_year' => $request->id_year,
+				'id_month' => $request->id_month,
+				'id_day' => $request->id_day,
+				'id_type' => $request->id_type,
+			];
+			if(isset($input['id_photo'])) {
+				$set['id_photo'] = $input['id_photo'];
+			}
+			if(isset($input['id_photo2'])) {
+				$set['id_photo2'] = $input['id_photo2'];
+			}
+			Users::where('id', '=', session()->get('uID'))->update($set);
+
+			return redirect('web/certification');
+		} else {
+			$user = Users::where('id', '=', session()->get('uID'))->get();
+			return View('web/certification', ['user' => $user[0]]);
+		}
+
 	}
 
 	public function veri_mail(Request $request)

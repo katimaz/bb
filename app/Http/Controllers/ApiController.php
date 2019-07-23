@@ -131,30 +131,60 @@ class ApiController extends Controller
 		$main_servicetype = $request->main_servicetype;
 		$sub_servicetype = $request->sub_servicetype;
 		// DB::enableQueryLog();
-		$where = "(olo.service_type LIKE '*[$main_servicetype,%' OR olo.service_type LIKE '%,$main_servicetype,%' OR olo.service_type LIKE '%,$main_servicetype]*' OR olo.service_type LIKE '*[$main_servicetype]*')";
 
-		if(isset($sub_servicetype)) {
-			foreach ($sub_servicetype as $key => $value) {
-				$where .= " OR (olo.service_type LIKE '*[$value,%' OR olo.service_type LIKE '%,$value,%' OR olo.service_type LIKE '%,$value]*' OR olo.service_type LIKE '*[$value]*')";
+		$user = User::where('usr_id',Session::get('usrID'))->first();
+		if($user->open_offer_setting == "0") {
+			$where = "(olo.service_type LIKE '*[$main_servicetype,%' OR olo.service_type LIKE '%,$main_servicetype,%' OR olo.service_type LIKE '%,$main_servicetype]*' OR olo.service_type LIKE '*[$main_servicetype]*')";
+
+			if(isset($sub_servicetype)) {
+				foreach ($sub_servicetype as $key => $value) {
+					$where .= " OR (olo.service_type LIKE '*[$value,%' OR olo.service_type LIKE '%,$value,%' OR olo.service_type LIKE '%,$value]*' OR olo.service_type LIKE '*[$value]*')";
+				}
+			}
+
+			$offer = DB::table('OfferListObj AS olo')->select(DB::raw('olo.id, ( 6371 * acos( cos( radians('.$lat.') ) * cos( radians( lat ) ) * cos( radians( lng ) - radians('.$lng.') ) + sin( radians('.$lat.') )* sin( radians( lat ) ) ) ) AS distance, lat, lng, usr_photo, last_name, first_name, usr_id'))->join('users AS u', 'olo.mem_id', '=', 'u.id')->whereRaw($where)->having('distance','<', $distance)->orderBy('distance')->get();
+			// // 取得所有 Query
+			// $queries = DB::getQueryLog();
+
+			// // 顯示最後一個 SQL 語法
+			// $last_query = end($queries);
+
+			// var_dump($last_query);
+
+			$loc = [];
+			foreach ($offer as $key => $value) {
+				$loc[$key]['addr'] = [$value->lat, $value->lng];
+				$loc[$key]['text'] = '<div  class="user_map"><div class="map-up"><div class="up-face"><img src="' . URL::to('/') . '/images/' . $value->usr_photo . '"></div><div class="up-left"><span class="user-name">' . $value->last_name . $value->first_name . '</span><span class="start"><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i> </span><span class="avg">4.9</span><div class="income"><i class="fa fa-map-marker" aria-hidden="true"></i><span class="text-success"> 距離：</span><span class="text-danger">' . (int)($value->distance * 1000) . '</span>公尺</div></div></div><div class="map-score"><div class="income"><span class="text-success"> 受雇次數：</span><span class="text-danger">21</span>次</div><div class="income"><span class="text-success"> 當地導遊：</span><span class="text-danger">500元</span>/小時</div><div class="income"><span class="text-success">其他服務：</span>居家清掃、水電工程、木工...<a href="' . URL::to('/') . '/web/helper_detail/' . $value->usr_id . '/' . (int)($value->distance * 1000) .'">詳細說明</a><div class="map-bt"><a href="#" class="lmbt" data-toggle="modal"              data-target="#exampleModalLong">線上諮詢</a><a href="#" class="rmbt" data-toggle="modal"              data-target="#exampleModalLong">雇用</a></div></div></div>';
+				$loc[$key]['icon'] = URL::to('/') . '/images/mark.png';
+				$loc[$key]['newLabel'] = '<img src="' . URL::to('/') . '/images/' . $value->usr_photo . '" style="border-radius:50%;width:30px;height:30px;margin-top: -95px;border: 2px solid #b30b06;">';
+			}
+		} else {
+			$where = "(nlo.service_type LIKE '*[$main_servicetype,%' OR nlo.service_type LIKE '%,$main_servicetype,%' OR nlo.service_type LIKE '%,$main_servicetype]*' OR nlo.service_type LIKE '*[$main_servicetype]*')";
+
+			if(isset($sub_servicetype)) {
+				foreach ($sub_servicetype as $key => $value) {
+					$where .= " OR (nlo.service_type LIKE '*[$value,%' OR nlo.service_type LIKE '%,$value,%' OR nlo.service_type LIKE '%,$value]*' OR nlo.service_type LIKE '*[$value]*')";
+				}
+			}
+
+			$offer = DB::table('NeedListObj AS nlo')->select(DB::raw('nlo.id, ( 6371 * acos( cos( radians('.$lat.') ) * cos( radians( lat ) ) * cos( radians( lng ) - radians('.$lng.') ) + sin( radians('.$lat.') )* sin( radians( lat ) ) ) ) AS distance, lat, lng, usr_photo, last_name, first_name, usr_id'))->join('users AS u', 'nlo.mem_id', '=', 'u.id')->whereRaw($where)->having('distance','<', $distance)->orderBy('distance')->get();
+			// // 取得所有 Query
+			// $queries = DB::getQueryLog();
+
+			// // 顯示最後一個 SQL 語法
+			// $last_query = end($queries);
+
+			// var_dump($last_query);
+
+			$loc = [];
+			foreach ($offer as $key => $value) {
+				$loc[$key]['addr'] = [$value->lat, $value->lng];
+				$loc[$key]['text'] = '<div  class="user_map"><div class="map-up"><div class="up-face"><img src="' . URL::to('/') . '/images/' . $value->usr_photo . '"></div><div class="up-left"><span class="user-name">' . $value->last_name . $value->first_name . '</span><span class="start"><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i> </span><span class="avg">4.9</span><div class="income"><i class="fa fa-map-marker" aria-hidden="true"></i><span class="text-success"> 距離：</span><span class="text-danger">' . (int)($value->distance * 1000) . '</span>公尺</div></div></div><div class="map-score"><div class="income"><span class="text-success"> 受雇次數：</span><span class="text-danger">21</span>次</div><div class="income"><span class="text-success"> 當地導遊：</span><span class="text-danger">500元</span>/小時</div><div class="income"><span class="text-success">其他服務：</span>居家清掃、水電工程、木工...<a href="' . URL::to('/') . '/web/helper_detail/' . $value->usr_id . '/' . (int)($value->distance * 1000) .'">詳細說明</a><div class="map-bt"><a href="#" class="lmbt" data-toggle="modal"              data-target="#exampleModalLong">線上諮詢</a><a href="#" class="rmbt" data-toggle="modal"              data-target="#exampleModalLong">雇用</a></div></div></div>';
+				$loc[$key]['icon'] = URL::to('/') . '/images/mark.png';
+				$loc[$key]['newLabel'] = '<img src="' . URL::to('/') . '/images/' . $value->usr_photo . '" style="border-radius:50%;width:30px;height:30px;margin-top: -95px;border: 2px solid #b30b06;">';
 			}
 		}
 
-		$offer = DB::table('OfferListObj AS olo')->select(DB::raw('olo.id, ( 6371 * acos( cos( radians('.$lat.') ) * cos( radians( lat ) ) * cos( radians( lng ) - radians('.$lng.') ) + sin( radians('.$lat.') )* sin( radians( lat ) ) ) ) AS distance, lat, lng, usr_photo, last_name, first_name, usr_id'))->join('users AS u', 'olo.mem_id', '=', 'u.id')->whereRaw($where)->having('distance','<', $distance)->orderBy('distance')->get();
-		// // 取得所有 Query
-		// $queries = DB::getQueryLog();
-
-		// // 顯示最後一個 SQL 語法
-		// $last_query = end($queries);
-
-		// var_dump($last_query);
-
-		$loc = [];
-		foreach ($offer as $key => $value) {
-			$loc[$key]['addr'] = [$value->lat, $value->lng];
-			$loc[$key]['text'] = '<div  class="user_map"><div class="map-up"><div class="up-face"><img src="' . URL::to('/') . '/images/' . $value->usr_photo . '"></div><div class="up-left"><span class="user-name">' . $value->last_name . $value->first_name . '</span><span class="start"><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i> </span><span class="avg">4.9</span><div class="income"><i class="fa fa-map-marker" aria-hidden="true"></i><span class="text-success"> 距離：</span><span class="text-danger">' . (int)($value->distance * 1000) . '</span>公尺</div></div></div><div class="map-score"><div class="income"><span class="text-success"> 受雇次數：</span><span class="text-danger">21</span>次</div><div class="income"><span class="text-success"> 當地導遊：</span><span class="text-danger">500元</span>/小時</div><div class="income"><span class="text-success">其他服務：</span>居家清掃、水電工程、木工...<a href="' . URL::to('/') . '/web/helper_detail/' . $value->usr_id . '/' . (int)($value->distance * 1000) .'">詳細說明</a><div class="map-bt"><a href="#" class="lmbt" data-toggle="modal"              data-target="#exampleModalLong">線上諮詢</a><a href="#" class="rmbt" data-toggle="modal"              data-target="#exampleModalLong">雇用</a></div></div></div>';
-			$loc[$key]['icon'] = URL::to('/') . '/images/mark.png';
-			$loc[$key]['newLabel'] = '<img src="' . URL::to('/') . '/images/' . $value->usr_photo . '" style="border-radius:50%;width:30px;height:30px;margin-top: -95px;border: 2px solid #b30b06;">';
-		}
 		$response['loc'] = $loc;
 		return response()->json($response);
 	}
@@ -168,27 +198,53 @@ class ApiController extends Controller
 		$main_servicetype = $request->main_servicetype;
 		$sub_servicetype = $request->sub_servicetype;
 		// DB::enableQueryLog();
-		$where = "(olo.service_type LIKE '*[$main_servicetype,%' OR olo.service_type LIKE '%,$main_servicetype,%' OR olo.service_type LIKE '%,$main_servicetype]*' OR olo.service_type LIKE '*[$main_servicetype]*')";
+		$user = User::where('usr_id',Session::get('usrID'))->first();
+		if($user->open_offer_setting == "0") {
+			$where = "(olo.service_type LIKE '*[$main_servicetype,%' OR olo.service_type LIKE '%,$main_servicetype,%' OR olo.service_type LIKE '%,$main_servicetype]*' OR olo.service_type LIKE '*[$main_servicetype]*')";
 
-		if(isset($sub_servicetype)) {
-			foreach ($sub_servicetype as $key => $value) {
-				$where .= " OR (olo.service_type LIKE '*[$value,%' OR olo.service_type LIKE '%,$value,%' OR olo.service_type LIKE '%,$value]*' OR olo.service_type LIKE '*[$value]*')";
+			if(isset($sub_servicetype)) {
+				foreach ($sub_servicetype as $key => $value) {
+					$where .= " OR (olo.service_type LIKE '*[$value,%' OR olo.service_type LIKE '%,$value,%' OR olo.service_type LIKE '%,$value]*' OR olo.service_type LIKE '*[$value]*')";
+				}
+			}
+
+			$offer = DB::table('OfferListObj AS olo')->select(DB::raw('olo.id, ( 6371 * acos( cos( radians('.$lat.') ) * cos( radians( lat ) ) * cos( radians( lng ) - radians('.$lng.') ) + sin( radians('.$lat.') )* sin( radians( lat ) ) ) ) AS distance, lat, lng, usr_photo, last_name, first_name, usr_id, price, price_type'))->join('users AS u', 'olo.mem_id', '=', 'u.id')->whereRaw($where)->having('distance','<', $distance)->orderBy('distance')->get();
+			// // 取得所有 Query
+			// $queries = DB::getQueryLog();
+
+			// // 顯示最後一個 SQL 語法
+			// $last_query = end($queries);
+
+			// var_dump($last_query);
+
+			$loc = [];
+			foreach ($offer as $key => $value) {
+				$loc[$key] = '<div class="list-box"> <div class="list-left"> <span class="b-face"><img src="' . URL::to('/') . '/images/' . $value->usr_photo . '"></span> </div> <a href="' . URL::to('/') . '/web/helper_detail/' . $value->usr_id . '/' . (int)($value->distance * 1000) . '" class="list-right"> <div class="list-name">' . $value->last_name . $value->first_name . '</div> <div  class="list-comm"> <span class="list-start"> <i class="fa fa-star" aria-hidden="true"></i> <i class="fa fa-star" aria-hidden="true"></i> <i class="fa fa-star" aria-hidden="true"></i> <i class="fa fa-star" aria-hidden="true"></i> <i class="fa fa-star" aria-hidden="true"></i> </span> <span class="avg">4.9</span> </div> <div class="list-ds"><span class="show-m">距離：</span>' . (int)($value->distance * 1000) . '公尺</div> <div class="list-dl"><span class="show-m">受雇次數：</span>256次</div > <div class="list-dl"><span class="show-m">工作時數：</span>125/小時</div > <div class="list-dl"><span class="show-m">服務項目：</span>水電工程</div> <div class="list-dl"><span class="show-m">價格：</span>' . $value->price . '/' . $value->price_type . '</div> <div class="list-types"><img src="images/work1.jpg"><img src="images/works.jpg"></div> </a> <div class="list-bt"> <a href="#" class="lask" data-toggle="modal" data-target="#exampleModalLong">詢問</a> <a href="#" class="lhire"  data-toggle="modal" data-target="#exampleModalLong">雇用</a> </div> </div>';
+			}
+		} else {
+			$where = "(nlo.service_type LIKE '*[$main_servicetype,%' OR nlo.service_type LIKE '%,$main_servicetype,%' OR nlo.service_type LIKE '%,$main_servicetype]*' OR nlo.service_type LIKE '*[$main_servicetype]*')";
+
+			if(isset($sub_servicetype)) {
+				foreach ($sub_servicetype as $key => $value) {
+					$where .= " OR (nlo.service_type LIKE '*[$value,%' OR nlo.service_type LIKE '%,$value,%' OR nlo.service_type LIKE '%,$value]*' OR nlo.service_type LIKE '*[$value]*')";
+				}
+			}
+
+			$offer = DB::table('NeedListObj AS nlo')->select(DB::raw('nlo.id, ( 6371 * acos( cos( radians('.$lat.') ) * cos( radians( lat ) ) * cos( radians( lng ) - radians('.$lng.') ) + sin( radians('.$lat.') )* sin( radians( lat ) ) ) ) AS distance, lat, lng, usr_photo, last_name, first_name, usr_id, price, price_type'))->join('users AS u', 'nlo.mem_id', '=', 'u.id')->whereRaw($where)->having('distance','<', $distance)->orderBy('distance')->get();
+			// // 取得所有 Query
+			// $queries = DB::getQueryLog();
+
+			// // 顯示最後一個 SQL 語法
+			// $last_query = end($queries);
+
+			// var_dump($last_query);
+
+			$loc = [];
+			foreach ($offer as $key => $value) {
+				$loc[$key] = '<div class="list-box"> <div class="list-left"> <span class="b-face"><img src="' . URL::to('/') . '/images/' . $value->usr_photo . '"></span> </div> <a href="' . URL::to('/') . '/web/helper_detail/' . $value->usr_id . '/' . (int)($value->distance * 1000) . '" class="list-right"> <div class="list-name">' . $value->last_name . $value->first_name . '</div> <div  class="list-comm"> <span class="list-start"> <i class="fa fa-star" aria-hidden="true"></i> <i class="fa fa-star" aria-hidden="true"></i> <i class="fa fa-star" aria-hidden="true"></i> <i class="fa fa-star" aria-hidden="true"></i> <i class="fa fa-star" aria-hidden="true"></i> </span> <span class="avg">4.9</span> </div> <div class="list-ds"><span class="show-m">距離：</span>' . (int)($value->distance * 1000) . '公尺</div> <div class="list-dl"><span class="show-m">受雇次數：</span>256次</div > <div class="list-dl"><span class="show-m">工作時數：</span>125/小時</div > <div class="list-dl"><span class="show-m">服務項目：</span>水電工程</div> <div class="list-dl"><span class="show-m">價格：</span>' . $value->price . '/' . $value->price_type . '</div> <div class="list-types"><img src="images/work1.jpg"><img src="images/works.jpg"></div> </a> <div class="list-bt"> <a href="#" class="lask" data-toggle="modal" data-target="#exampleModalLong">詢問</a> <a href="#" class="lhire"  data-toggle="modal" data-target="#exampleModalLong">雇用</a> </div> </div>';
 			}
 		}
 
-		$offer = DB::table('OfferListObj AS olo')->select(DB::raw('olo.id, ( 6371 * acos( cos( radians('.$lat.') ) * cos( radians( lat ) ) * cos( radians( lng ) - radians('.$lng.') ) + sin( radians('.$lat.') )* sin( radians( lat ) ) ) ) AS distance, lat, lng, usr_photo, last_name, first_name, usr_id, price, price_type'))->join('users AS u', 'olo.mem_id', '=', 'u.id')->whereRaw($where)->having('distance','<', $distance)->orderBy('distance')->get();
-		// // 取得所有 Query
-		// $queries = DB::getQueryLog();
-
-		// // 顯示最後一個 SQL 語法
-		// $last_query = end($queries);
-
-		// var_dump($last_query);
-
-		$loc = [];
-		foreach ($offer as $key => $value) {
-			$loc[$key] = '<div class="list-box"> <div class="list-left"> <span class="b-face"><img src="' . URL::to('/') . '/images/' . $value->usr_photo . '"></span> </div> <a href="' . URL::to('/') . '/web/helper_detail/' . $value->usr_id . '/' . (int)($value->distance * 1000) . '" class="list-right"> <div class="list-name">' . $value->last_name . $value->first_name . '</div> <div  class="list-comm"> <span class="list-start"> <i class="fa fa-star" aria-hidden="true"></i> <i class="fa fa-star" aria-hidden="true"></i> <i class="fa fa-star" aria-hidden="true"></i> <i class="fa fa-star" aria-hidden="true"></i> <i class="fa fa-star" aria-hidden="true"></i> </span> <span class="avg">4.9</span> </div> <div class="list-ds"><span class="show-m">距離：</span>' . (int)($value->distance * 1000) . '公尺</div> <div class="list-dl"><span class="show-m">受雇次數：</span>256次</div > <div class="list-dl"><span class="show-m">工作時數：</span>125/小時</div > <div class="list-dl"><span class="show-m">服務項目：</span>水電工程</div> <div class="list-dl"><span class="show-m">價格：</span>' . $value->price . '/' . $value->price_type . '</div> <div class="list-types"><img src="images/work1.jpg"><img src="images/works.jpg"></div> </a> <div class="list-bt"> <a href="#" class="lask" data-toggle="modal" data-target="#exampleModalLong">詢問</a> <a href="#" class="lhire"  data-toggle="modal" data-target="#exampleModalLong">雇用</a> </div> </div>';
-		}
 		$response['loc'] = $loc;
 		return response()->json($response);
 	}
@@ -283,6 +339,18 @@ class ApiController extends Controller
 			$member_notify_setting->save();
 		}
 
+		return response()->json([]);
+	}
+
+	public function change()
+	{
+		$user = User::find(session()->get('uID'));
+		if($user->open_offer_setting == '1') {
+			User::where('id', '=', session()->get('uID'))->update(['open_offer_setting' => 0]);
+		} else {
+			User::where('id', '=', session()->get('uID'))->update(['open_offer_setting' => 1]);
+
+		}
 		return response()->json([]);
 	}
 }

@@ -48,6 +48,8 @@ Route::prefix('web')->group(function () {
 	Route::get('einvoice_info', 'WebController@einvoice_info');
 	Route::get('collection_info', 'WebController@collection_info');
 	Route::get('set_notify', 'WebController@set_notify');
+
+	Route::any('certification', 'WebController@certification');
 });
 
 Route::prefix('admin')->group(function () {
@@ -106,6 +108,7 @@ Route::prefix('api')->group(function () {
 	Route::post('set_bank', 'ApiController@set_bank');
 	Route::post('del_bank', 'ApiController@del_bank');
 	Route::post('set_notify', 'ApiController@set_notify');
+	Route::post('change', 'ApiController@change');
 });
 
 Route::get('home/big/{filename}', array(function ($filename)

@@ -48,6 +48,22 @@
 <script src="{{asset("/js/position.js")}}"></script>
 <script src="{{asset("/js/main.js")}}"></script>
 
+<script>
+    $('#head-change').on('click', function () {
+        $.ajax({
+            type: "post",
+            url: "{{url('/api/change')}}",
+            dataType: "json",
+            data: {
+                _token: '{{csrf_token()}}'
+            },
+            success: function (response) {
+                location.reload();
+            }
+        });
+    })
+</script>
+
 @yield('myScript')
 
 </html>

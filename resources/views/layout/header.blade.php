@@ -82,13 +82,14 @@
                 <a href="javascript:void(0)">基本設定<i class="fa fa-angle-down" aria-hidden="true"></i></a>
                 <div class="user-sub">
                     <a class="sub-item" href="{{url('/web/profile')}}">個人資訊</a>
+                    <a class="sub-item" href="{{url('/web/certification')}}">身份認證</a>
                     <a class="sub-item" href="{{url('/web/collection_info')}}">收付款設定</a>
                     <a class="sub-item" href="{{url('/web/einvoice_info')}}">發票設定</a>
                     <a class="sub-item" href="{{url('/web/set_notify')}}">通知設定</a>
                 </div>
             </div>
             <a class="user-item" href="coupon.html">我的優惠劵</a>
-            <a class="user-item" href="h-index.html">切換成幫手</a>
+            <a class="user-item" href="javascript:void(0)" id="head-change">切換成幫手</a>
             <a class="user-item" href="contact.html">聯絡幫棒</a>
             <a class="user-item" href="{{url('/web/logout')}}">登出</a>
         </div>

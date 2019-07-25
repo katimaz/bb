@@ -50,6 +50,7 @@ Route::prefix('web')->group(function () {
 	Route::get('set_notify', 'WebController@set_notify');
 
 	Route::any('certification', 'WebController@certification');
+	Route::get('job_detail/{u_id}/{distance}', 'WebController@job_detail');
 });
 
 Route::prefix('admin')->group(function () {

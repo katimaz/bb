@@ -580,6 +580,19 @@ class WebController extends Controller
 
 	}
 
+	// job-detail
+	public function job_detail($usr_id = '', $distance = 0)
+	{
+		// 使用者資訊
+		$user = Users::where('usr_id', $usr_id)->first()->get();
+		// 服務
+		$nlo = NeedListObj::where('mem_id', $user[0]->id)->get();
+		// 評價
+		$service_rate = [];
+
+		return View('web/job_detail', ['distance' => $distance, 'user' => $user[0], 'nlo' => $nlo]);
+	}
+
 	public function veri_mail(Request $request)
     {
 		$data = json_decode(Utils::decrypt(base64_decode($request->data), config('bbpro.iv')));

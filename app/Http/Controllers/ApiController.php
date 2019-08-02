@@ -12,21 +12,14 @@ use App\Models\Setting;
 use App\Models\Video;
 use App\Models\Pic_table;
 use App\Models\Member_addr_recode;
-use App\Models\NeedListObj;
-use App\Models\Users;
-use App\Models\einvoice_info;
-use App\Models\collection_info;
-use App\Models\member_notify_setting;
 use Session;
 use App\User;
 use Auth;
 use Cookie;
-use DB;
-use URL;
 
 class ApiController extends Controller
 {
-
+    
 	public function chk_mail(Request $request)
     {
 		$user = User::where('email',$request->id)->select('FB_login_token','Google_login_token','Line_login_token')->first();
@@ -38,79 +31,100 @@ class ApiController extends Controller
 			if($user->Google_login_token)
 				$socials[] = 'Google';
 			if($user->Line_login_token)
-				$socials[] = 'Line';
+				$socials[] = 'Line';				
 		}
 		return array('checkmail'=>((isset($user))?0:1),'socials'=>((isset($socials))?$socials:''));
 	}
-
+	
 	public function chk_tel(Request $request)
     {
 		//preg_match("/09[0-9]{2}[0-9]{6}/", $TELEPHONE)
 		return User::where('tel',$request->id)->count();
 	}
-
+	
 	public function get_forgot_passwd(Request $request)
     {
 		$user = User::where('email',$request->id)->select('first_name','last_name')->first();
 		if(!$user)
 			return 'error';
-
+			
 		$key = ((Session::has('veri_id')?Session::get('veri_id'):Utils::create_name_id(time())));
 		session()->put('veri_id', $key);
-
+		
 		$data = base64_encode(Utils::encrypt('{"email":"'.$request->id.'","key":"'.$key.'"}', config('bbpro.iv')));
-
+		
 		$btn = json_encode(array('url'=>env('APP_URL').'/set_forgot_passwd?data='.$data,'name'=>'重設密碼'));
 		Mail::to($request->id)->queue(new toMail(env('APP_URL'),$btn,$user->first_name,'BounBang 幫棒 – 忘記密碼','按一下下方的按鈕重設您 BounBang 幫棒帳戶的密碼'));
-
+		
 		return array('is_tomail'=>((Session::has('veri_id')?1:0)));
 	}
-
+	
 	public function get_profile(Request $request)
     {
-		$user = User::where('usr_id',Session::get('usrID'))->select('id','usr_status','first_name','last_name','open_offer_setting','usr_id','phone_number','phone_nat_code','sex','email','usr_photo','email_validated')->first();;
+		$user = User::where('usr_id',Session::get('usrID'))->select('id','usr_status','first_name','last_name','open_offer_setting','usr_id','phone_number','phone_nat_code','sex','email','usr_photo','email_validated')->first();
 		if(!$user)
 			return 'error';
-
+		$zipcodes = Utils::get_area_zipcode();
+		$citys = array();
+		$areas = array();
+		foreach($zipcodes as $key => $value)
+		{
+			$citys[] = $key;
+			$areas[] = $value['Zip'];
+		}
 		$addrs = Member_addr_recode::where('u_id',$user->id)->get();
-
-		$user->addr = ((isset($addrs))?$addrs:'');
+		$positions = array();
+		if(isset($addrs) && count($addrs))
+		{
+			foreach($addrs as $addr)
+			{
+				$index = array_search($addr->city,$citys);
+				$positions[] = array('city'=>$addr->city,'areas'=>$areas[$index],'nat'=>$addr->nat,'zip'=>$addr->zip,'addr'=>$addr->addr,'lat'=>$addr->lat,'lng'=>$addr->lng);
+			}
+		}else
+		{
+			$positions[] = array('city'=>'','areas'=>array(),'nat'=>'','zip'=>'','addr'=>'','lat'=>'','lng'=>'');
+		}
 		$user->password = '';
 		$user->open_offer_setting = ((!$user->open_offer_setting)?0:$user->open_offer_setting);
 		$user->sex = ((!$user->sex)?0:$user->sex);
 		$user->phone_nat_code = ((!$user->phone_nat_code)?'886':$user->phone_nat_code);
-
-		return array('user'=>((isset($user))?$user:''));
-
+		
+		return array('user'=>((isset($user))?$user:''),'positions'=>$positions,'citys'=>((isset($citys))?$citys:''),'areas'=>((isset($areas))?$areas:''));
+		
 	}
-
+	
 	public function set_veri_mail(Request $request)
     {
 		$user = User::where('email',$request->id)->select('email_valid_key')->first();
 		if(!$user)
 			return 'error';
-
+			
 		if($user->email_valid_key)
 			$key = $user->email_valid_key;
 		else
 			$key = Utils::create_name_id(time());
-
+		
 		session()->put('veri_id', $key);
 		$setting = Setting::select('email_veri_subj','email_veri_body')->first();
-
+		
 		$data = base64_encode(Utils::encrypt('{"email":"'.$request->id.'","key":"'.$key.'"}', config('bbpro.iv')));
 		$btn = json_encode(array('url'=>env('APP_URL').'/veri_mail?data='.$data,'name'=>'完成驗證'));
+		
 		Mail::to($request->id)->queue(new toMail(env('APP_URL'),$btn,$user->last_name.$user->first_name,((isset($setting) && $setting->email_veri_subj)?$setting->email_veri_subj:'BounBang 幫棒 - 會員註冊驗證信'),((isset($setting) && $setting->email_veri_body)?$setting->email_veri_body:'歡迎加入 BounBang 幫棒家族<br />您正在進行電子郵件信箱設定，請盡快完成電子郵件信箱驗證。<br />請點擊下面"按鈕"開始驗證Email作業')));
-
+		
 		return array('is_tomail'=>((Session::has('veri_id')?1:0)));
-
+		
 	}
-
+	
 	public function is_existed(Request $request)
     {
-		return User::where('email',$request->id)->count();
+		$num = User::where('usr_id','!=',Session::get('usrID'))->where('email',$request->id)->count();
+		return ((isset($num) && $num)?$num:0);
 	}
-
+	
+	
+	//--------------------------------------------------前端
 	public function set_latlng(Request $request)
 	{
 		$lat = $request->lat;
@@ -353,4 +367,6 @@ class ApiController extends Controller
 		}
 		return response()->json([]);
 	}
+}
+	
 }

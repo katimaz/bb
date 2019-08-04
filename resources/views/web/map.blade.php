@@ -374,6 +374,13 @@
       output.innerHTML = this.value/1000;
     }
 
+  $(function () {
+    $('.search-bt').on('click', function () {
+      var keyword = $('#input-search').val();
+      location.href="<?=URL::to('/')?>/web/map?keyword=" + keyword;
+    })
+  })
+
     $(function () {
       $("#toggle-select").change(function () {
         var $this = $(this).find(':selected');

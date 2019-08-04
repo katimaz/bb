@@ -3,10 +3,15 @@
 <div class="btbg"></div>
 <div class="userbg"></div>
 <div class="search-frame">
-    <input name="" type="search">
+    @if(isset($keyword))
+    <input id="input-search" type="search" value="{{$keyword}}">
+    @else
+    <input id="input-search" type="search" value="  ">
+    @endif
     <div class="search-bt">
         <img src="{{asset("/images/bsearch-bt.png")}}" class="d-none d-sm-block">
-        <img src="{{asset("/images/search-bt.png")}}" class="show-xs"></div>
+        <img src="{{asset("/images/search-bt.png")}}" class="show-xs">
+    </div>
 </div>
 <div class="s-close">
     <img src="{{asset("/images/close.png")}}" width="19" height="20">
@@ -69,8 +74,8 @@
         </a>
         <div class="user-box">
             <div class="user-info">
-                <div class="user-face"><img src="{{asset("/images/5b7d4694c0ab9850731325.jpg")}}"></div>
-                <div class="user-score"><span class="user-name">吳大偉</span><span class="start"><i class="fa fa-star"
+                <div class="user-face"><img src="{{URL::to('/') . '/avatar/small/' . $user->usr_photo}}"></div>
+                <div class="user-score"><span class="user-name">{{session()->get('usrName')['last'] . session()->get('usrName')['first']}}</span><span class="start"><i class="fa fa-star"
                             aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star"
                             aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star"
                             aria-hidden="true"></i> </span><span class="avg">4.9</span>

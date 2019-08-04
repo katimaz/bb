@@ -41,12 +41,42 @@
   </div>
   <div class="w-100">
     <div class="sub-type" id="type1">
-      <a href="map.html">美味家常菜</a>、<a href="map.html">居家清掃</a>、<a href="map.html">水電工程</a>、<a href="#">小孩讀伴玩</a>、<a href="#">銀髮族照護</a>、<a href="#">寵物美容/照顧</a>、<a href="#">洗車/汽車美容</a>、<a href="#">居家布置</a>、<a href="#">花藝</a>、<a href="#">衣物送洗</a>、<a href="#">管家服務</a>、<a href="#">月子媽媽</a>、<a href="#">其他</a></div>
+      <a href="<?=URL::to('/')?>/web/map?keyword=美味家常菜">美味家常菜</a>、
+      <a href="<?=URL::to('/')?>/web/map?keyword=居家清掃">居家清掃</a>、
+      <a href="<?=URL::to('/')?>/web/map?keyword=水電工程">水電工程</a>、
+      <a href="<?=URL::to('/')?>/web/map?keyword=小孩讀伴玩">小孩讀伴玩</a>、
+      <a href="<?=URL::to('/')?>/web/map?keyword=銀髮族照護">銀髮族照護</a>、
+      <a href="<?=URL::to('/')?>/web/map?keyword=寵物美容">寵物美容</a>/
+      <a href="<?=URL::to('/')?>/web/map?keyword=寵物照顧">照顧</a>、
+      <a href="<?=URL::to('/')?>/web/map?keyword=洗車">洗車</a>/
+      <a href="<?=URL::to('/')?>/web/map?keyword=汽車美容">汽車美容</a>、
+      <a href="<?=URL::to('/')?>/web/map?keyword=居家布置">居家布置</a>、
+      <a href="<?=URL::to('/')?>/web/map?keyword=花藝">花藝</a>、
+      <a href="<?=URL::to('/')?>/web/map?keyword=衣物送洗">衣物送洗</a>、
+      <a href="<?=URL::to('/')?>/web/map?keyword=管家服務">管家服務</a>、
+      <a href="<?=URL::to('/')?>/web/map?keyword=月子媽媽">月子媽媽</a>、
+      <a href="<?=URL::to('/')?>/web/map?keyword=其他">其他</a></div>
     <div  class="sub-type"  id="type2">
-      <a href="#">美容</a>、<a href="#">按摩</a>、<a href="#">美髮</a><a href="#">美甲美睫</a>、<a href="#">運動</a>、<a href="#">瑜珈</a>、<a href="#">舞蹈</a>、<a href="#">游泳</a>、<a href="#">其他</a>
+      <a href="<?=URL::to('/')?>/web/map?keyword=美容">美容</a>、
+      <a href="<?=URL::to('/')?>/web/map?keyword=按摩">按摩</a>、
+      <a href="<?=URL::to('/')?>/web/map?keyword=美髮">美髮</a>
+      <a href="<?=URL::to('/')?>/web/map?keyword=美甲美睫">美甲美睫</a>、
+      <a href="<?=URL::to('/')?>/web/map?keyword=運動">運動</a>、
+      <a href="<?=URL::to('/')?>/web/map?keyword=瑜珈">瑜珈</a>、
+      <a href="<?=URL::to('/')?>/web/map?keyword=舞蹈">舞蹈</a>、
+      <a href="<?=URL::to('/')?>/web/map?keyword=游泳">游泳</a>、
+      <a href="<?=URL::to('/')?>/web/map?keyword=其他">其他</a>
      </div>
     <div  class="sub-type"  id="type3">
-      <a href="#"> 課業伴讀</a>、<a href="#">語言學習</a>、<a href="#">音樂教學</a>、<a href="#">攝影教學</a>、<a href="#">廚藝指導</a>、<a href="#">繪畫教學</a>、<a href="#">才藝培養</a>、<a href="#">電腦教學</a>、<a href="#">其他</a>
+      <a href="<?=URL::to('/')?>/web/map?keyword=課業伴讀">課業伴讀</a>、
+      <a href="<?=URL::to('/')?>/web/map?keyword=語言學習">語言學習</a>、
+      <a href="<?=URL::to('/')?>/web/map?keyword=音樂教學">音樂教學</a>、
+      <a href="<?=URL::to('/')?>/web/map?keyword=攝影教學">攝影教學</a>、
+      <a href="<?=URL::to('/')?>/web/map?keyword=廚藝指導">廚藝指導</a>、
+      <a href="<?=URL::to('/')?>/web/map?keyword=繪畫教學">繪畫教學</a>、
+      <a href="<?=URL::to('/')?>/web/map?keyword=才藝培養">才藝培養</a>、
+      <a href="<?=URL::to('/')?>/web/map?keyword=電腦教學">電腦教學</a>、
+      <a href="<?=URL::to('/')?>/web/map?keyword=其他">其他</a>
      </div>
   </div>
   <div class="session">

@@ -4,11 +4,11 @@
 	<div class="w-100 p-2 d-table text-center mb-4">
         <div class="w-25 float-left text-left">
         	<a class="btn btn-primary" v-if="mode" href="/admin/users" v-text="((!mode)?'':'返回')"></a>
-        </div>    
+        </div>
         <div class="w-50 float-left mx-auto">
         	<input type="text" class="form-control float-left w-75" id="search" v-model="search_text" @keyup.enter="searchBtn" placeholder="搜尋會員任一字串" />
             <a href="javascript:void(0)" @click="searchBtn" class="btn btn-primary">搜尋</a>
-        </div>  
+        </div>
         <div class="w-25 float-right text-right">
         	<h3 v-text="'會員'+((mode=='edit')?'修改':'列表')"></h3>
         </div>
@@ -38,7 +38,7 @@
                           <input class="form-check-input" type="radio" name="usr_status" value="4" v-model="user.usr_status" id="d">
                           <label class="form-check-label" for="d">VIP</label>
                         </div>
-                    	<div class="rounded-circle border float-right" :style="'width:60px;height:60px;background:url('+((user.usr_photo)?'/avatar/small/'+user.usr_photo:'/images/person-icon.jpg')+') no-repeat center center / auto 100% #eee;'"></div>  
+                    	<div class="rounded-circle border float-right" :style="'width:60px;height:60px;background:url('+((user.usr_photo)?'/avatar/small/'+user.usr_photo:'/images/person-icon.jpg')+') no-repeat center center / auto 100% #eee;'"></div>
                     </td>
                   </tr>
                   <tr>
@@ -126,11 +126,11 @@
                     <td v-text="user.email"></td>
                     <td v-text="user.phone_number"></td>
                     <td v-text="user.created_at"></td>
-                </tr>	
+                </tr>
             </tbody>
         </table>
         <div class="w-100 d-table py-2 text-center border-top" v-if="users.last_page>1">
-            <a class="btn btn-light btn-sm float-left" v-if="parseInt(users.current_page) > 1" href="javascript:void(0)" @click="go_content_page(parseInt(users.current_page-1))">上一頁</a>	
+            <a class="btn btn-light btn-sm float-left" v-if="parseInt(users.current_page) > 1" href="javascript:void(0)" @click="go_content_page(parseInt(users.current_page-1))">上一頁</a>
             <span class="h5" v-if="parseInt(users.current_page) > 1" v-text="users.current_page"></span>
             <a class="btn btn-light btn-sm float-right" v-if="users.last_page>users.current_page" href="javascript:void(0)" @click="go_content_page(parseInt(users.current_page)+1)">下一頁</a>
         </div>
@@ -163,9 +163,9 @@ new Vue({
 			console.log(response.data)
 			if(response.data=='error')
 				window.location = '/error';
-			
+
 			self.user = response.data.user;
-			
+
 		});
 	},
 	sendform: function(){
@@ -174,19 +174,19 @@ new Vue({
 		if(!self.user.first_name)
 		{
 			$("#first_name").css({"border":"1px solid #a02"});
-			chk = 0;	
+			chk = 0;
 		}else
 			$("#first_name").css({"border":"1px solid #ccc"});
-		
+
 		if(!self.user.last_name)
 		{
 			$("#last_name").css({"border":"1px solid #a02"});
-			chk = 0;	
+			chk = 0;
 		}else
 			$("#last_name").css({"border":"1px solid #ccc"});
-				
+
 		if(chk)
-			$('#mainFrm').submit();	
+			$('#mainFrm').submit();
 	},
 	searchBtn: function(){
 		var self = this;
@@ -198,22 +198,22 @@ new Vue({
 				console.log(response.data)
 				if(response.data=='error')
 					window.location = '/error';
-				
+
 				self.users = response.data.users;
-				
-			});		
+
+			});
 		}else
 			$("#search").css({"border":"1px solid #a02"});
 	},
 	go_content_page: function(page){
-	  
+
 	  var self = this;
 	  self.thisPage = page;
 	  axios.get('/admin/get_users?mode=turn&text='+self.search_text+'&page='+page).then(function (response){
-			console.log(response.data)		
+			console.log(response.data)
 		  self.users = response.data.users;
 	 })
-	  
+
 	},
 	list_user: function(){
 		var self = this;
@@ -222,13 +222,13 @@ new Vue({
 			console.log(response.data)
 			if(response.data=='error')
 				window.location = '/error';
-			
+
 			self.users = response.data.users;
 		});
 	}
-	
+
   }
-  
+
 })
-</script>   
+</script>
 @stop

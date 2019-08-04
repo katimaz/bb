@@ -109,6 +109,7 @@ class WebController extends Controller
 				  session()->put('usrID', $user->usr_id);
 				  session()->put('usrStatus', $user->usr_status);
 				  session()->put('usrName', array('first'=>$user->first_name,'last'=>$user->last_name));
+				  session()->put('usrPhoto', $user->usr_photo);
 
 
 				  if(isset($user) && $user->cookie_id)
@@ -128,7 +129,7 @@ class WebController extends Controller
 					  );
 				  }
 				  if(!$user->usr_status)
-					  return redirect('/web/profile');
+					  return redirect('/');
 				  else
 				  {
 					  $url = ((Cookie::has('BB_login_cookie'))?Cookie::get('BB_login_cookie'):'/');
@@ -255,6 +256,7 @@ class WebController extends Controller
 				//chmod(storage_path()."/files/pic/avatar/photoSmall/".$Fn_name, 0775);
 				Utils::ImageResize(storage_path()."/files/pic/avatar/photoSmall/".$Fn_name, storage_path()."/files/pic/avatar/photoSmall/".$Fn_name, 200,200,72);
 				$input['usr_photo'] = $Fn_name;
+				session()->put('usrPhoto', $Fn_name);
 			}else
 				return View('web/error_message', array('message' => '錯誤的影像格式，請使用JPG圖檔!', 'goUrl'=>'/register'));
 		}
@@ -410,9 +412,7 @@ class WebController extends Controller
 			}
 		}
 
-
-
-		return View('web/map', array('user'=>$user, 'loc' => $loc));
+		return View('web/map', array('user'=>$user, 'loc' => $loc, 'keyword' => $keyword));
 
 	}
 
@@ -431,6 +431,7 @@ class WebController extends Controller
 		$lat = Session::get('lat');
 		$lng = Session::get('lng');
 
+		// 用戶
 		if($user->open_offer_setting == "0") {
 			if($keyword != '') {
 				$offer = DB::table('OfferListObj AS olo')->select(DB::raw('olo.id, ( 6371 * acos( cos( radians('.$lat.') ) * cos( radians( lat ) ) * cos( radians( lng ) - radians('.$lng.') ) + sin( radians('.$lat.') )* sin( radians( lat ) ) ) ) AS distance, lat, lng, usr_photo, last_name, first_name, u.usr_id'))->join('users AS u', 'olo.mem_id', '=', 'u.id')->where('offer_title', 'like', "%$keyword%")->having('distance','<', $distance)->orderBy('distance')->get();
@@ -447,7 +448,7 @@ class WebController extends Controller
 			if($keyword != '') {
 				$offer = DB::table('NeedListObj AS nlo')->select(DB::raw('nlo.id, ( 6371 * acos( cos( radians('.$lat.') ) * cos( radians( lat ) ) * cos( radians( lng ) - radians('.$lng.') ) + sin( radians('.$lat.') )* sin( radians( lat ) ) ) ) AS distance, lat, lng, usr_photo, last_name, first_name, u.usr_id'))->join('users AS u', 'nlo.mem_id', '=', 'u.id')->where('offer_title', 'like', "%$keyword%")->having('distance','<', $distance)->orderBy('distance')->get();
 			} else {
-				$offer = DB::table('NeedListObj AS nlo')->select(DB::raw('nlo.id, ( 6371 * acos( cos( radians('.$lat.') ) * cos( radians( lat ) ) * cos( radians( lng ) - radians('.$lng.') ) + sin( radians('.$lat.') )* sin( radians( lat ) ) ) ) AS distance, lat, lng, usr_photo, last_name, first_name, u.usr_id, price, price_type'))->join('users AS u', 'nlo.mem_id', '=', 'u.id')->having('distance','<', $distance)->orderBy('distance')->get();
+				$offer = DB::table('NeedListObj AS nlo')->select(DB::raw('nlo.id, ( 6371 * acos( cos( radians('.$lat.') ) * cos( radians( lat ) ) * cos( radians( lng ) - radians('.$lng.') ) + sin( radians('.$lat.') )* sin( radians( lat ) ) ) ) AS distance, lat, lng, usr_photo, last_name, first_name, u.usr_id, budget, budget_type'))->join('users AS u', 'nlo.mem_id', '=', 'u.id')->having('distance','<', $distance)->orderBy('distance')->get();
 			}
 
 			$loc = [];
@@ -458,7 +459,7 @@ class WebController extends Controller
 		}
 
 
-		return View('web/list', array('user'=>$user, 'loc' => $loc));
+		return View('web/list', array('user'=>$user, 'loc' => $loc, 'keyword' => $keyword));
 
 	}
 

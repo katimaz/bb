@@ -363,6 +363,12 @@
 <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyABW4BgnHQyCb11qpo3kx6t97BwxgG1k18" type="text/javascript"></script>
 <script src="{{asset('js/bootstrap-input-spinner.js')}}"></script>
 <script>
+  $(function () {
+    $('.search-bt').on('click', function () {
+      var keyword = $('#input-search').val();
+      location.href="<?=URL::to('/')?>/web/map?keyword=" + keyword;
+    })
+  })
   $("input[type='number']").inputSpinner();
   $('.input-group').click(function(e) {
 

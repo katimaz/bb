@@ -6,7 +6,7 @@
     @if(isset($keyword))
     <input id="input-search" type="search" value="{{$keyword}}">
     @else
-    <input id="input-search" type="search" value="  ">
+    <input id="input-search" type="search" value="">
     @endif
     <div class="search-bt">
         <img src="{{asset("/images/bsearch-bt.png")}}" class="d-none d-sm-block">
@@ -32,6 +32,7 @@
         <span class="bottom"></span>
     </div>
     <div class="main-menu">
+        @if(session()->get('usr_type') == 0)
         <ul class="menu-ul">
             <li>
                 <a href="reservation.html">我的需求</a>
@@ -67,6 +68,43 @@
                 <a href="calendar.html">我的行事曆</a>
             </li>
         </ul>
+        @else
+        <ul class="menu-ul">
+            <li>
+                <a href="job-reservation.html">我的工作<i class="nl-badge">2</i></a>
+            </li>
+            <li>
+                <a href="order-statu.html">我的訂單<i class="nl-badge">1</i></a>
+            </li>
+            <li>
+                <a href="h-set.html">服務設定</a>
+            </li>
+            <li class="submenu" id="subA">
+            <a href="javascript:void(0)">
+                我的帳務<i class="fa fa-angle-down" aria-hidden="true"></i>
+                </a>
+                <div class="sub-list" id="boxA">
+                <a class="sub-item" href="feedback.html">回饋金</a>
+                <a class="sub-item" href="income.html">服務收入</a>
+                <a class="sub-item" href="pay.html">支出</a>
+                </div>
+            </li>
+            <li class="submenu" id="subB">
+                <a href="javascript:void(0)">
+                推薦賺回饋<i class="fa fa-angle-down" aria-hidden="true"></i>
+                </a>
+                <div class="sub-list" id="boxB">
+                <a class="sub-item" href="recommend.html">推薦連結</a>
+                <a class="sub-item" href="promote.html">介紹幫棒給新夥伴</a>
+                <a class="sub-item" href="partners.html">我的夥伴團隊</a>
+                <a class="sub-item" href="total.html">我的夥伴團隊總營收</a>
+                </div>
+            </li>
+            <li>
+                <a href="calendar.html">我的行事曆</a>
+            </li>
+        </ul>
+        @endif
     </div>
     <div class="user">
         <a href="javascript:void(0)" class="user-icon">
@@ -74,7 +112,7 @@
         </a>
         <div class="user-box">
             <div class="user-info">
-                <div class="user-face"><img src="{{URL::to('/') . '/avatar/small/' . $user->usr_photo}}"></div>
+                <div class="user-face"><img src="{{URL::to('/') . '/avatar/small/' . session()->get('usrPhoto')}}"></div>
                 <div class="user-score"><span class="user-name">{{session()->get('usrName')['last'] . session()->get('usrName')['first']}}</span><span class="start"><i class="fa fa-star"
                             aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star"
                             aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star"
@@ -94,7 +132,11 @@
                 </div>
             </div>
             <a class="user-item" href="coupon.html">我的優惠劵</a>
+            @if(session()->get('usr_type') == 0)
             <a class="user-item" href="javascript:void(0)" id="head-change">切換成幫手</a>
+            @else
+            <a class="user-item" href="javascript:void(0)" id="head-change">切換成會員</a>
+            @endif
             <a class="user-item" href="contact.html">聯絡幫棒</a>
             <a class="user-item" href="{{url('/web/logout')}}">登出</a>
         </div>

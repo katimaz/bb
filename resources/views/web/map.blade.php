@@ -11,7 +11,7 @@
           </div>
           <div class="slidecontainer">
             <label for="myRange"><i class="fa fa-adjust" aria-hidden="true"></i> 搜尋半徑</label>
-            <input type="range" min="500" max="50000" value="10000" class="slider" id="myRange">
+            <input type="range" min="500" max="50000" value="50000" class="slider" id="myRange">
             <div class="c-range">目前範圍：<span id="demo"></span>公里</div>
           </div>
           <div class="form-group" id="toggle-select">
@@ -100,8 +100,8 @@
           </div>
           <div class="mach-bt"><a href="#" class="hmbt">搜尋幫手</a></div>
         </form>
-      <a href="#" class="bell"　　　　 data-toggle="modal"              data-target="#exampleModalLong"><img src="<?=URL::to('/')?>/images/bell.svg"></a>
-      <div class="bell-text">需要客製化與即時服務嗎?<br>使用<a href="#"　　　　 data-toggle="modal"              data-target="#exampleModalLong">服務鈴(配對)</a>．</div>
+      <a href="#" class="bell" data-toggle="modal" data-target="#exampleModalLong"><img src="<?=URL::to('/')?>/images/bell.svg"></a>
+      <div class="bell-text">需要客製化與即時服務嗎?<br>使用<a href="#" class="bell" data-toggle="modal" data-target="#exampleModalLong">服務鈴(配對)</a>．</div>
       </div>
     </div>
     <div class="map-right">
@@ -123,18 +123,22 @@
           </button>
         </div>
         <div class="modal-body">
-          <p><span class="text-success">關鍵字：</span>加壓馬逹安裝</p>
+          @if(isset($keyword))
+          <p><span class="text-success">關鍵字：</span>{{$keyword}}</p>
+          @else
+          <p><span class="text-success">關鍵字：</span></p>
+          @endif
           <p>
             <span class="text-success"><i class="fa fa-map-marker" aria-hidden="true"></i> 所需服務地點：</span>
             <span id="need_location">目前地點</span>
           </p>
           <p>
             <span class="text-success"><i class="fa fa-adjust" aria-hidden="true"></i> 搜尋半徑：</span>
-            <span id="need_distance"> 10 公里 </span>
+            <span id="need_distance">公里 </span>
           </p>
           <p>
             <span class="text-success"><i class="fa fa-check-square-o" aria-hidden="true"></i> 服務類別：</span>
-            <span id="need_service_type"> 水電工程 </span>
+            <span id="need_service_type"></span>
           </p>
 
 
@@ -297,7 +301,7 @@
               </svg>
               <span class="input-file-label">照片上傳：</span>
             </label>
-          <textarea name="" 　class="form-control" placeholder="需求描述"></textarea>
+          <textarea name="" class="form-control" id="need_description" placeholder="需求描述"></textarea>
           <div class="summary">
             <p> 預算：<span id="smr-budget"></span>元/<span id="smr-budget_type">每件</span> </p>
             <p>時間週期：<span id="smr-week"></span>，<span id="smr-s_dt"></span> 至 <span id="smr-e_dt"></span>，<span id="smr-time"><span>-<span id="smr-e_t"></span>點</p>
@@ -311,6 +315,8 @@
       </div>
     </div>
   </div>
+  <input type="hidden" id="lat" value="<?=session()->get('lat')?>">
+  <input type="hidden" id="lng" value="<?=session()->get('lng')?>">
   <!--內容結束 -->
   <!-- <script src="{{asset('/js/jquery.min.js')}}"></script>
   <script> $(window).on('load', function () { $(".se-pre-con").fadeOut("slow"); });</script> -->
@@ -403,6 +409,26 @@
 
       });
     });
+    $('.bell').on('click', function (e) {
+      var bell = 0;
+      $('.sub-servicetype').each(function () {
+        if($(this).prop('checked')) {
+          $('#need_service_type').text($(this).val());
+          bell = 1;
+          return false;
+        }
+      })
+      if(bell == 0) {
+        e.preventDefault();
+        alert('請選擇服務類別');
+        return false;
+      }
+      if($('#location').val() != '') {
+        $('#need_location').text($('#location').val());
+      }
+      $('#need_distance').text($('#myRange').val() / 1000 + ' 公里');
+
+    })
     $(".map-detail a").on('click', function () {
       $(this).find('i').toggleClass('fa fa-plus fa fa-minus')
       $('.detail-option').slideToggle();
@@ -461,6 +487,8 @@
 
     function search_offer(lat, lng) {
       var sub_servicetype = [];
+      $('#lat').val(lat);
+      $('#lng').val(lng);
 
       // var sub_servicetype_str = "";
       $('.sub-servicetype').each( function(){
@@ -811,6 +839,8 @@
     })
 
     $('#btn-need-list').on('click', function () {
+      $('#btn-need-list').text('配對發送中…').prop('disabled', true);
+
       $.ajax({
         type: "post",
         url: "{{url('/api/set_need')}}",
@@ -826,10 +856,17 @@
           week: week,
           monthday_enum: monthday_enum,
           total: total,
+          service_type: $('#need_service_type').text(),
+          mem_addr: $('#location').val(),
+          keyword: $('#input-search').val(),
+          need_description: $('#need_description').val(),
+          lat: $('#lat').val(),
+          lng: $('#lng').val(),
           _token: '{{ csrf_token() }}'
         },
         dataType: "json",
         success: function (response) {
+          $('#btn-need-list').text('確認配對').prop('disabled', false);
           alert(response.msg);
         }
       });

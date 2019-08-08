@@ -93,59 +93,54 @@ class WebController extends Controller
 
 	public function login_pt(Request $request)
     {
-		if ($request->has('email') && $request->email && $request->has ( 'password' ))
-	   	{
-		  if(!User::where('email', '=', $request->email)->count()){
+		if ($request->has('email') && $request->email && $request->has ( 'password' )) {
+		  if(!User::where('email', '=', $request->email)->count()) {
 			  return View('web/error', array('message' => '很抱歉，帳密有問題喔!'));
-		  }else
-		  {
-			  $user = User::where('email', '=', trim($request->email))->select('id','usr_id','password','usr_status','last_name','first_name','phone_number','email','remember_token','cookie_id')->first();
+		  } else {
+			  $user = User::where('email', '=', trim($request->email))->select('id','usr_id','password','usr_status','last_name','first_name','phone_number','email','remember_token','cookie_id', 'usr_photo')->first();
 			  $password = trim($request->password) . ":" . $user->usr_id;
 
 			  $request->session()->flush();
-			  if (Auth::attempt(array('email' => trim($request->email), 'password' => $password),((isset($request->remember))?true:false)))
-			  {
+			  if (Auth::attempt(array('email' => trim($request->email), 'password' => $password), ((isset($request->remember)) ? true : false))) {
 				  session()->put('uID', $user->id);
 				  session()->put('usrID', $user->usr_id);
 				  session()->put('usrStatus', $user->usr_status);
 				  session()->put('usrName', array('first'=>$user->first_name,'last'=>$user->last_name));
 				  session()->put('usrPhoto', $user->usr_photo);
+				  session()->put('usr_type', $user->usr_type);
 
-
-				  if(isset($user) && $user->cookie_id)
-				  {
-					  if($user->cookie_id != Cookie::get('BB_cookie_id'))
-					  {
+				  if(isset($user) && $user->cookie_id) {
+					  if($user->cookie_id != Cookie::get('BB_cookie_id')) {
 						Cookie::queue(
 							Cookie::forever('BB_cookie_id', $user->cookie_id)
 						);
 					  }
-				  }else
-				  {
+				  } else {
 					  $new_cookie = Utils::v4();
 					  User::where('usr_id',Session::get('usrID'))->update(array('cookie_id'=>$new_cookie));
 					  Cookie::queue(
 						  Cookie::forever('BB_cookie_id', $new_cookie)
 					  );
 				  }
-				  if(!$user->usr_status)
+				  if(!$user->usr_status) {
 					  return redirect('/');
-				  else
-				  {
+				  } else {
 					  $url = ((Cookie::has('BB_login_cookie'))?Cookie::get('BB_login_cookie'):'/');
 					  Cookie::queue(Cookie::forget('BB_login_cookie'));
 					  return redirect($url);
 				  }
 
-			  }else
+			  }else {
 			 	return View('web/error', array('message' => '很抱歉，帳密有問題喔!', 'data'=>''));
+			  }
 
-
-			  if($user->usr_status<0)
+			  if($user->usr_status<0) {
 			  	return View('web/error', array('message' => '很抱歉，您的權限不足請聯絡官方服務人員!', 'data'=>''));
+			  }
 			}
-		}else
+		}else {
 			return View('web/error', array('message' => '很抱歉，帳密有問題喔!'));
+		}
 	}
 
 	public function signup_pt(Request $request)
@@ -265,8 +260,8 @@ class WebController extends Controller
 		if(isset($request->password) && $request->password && $request->password==$request->chk_password)
 			$input['password'] = Utils::set_password(trim($request->password),trim($account));
 
-
-		$input['open_offer_setting'] = $request->open_offer_setting;
+		session()->put('usr_type', $request->usr_type);
+		$input['usr_type'] = $request->usr_type;
 		$input['last_name'] = $request->last_name;
 		$input['first_name'] = $request->first_name;
 		if($user->email_validated)
@@ -379,7 +374,7 @@ class WebController extends Controller
 		$lng = Session::get('lng');
 
 		// 用戶
-		if($user->open_offer_setting == "0") {
+		if($user->usr_type == "0") {
 			// 如果有輸入關鍵字搜尋
 			if($keyword != '') {
 				$offer = DB::table('OfferListObj AS olo')->select(DB::raw('olo.id, ( 6371 * acos( cos( radians('.$lat.') ) * cos( radians( lat ) ) * cos( radians( lng ) - radians('.$lng.') ) + sin( radians('.$lat.') )* sin( radians( lat ) ) ) ) AS distance, lat, lng, usr_photo, last_name, first_name, u.usr_id'))->join('users AS u', 'olo.mem_id', '=', 'u.id')->where('offer_title', 'like', "%$keyword%")->having('distance','<', $distance)->orderBy('distance')->get();
@@ -432,7 +427,7 @@ class WebController extends Controller
 		$lng = Session::get('lng');
 
 		// 用戶
-		if($user->open_offer_setting == "0") {
+		if($user->usr_type == "0") {
 			if($keyword != '') {
 				$offer = DB::table('OfferListObj AS olo')->select(DB::raw('olo.id, ( 6371 * acos( cos( radians('.$lat.') ) * cos( radians( lat ) ) * cos( radians( lng ) - radians('.$lng.') ) + sin( radians('.$lat.') )* sin( radians( lat ) ) ) ) AS distance, lat, lng, usr_photo, last_name, first_name, u.usr_id'))->join('users AS u', 'olo.mem_id', '=', 'u.id')->where('offer_title', 'like', "%$keyword%")->having('distance','<', $distance)->orderBy('distance')->get();
 			} else {

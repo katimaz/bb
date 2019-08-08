@@ -68,7 +68,7 @@ class ApiController extends Controller
 
 	public function get_profile(Request $request)
     {
-		$user = User::where('usr_id',Session::get('usrID'))->select('id','usr_status','first_name','last_name','open_offer_setting','usr_id','phone_number','phone_nat_code','sex','email','usr_photo','email_validated')->first();;
+		$user = User::where('usr_id',Session::get('usrID'))->select('id','usr_status','first_name','last_name','usr_type', 'open_offer_setting','usr_id','phone_number','phone_nat_code','sex','email','usr_photo','email_validated')->first();;
 		if(!$user)
 			return 'error';
 
@@ -76,7 +76,7 @@ class ApiController extends Controller
 
 		$user->addr = ((isset($addrs))?$addrs:'');
 		$user->password = '';
-		$user->open_offer_setting = ((!$user->open_offer_setting)?0:$user->open_offer_setting);
+		$user->usr_type = ((!$user->usr_type) ? 0 : $user->usr_type);
 		$user->sex = ((!$user->sex)?0:$user->sex);
 		$user->phone_nat_code = ((!$user->phone_nat_code)?'886':$user->phone_nat_code);
 
@@ -263,6 +263,18 @@ class ApiController extends Controller
 		$need_list_obj->available_daytime_enum =  ($request->available_daytime_enum == null) ? '0' : $request->available_daytime_enum;
 		$need_list_obj->weekday_enum =  ($request->week == null) ? '0' : $request->week;
 		$need_list_obj->monthday_enum =  ($request->monthday_enum == null) ? '0' : $request->monthday_enum;
+		$need_list_obj->service_type = $request->service_type;
+		$need_list_obj->keyword = $request->keyword;
+		$need_list_obj->need_description = $request->need_description;
+		$need_list_obj->lat = $request->lat;
+		$need_list_obj->lng = $request->lng;
+		if($request->mem_addr == '') {
+			$gmap = file_get_contents('https://maps.googleapis.com/maps/api/geocode/json?latlng=' . session()->get('lat') . ',' . session()->get('lng')  . '&language=zh-TW&key=AIzaSyABW4BgnHQyCb11qpo3kx6t97BwxgG1k18');
+			$location = json_decode($gmap);
+			$need_list_obj->mem_addr = $location->results[0]->formatted_address;
+		} else {
+			$need_list_obj->mem_addr = $request->mem_addr;
+		}
 		// $need_list_obj->total =  $request->total;
 
 		$need_list_obj->save();
@@ -345,12 +357,14 @@ class ApiController extends Controller
 	public function change()
 	{
 		$user = User::find(session()->get('uID'));
-		if($user->open_offer_setting == '1') {
-			User::where('id', '=', session()->get('uID'))->update(['open_offer_setting' => 0]);
+		if($user->usr_type == '1') {
+			User::where('id', '=', session()->get('uID'))->update(['usr_type' => 0]);
+			session()->put('usr_type', 0);
 		} else {
-			User::where('id', '=', session()->get('uID'))->update(['open_offer_setting' => 1]);
-
+			User::where('id', '=', session()->get('uID'))->update(['usr_type' => 1]);
+			session()->put('usr_type', 1);
 		}
+
 		return response()->json([]);
 	}
 }

@@ -22,6 +22,9 @@ use App\Models\Newebpay_mpg;
 use App\Models\Invoice_track;
 use App\Models\Invoice;
 use App\Models\Invoice_allowance;
+use App\Models\Merchant;
+use App\Models\ChargeInstruct;
+use App\Models\ExportInstruct;
 use App\User;
 use Cookie;
 use DB;
@@ -60,7 +63,8 @@ class AdminController extends Controller
 				
 				$data = Utils::encrypt('{"SessionId":"'.$request->session()->getId().'", "Account":"'.$owner->adm_account.'", "Group":"'.$owner->group_id.'"}', config('bbpro.key'));
 				
-				Cookie::queue('dataCookie',$data, 28800);
+				//Cookie::queue('dataCookie',$data, 28800);
+				Cookie::queue(Cookie::make('dataCookie', $data, 28800));
 				
 				return redirect('admin/owner');
 			}
@@ -299,6 +303,46 @@ class AdminController extends Controller
 		}
 	}
 	
+	public function serviceFee(Request $request)
+    {
+    	if(!Admin_member::isManager(9))
+		{
+			Log::warning("登入驗證失敗(".Session::get('ownerID')." >> ".basename(url()->current(),".php")." >> ".$_SERVER["REMOTE_ADDR"].")");
+			return View('admin/error', array('message' => '您的權限似乎不足喔!!'));
+		}
+		
+		$setting = Setting::select('service_fee')->first();
+		
+		return View('admin/serviceFee', array('fee'=>((isset($setting))?$setting->service_fee:'')));
+	}
+	
+	public function serviceFee_pt(Request $request)
+	{
+		if(!Admin_member::isManager(9))
+		{
+			Log::warning("登入驗證失敗(".Session::get('ownerID')." >> ".basename(url()->current(),".php")." >> ".$_SERVER["REMOTE_ADDR"].")");
+			return View('admin/error', array('message' => '您的權限似乎不足喔!!'));
+		}
+		$validator = Validator::make($request->all(), array(
+			'serviceFee' => 'required|numeric|between:10,50',
+		));
+		
+		if ($validator->fails()) {
+			return View('admin/error_message', array('message' => '輸入表單欄位驗證錯誤!!', 'goUrl'=>'/admin/serviceFee'));
+		}
+				
+		if(!Setting::count())
+		{
+			$input = new Setting;
+			$input->service_fee = $request->serviceFee;
+			$input->save();	
+		}else
+			Setting::where('id',1)->update(array('service_fee'=>$request->serviceFee));
+			
+		return redirect('admin/serviceFee');
+		
+	}
+	
 	public function transfer_records(Request $request)
     {
     	//dd(basename(url()->current(),".php"));
@@ -312,7 +356,7 @@ class AdminController extends Controller
 		$item = ($request->has('item'))?$request->item:'';
 		$action = ($request->has('action'))?$request->action:'';
 		$status = ($request->has('status'))?$request->status:'';
-		$message = ($request->has('message'))?$request->message:'';
+		$message = ($request->has('message') && $request->get('message'))?$request->message:'';
 		
 		return View('admin/transfer_records', array('item'=>$item,'action'=>$action,'status'=>$status,'message'=>$message));
 		
@@ -332,22 +376,25 @@ class AdminController extends Controller
 		{
 			$newebPay = new NewebPay();
 			$ezpay = new Ezpay();
-			$merchant_id = env('newebPay_merchant_id');
+			//$merchant_id = env('newebPay_merchant_id');
+			//dd($request->all());
 			if($action=='mpg_gateway')
 			{
 				$validator = Validator::make($request->all(), array(
 					'usr_id' => 'required|max:32',
 					'Email' => 'required|max:128',
+					'MerchantID' => 'required|max:15',
 					'MerchantOrderNo' => 'required|max:32',
-					'Amt' => 'required|min:1',
+					'Amt' => 'required|integer|min:1',
 				
 				));
 			
 				if ($validator->fails()) {
-					return View('admin/error_message', array('message' => '輸入表單欄位驗證錯誤!!', 'goUrl'=>'/admin/transfer_records','item'=>$item));
+					return View('admin/error_message', array('message' => '輸入表單欄位驗證錯誤!!', 'goUrl'=>'/admin/transfer_records','item'=>$item,'action'=>$action));
 				}
 				$post_data_array = array(
 					'usr_id' => $request->usr_id, //會員ID
+					'MerchantID' => $request->MerchantID, //合作商店ID
 					'MerchantOrderNo' => $request->MerchantOrderNo, //自訂商品編號
 					'Amt' => $request->Amt, //交易金額
 					'ItemDesc' => $request->ItemDesc, //商品資訊50字內
@@ -357,10 +404,10 @@ class AdminController extends Controller
 				
 			}elseif($action=='cancel')
 			{
-				$transfer = Newebpay_mpg::where('MerchantOrderNo',$request->id)->first();
+				$transfer = Newebpay_mpg::join('merchants','newebpay_mpgs.MerchantID','=','merchants.MerchantID')->where('MerchantOrderNo',$request->id)->first();
 				if(!$transfer)
-					return 'error';
-				if(isset($transfer->TradeNo))	
+					return View('admin/error_message', array('message' => '無合作商店資料喔!!', 'goUrl'=>'/admin/transfer_records','item'=>$item,'action'=>$action));
+				if(isset($transfer->TradeNo) && $transfer->TradeNo)	
 					$invoice = Invoice::where('TransNum',$transfer->TradeNo)->where('InvoiceStatus',1)->first();
 				
 				$post_data_array = array(//post_data 欄位資料            
@@ -373,13 +420,11 @@ class AdminController extends Controller
 					 "NotifyURL" => env('newebPay_creditCancel_url')
 				);
 				$result = $newebPay->credit_card_cancel($post_data_array,$transfer,$invoice);
-				
 				if($result['Status']!='SUCCESS')
 					$message = $result['Message'];
 				return redirect('admin/transfer_records?item='.$item.'&action=manage&message='.((isset($message))?$message:''));
 			}elseif($action=='credit_close')
 			{
-				$newebPay = new NewebPay();
 				$validator = Validator::make($request->all(), array(
 					'MerchantOrderNo' => 'required|max:32',
 					'TradeNo' => 'required|max:32',
@@ -391,7 +436,6 @@ class AdminController extends Controller
 				}
 				
 				$result = $newebPay->send_credit_close($request);
-				
 				if($result['Status']!='SUCCESS')
 					$message = 	$result['Message'];
 				return redirect('admin/transfer_records?item='.$item.'&action=credit_close&message='.((isset($message))?$message:''));	
@@ -435,9 +479,265 @@ class AdminController extends Controller
 		$item = ($request->has('item'))?$request->item:'';
 		$mode = ($request->has('mode'))?$request->mode:'';
 		$action = ($request->has('action'))?$request->action:'';
-		$ezpay = new EzPay();
-		if($item=='invoice_tracks')
+		if($item=='systemAccount')
 		{
+			$newebPay = new NewebPay();
+			if($action=='merchant_create')
+			{
+				$validator = Validator::make($request->all(), array(
+					'usr_id' => 'required|max:32',
+					'MerchantID' => 'required|max:15',
+				
+				));
+				if ($validator->fails()) {
+					return View('admin/error_message', array('message' => '輸入表單欄位驗證錯誤!!', 'goUrl'=>'/admin/accountings','item'=>$item));
+				}
+				
+				$user = User::where('usr_id',$request->usr_id)->select('id')->first();
+				if(!$user)
+					return View('admin/error_message', array('message' => '無會員資料喔!!', 'goUrl'=>'/admin/accountings','item'=>$item));
+				$paymodes = array('CREDIT','WEBATM','VACC','CVS','BARCODE');
+				$pays = explode('|',$request->PaymentType);
+				$PaymentArr = array();
+				foreach($paymodes as $paymode)
+				{
+					if(in_array($paymode,$pays))
+						$PaymentArr[] = $paymode.':1';
+					else
+						$PaymentArr[] = $paymode.':0';	
+				}
+				$merchant = Merchant::where('u_id',$user->id)->select('MerchantID')->first();
+				if(!$merchant && $request->mode=='add')  //新增合作商家
+				{
+					//dd($request->all());
+					$post_data_array = array(
+						'Version' => '1.2',
+						'TimeStamp' => time(),
+						'MerchantID' => $request->MerchantID,
+						'ManagerID' => (($request->MerchantClass==2)?$request->Manager_id.';'.$request->Manager_id_number:''),
+						'IDCardDate' => (($request->MerchantClass==1)?str_pad($request->ID_year,3,'0',STR_PAD_LEFT).$request->ID_month.$request->ID_day:''),
+						'MemberUnified' => $request->MemberUnified,
+						'IDCardPlace' => (($request->MerchantClass==1)?$request->IDCardPlace:''),
+						'IDPic' => (($request->MerchantClass==1)?$request->IDPic:''),
+						'IDFrom' => (($request->MerchantClass==1)?$request->IDFrom:''),
+						'MemberName' => $request->MemberName,
+						'MemberPhone' => $request->telHead.'-'.$request->telValue,
+						'ManagerName' => $request->ManagerName,
+						'ManagerNameE' => $request->ManagerNameE,
+						'LoginAccount' => 'BB'.time(),
+						'ManagerMobile' => $request->ManagerMobile,
+						'ManagerEmail' => $request->ManagerEmail,
+						'MerchantName' => $request->MerchantName,
+						'MerchantNameE' => $request->MerchantNameE,
+						'MerchantWebURL' => $request->MerchantWebURL,
+						'MerchantAddrCity' => $request->MerchantAddrCity,
+						'MerchantAddrArea' => $request->MerchantAddrArea,
+						'MerchantAddrCode' => $request->MerchantAddrCode,
+						'MerchantAddr' => $request->MerchantAddr,
+						'NationalE' => $request->NationalE,
+						'CityE' => $request->CityE,
+						'MerchantType' => $request->MerchantType,
+						'BusinessType' => $request->BusinessType,
+						'MerchantDesc' => $request->MerchantDesc,
+						'BankCode' => $request->BankCode,
+						'SubBankCode' => $request->SubBankCode,
+						'BankAccount' => $request->BankAccount,
+						'CreditAutoType' => $request->CreditAutoType,
+						'CreditLimit' => $request->CreditLimit,
+						'PaymentType' => join('|',$PaymentArr)
+					);
+					//dd($post_data_array);
+					$result = $newebPay->merchantCreate($post_data_array);
+					$result_data = json_decode($result);
+					//dd($result_data);
+					if($result_data->status=='SUCCESS')
+					{
+						$input = new Merchant;
+						if($request->MerchantClass==2)
+							$input->ManagerID = $request->Manager_id.';'.$request->Manager_id_number;
+						else
+						{
+							$input->IDCardDate = $request->ID_year.$request->ID_month.$request->ID_day;
+							$input->IDCardPlace = $request->IDCardPlace;
+							$input->IDPic = $request->IDPic;
+							$input->IDFrom = $request->IDFrom;
+						}	
+						$input->u_id = $user->id;
+						$input->MerchantID = $result_data->result->MerchantID;
+						$input->MerchantClass = $request->MerchantClass;
+						$input->MemberUnified = $request->MemberUnified;
+						$input->MemberName = $request->MemberName;
+						$input->MemberPhone = $request->telHead.'-'.$request->telValue;
+						$input->ManagerName = $request->ManagerName;
+						$input->ManagerNameE = $request->ManagerNameE;
+						$input->ManagerMobile = $request->ManagerMobile;
+						$input->ManagerEmail = $request->ManagerEmail;
+						$input->MerchantName = $request->MerchantName;
+						$input->MerchantNameE = $request->MerchantNameE;
+						$input->MerchantWebURL = $request->MerchantWebURL;
+						$input->MerchantAddrCity = $request->MerchantAddrCity;
+						$input->MerchantAddrArea = $request->MerchantAddrArea;
+						$input->MerchantAddrCode = $request->MerchantAddrCode;
+						$input->MerchantAddr = $request->MerchantAddr;
+						$input->NationalE = $request->NationalE;
+						$input->CityE = $request->CityE;
+						$input->MerchantType = $request->MerchantType;
+						$input->BusinessType = $request->BusinessType;
+						$input->MerchantDesc = $request->MerchantDesc;
+						$input->BankCode = $request->BankCode;
+						$input->SubBankCode = $request->SubBankCode;
+						$input->BankAccount = $request->BankAccount;
+						$input->CreditAutoType = $request->CreditAutoType;
+						$input->CreditLimit = $request->CreditLimit;
+						$input->PaymentType = join('|',$PaymentArr);
+						$input->MerchantStatus = 1;
+						$input->MerchantHashKey = $result_data->result->MerchantHashKey;
+						$input->MerchantIvKey = $result_data->result->MerchantIvKey;
+						$input->save();
+					}
+					if($result_data->status!='SUCCESS')
+					{
+						//Cookie::queue('tempCookie',json_encode($request->all()), 3600);
+						Cookie::queue(Cookie::make('tempCookie', json_encode($request->all()), 3600));
+						$message = $result_data->message;	
+						return redirect('admin/accountings?item='.$item.'&action='.$action.'&message='.((isset($message))?$message:''));
+					}
+					return redirect('admin/accountings?item='.$item.'&action=merchant_manager');	
+				}else if($request->mode=='edit') //修改合作商家
+				{
+					$post_data_array = array(
+						'Version' => '1.2',
+						'MerchantID' => $request->MerchantID,
+						'MemberPhone' => $request->telHead.'-'.$request->telValue,
+						'MerchantAddrCity' => $request->MerchantAddrCity,
+						'MerchantAddrArea' => $request->MerchantAddrArea,
+						'MerchantAddrCode' => $request->MerchantAddrCode,
+						'MerchantAddr' => $request->MerchantAddr,
+						'BankCode' => $request->BankCode,
+						'SubBankCode' => $request->SubBankCode,
+						'BankAccount' => $request->BankAccount,
+						'CreditAutoType' => $request->CreditAutoType,
+						'CreditLimit' => $request->CreditLimit,
+						'MerchantStatus' => $request->MerchantStatus
+						
+					);
+					//dd($post_data_array);
+					$result = $newebPay->merchantModify($post_data_array);
+					$result_data = json_decode($result);
+					//dd($result_data);
+					if($result_data->status=='SUCCESS')
+					{
+						$input['MemberName'] = $request->MemberName;
+						$input['MemberPhone'] = $request->telHead.'-'.$request->telValue;
+						$input['MerchantAddrCity'] = $request->MerchantAddrCity;
+						$input['MerchantAddrArea'] = $request->MerchantAddrArea;
+						$input['MerchantAddrCode'] = $request->MerchantAddrCode;
+						$input['MerchantAddr'] = $request->MerchantAddr;
+						$input['BankCode'] = $request->BankCode;
+						$input['SubBankCode'] = $request->SubBankCode;
+						$input['BankAccount'] = $request->BankAccount;
+						$input['CreditAutoType'] = $request->CreditAutoType;
+						$input['CreditLimit'] = $request->CreditLimit;
+						$input['PaymentType'] = join('|',$PaymentArr);
+						$input['MerchantStatus'] = $request->MerchantStatus;
+						Merchant::where('u_id',$user->id)->update($input);
+					}else
+						$message = $result_data->message;
+					//$merchantId = $merchant->MerchantID;
+					
+					return redirect('admin/accountings?item='.$item.'&action=merchant_manager&message='.((isset($message))?$message:''));
+				}
+			}elseif($action=='FeeInstruct')
+			{
+				$validator = Validator::make($request->all(), array(
+					'MerchantID' => 'required|max:15',
+					'MerchantOrderNo' => 'required|max:24',
+					'Amount' => 'required|integer'
+				
+				));
+				if ($validator->fails()) {
+					return View('admin/error_message', array('message' => '輸入表單欄位驗證錯誤!!', 'goUrl'=>'/admin/accountings','item'=>$item,'action'=>$action));
+				}
+				
+				if($request->feeMode=='ChargeInstruct')
+				{
+					$transfer = Newebpay_mpg::where('MerchantOrderNo',$request->MerchantOrderNo)->select('Amt')->first();
+					if(!$transfer)
+						return View('admin/error_message', array('message' => '查無該筆交易資料喔!!', 'goUrl'=>'/admin/accountings','item'=>$item,'action'=>$action));
+					
+					$setting = Setting::select('service_fee')->first();
+					$serviceFee = ((isset($setting) && $setting->service_fee)?$setting->service_fee:20);
+					$fee = round($transfer->Amt*$serviceFee*0.01);
+					if($request->Amount>$fee)
+						return View('admin/error_message', array('message' => '扣款金額不得大於可扣款金額!!', 'goUrl'=>'/admin/accountings','item'=>$item,'action'=>$action));	
+					
+					$post_data_array = array(
+						'Version' => '1.0',
+						'TimeStamp' => time(),
+						'MerchantID' => $request->MerchantID,
+						'MerTrade' => $request->MerchantOrderNo,
+						'BalanceType' => $request->BalanceType,
+						'FeeType' => $request->FeeType,
+						'Amount' => $request->Amount,
+						
+					);
+					//dd($post_data_array);
+					$result = $newebPay->ChargeInstruct($post_data_array);
+					$result_data = json_decode($result);
+					if($result_data->Status=='SUCCESS')
+					{
+						$input = new ChargeInstruct;
+						$input->MerchantID = $request->MerchantID;
+						$input->Amount = $request->Amount;
+						$input->FeeType = $request->FeeType;
+						$input->BalanceType = $request->BalanceType;
+						$input->MerTrade = $result_data->MerTrade;
+						$input->FundTime = $result_data->FundTime;
+						$input->ExeNo = $result_data->ExeNo;
+						$input->save();
+					}
+					
+					$message = $result_data->Message;	
+				}elseif($request->feeMode=='ExportInstruct')
+				{
+					$transfer = Newebpay_mpg::where('MerchantOrderNo',$request->MerchantOrderNo)->select('Amt')->first();
+					if(!$transfer)
+						return View('admin/error_message', array('message' => '查無該筆交易資料喔!!', 'goUrl'=>'/admin/accountings','item'=>$item,'action'=>$action));
+					$setting = Setting::select('service_fee')->first();
+					$serviceFee = ((isset($setting) && $setting->service_fee)?$setting->service_fee:20);
+					//$fee = round($transfer->Amt*$serviceFee*0.01);
+					if($request->Amount>$transfer->Amt)
+						return View('admin/error_message', array('message' => '撥款金額不得大於可撥款金額!!', 'goUrl'=>'/admin/accountings','item'=>$item,'action'=>$action));	
+					
+					$post_data_array = array(
+						'Version' => '1.0',
+						'TimeStamp' => time(),
+						'MerchantID' => $request->MerchantID,
+						'MerchantOrderNo' => $request->MerchantOrderNo,
+						'Amount' => $request->Amount
+					);
+					//dd($post_data_array);
+					$result = $newebPay->ExportInstruct($post_data_array);
+					$result_data = json_decode($result);
+					//dd($result_data);
+					if($result_data->Status=='SUCCESS')
+					{
+						$input = new ChargeInstruct;
+						$input->MerchantID = $request->MerchantID;
+						$input->MerchantOrderNo = $request->MerchantOrderNo;
+						$input->Amount = $request->Amount;
+						$input->save();
+					}
+					
+					$message = $result_data->Message;		
+				}
+				
+				return redirect('admin/accountings?item='.$item.'&action='.$action.'&message='.((isset($message))?$message:''));
+					
+			}
+		}elseif($item=='invoice_tracks')
+		{
+			$ezpay = new EzPay();
 			$company_id = env('ezPay_invoice_track_company_id');
 			if($action=='create')
 			{
@@ -563,6 +863,7 @@ class AdminController extends Controller
 			}
 		}elseif($item=='invoices')
 		{
+			$ezpay = new EzPay();
 			$merchant_id = env('ezPay_invoice_merchant_id');
 			if($action=='create')
 			{
@@ -1051,7 +1352,7 @@ class AdminController extends Controller
 		{
 			$valArr = array(
 				'first_name' => 'required|string|max:24',
-				'last_name' => 'required|string:max:24'
+				'last_name' => 'required|string|max:24'
 			);
 			$validator = Validator::make($request->all(), $valArr );
 		
@@ -1380,27 +1681,29 @@ class AdminController extends Controller
 		}else
 		{
 			$groups = Admin_group::where('group_master',0)->select('id','group_status','group_id','group_name','group_manager','group_setting','created_at')->get();
-			
-			foreach($groups as $group)
+			if(isset($groups) && count($groups))
 			{
-				if($group->group_manager)
+				foreach($groups as $group)
 				{
-					$manager = Admin_member::where('id',$group->group_manager)->select('adm_name')->first();
-					if(isset($manager))
-						$group->group_manager = $manager->adm_name;	
-				}
-				$arr = array();
-				if($group->group_setting)
-				{
-					$sets = json_decode($group->group_setting);	
-					foreach($sets as $set)
+					if($group->group_manager)
 					{
-						$arr[] = $gets[$set];	
+						$manager = Admin_member::where('id',$group->group_manager)->select('adm_name')->first();
+						if(isset($manager))
+							$group->group_manager = $manager->adm_name;	
 					}
+					$arr = array();
+					if($group->group_setting)
+					{
+						$sets = json_decode($group->group_setting);	
+						foreach($sets as $set)
+						{
+							if(isset($gets[$set]) && $gets[$set])
+								$arr[] = $gets[$set];	
+						}
+					}
+					$group->group_setting = $arr;
 				}
-				$group->group_setting = $arr;
 			}
-			
 			return array('groups'=>((isset($groups))?$groups:''),'admins'=>((isset($admins))?$admins:''),'settings'=>((isset($settings))?$settings:''));
 		}
 	}
@@ -1647,13 +1950,14 @@ class AdminController extends Controller
 		}
 		$item = (($request->has('item'))?$request->item:'');
 		$action = (($request->has('action'))?$request->action:'');
+		$message = (($request->has('message') && $request->get('message'))?$request->message:'');
 		
 		if($item=='newebPay')
 		{
 			$newebPay = new NewebPay();
 			if($action=='mpg_gateway')
 			{
-				$create_transfer = array('MerchantOrderNo'=>'','Amt'=>0,'ItemDesc'=>'','Email'=>'');
+				$create_transfer = array('MerchantOrderNo'=>'','BuyerName'=>'','Amt'=>0,'ItemDesc'=>'','Email'=>'');
 				$title = '手動開立交易新增';	
 			}elseif($action=='search')
 			{
@@ -1661,12 +1965,14 @@ class AdminController extends Controller
 				if($text)
 				{
 				  $transfers = Newebpay_mpg::join('users','newebpay_mpgs.u_id','=','users.id')
+					  ->join('merchants','newebpay_mpgs.MerchantID','=','merchants.MerchantID')
 					  ->where(function($query) use($request){
 					  	if($request->tradeStatus!='')
 							$query->orWhere('newebpay_mpgs.TradeStatus',$request->tradeStatus);
 					  })
 					  ->where(function($query) use($text){
 						  $query->orWhere('newebpay_mpgs.MerchantOrderNo',$text);
+						  $query->orWhere('newebpay_mpgs.MerchantID',$text);
 						  $query->orWhere('newebpay_mpgs.TradeNo',$text);
 						  $query->orWhere('newebpay_mpgs.Email',$text);
 						  $query->orWhere('newebpay_mpgs.PayTime','like','%'.$text.'%');
@@ -1686,20 +1992,28 @@ class AdminController extends Controller
 						  $query->orWhere('users.last_name',$text);
 						  $query->orWhere('users.first_name',$text);
 					  })
+					   ->select('newebpay_mpgs.MerchantOrderNo','newebpay_mpgs.TradeStatus','newebpay_mpgs.TradeNo','newebpay_mpgs.PaymentType','newebpay_mpgs.Amt','newebpay_mpgs.ItemDesc','newebpay_mpgs.Email','newebpay_mpgs.EscrowBank','newebpay_mpgs.PayTime','newebpay_mpgs.MerchantID','merchants.MemberName','merchants.MerchantName','newebpay_mpgs.FundTime')
 					  ->orderBy('newebpay_mpgs.created_at','desc')
 					  ->paginate(30);
 				}else
-					 $transfers = Newebpay_mpg::join('users','newebpay_mpgs.u_id','=','users.id')
-					  ->where(function($query) use($request){
+					 $transfers = Newebpay_mpg::join('merchants','newebpay_mpgs.MerchantID','=','merchants.MerchantID')
+					  	->where(function($query) use($request){
 					  	if($request->tradeStatus!='')
 							$query->orWhere('newebpay_mpgs.TradeStatus',$request->tradeStatus);
 					  })
+					  ->select('newebpay_mpgs.MerchantOrderNo','newebpay_mpgs.TradeStatus','newebpay_mpgs.TradeNo','newebpay_mpgs.PaymentType','newebpay_mpgs.Amt','newebpay_mpgs.ItemDesc','newebpay_mpgs.Email','newebpay_mpgs.EscrowBank','newebpay_mpgs.PayTime','newebpay_mpgs.MerchantID','merchants.MemberName','merchants.MerchantName','newebpay_mpgs.FundTime')
 					  ->orderBy('newebpay_mpgs.created_at','desc')
 					  ->paginate(30);
+					  
 				$title = '交易搜尋管理';	
 			}elseif($action=='manage' || !$action)
 			{	
-				$transfers = Newebpay_mpg::orderBy('created_at','desc')->paginate(30);
+				$transfers = Newebpay_mpg::join('merchants','newebpay_mpgs.MerchantID','=','merchants.MerchantID')
+					  ->select('newebpay_mpgs.MerchantOrderNo','newebpay_mpgs.TradeStatus','newebpay_mpgs.TradeNo','newebpay_mpgs.PaymentType','newebpay_mpgs.Amt','newebpay_mpgs.ItemDesc','newebpay_mpgs.Email','newebpay_mpgs.EscrowBank','newebpay_mpgs.PayTime','newebpay_mpgs.MerchantID','merchants.MemberName','merchants.MerchantName','newebpay_mpgs.FundTime')
+					  ->orderBy('newebpay_mpgs.created_at','desc')
+					  ->paginate(30);
+					  
+				//$transfers = Newebpay_mpg::orderBy('created_at','desc')->paginate(30);
 				$title = '交易查詢管理';
 			}elseif($action=='del')
 			{	
@@ -1708,7 +2022,7 @@ class AdminController extends Controller
 				$title = '交易查詢管理';
 			}elseif($action=='detail')
 			{
-				$transfer = Newebpay_mpg::where('MerchantOrderNo',$request->id)->first();
+				$transfer = Newebpay_mpg::join('merchants','newebpay_mpgs.MerchantID','=','merchants.MerchantID')->where('newebpay_mpgs.MerchantOrderNo',$request->id)->first();
 				if(!$transfer)
 					return 'error';
 				if($transfer->TradeNo)
@@ -1721,15 +2035,26 @@ class AdminController extends Controller
 				
 			}elseif($action=='credit_close')
 			{	
-				$credits = Newebpay_mpg::where('TradeStatus',1)
-					->where('PaymentType','CREDIT')
-					->where('Auth','!=','')
-					->orderBy('created_at','desc')
+				$credits = Newebpay_mpg::join('merchants','newebpay_mpgs.MerchantID','=','merchants.MerchantID')
+					->where('newebpay_mpgs.TradeStatus',1)
+					->where('newebpay_mpgs.PaymentType','CREDIT')
+					->where('newebpay_mpgs.Auth','!=','')
+					->orderBy('newebpay_mpgs.created_at','desc')
 					->paginate(30);
 				$title = '信用卡請退款作業';
-			}elseif($action=='test')
-			{	
-				$title = '模擬平台回傳作業';
+			}elseif($action=='merchant_search')
+			{
+				//return $request->all();
+				$merchants = Merchant::where('MemberUnified',$request->text)
+					->orWhere('ManagerID',$request->text)
+					->orWhere('MemberName','like','%'.$request->text.'%')
+					->orWhere('MemberPhone',$request->text)
+					->orWhere('ManagerName',$request->text)
+					->orWhere('ManagerMobile',$request->text)
+					->orWhere('ManagerEmail','like','%'.$request->text.'%')
+					->orWhere('MerchantName','like','%'.$request->text.'%')
+					->paginate(30);
+				return array('merchants'=>((isset($merchants))?$merchants:''));
 			}
 			
 			if(isset($transfers))
@@ -1760,15 +2085,253 @@ class AdminController extends Controller
 		$Year = (($request->has('Year'))?$request->Year:date("Y")-1911);
 		$id = (($request->has('id'))?$request->id:'');
 		
-		if($item=='sysAccounting')
+		if($item=='systemAccount')
 		{
-			$newebpay = new NewebPay();
-			$FeeDate = ((isset($request->FeeDate))?$request->FeeDate:date("Y-m-d",strtotime("-1 day")));
-			$usr_id = ((isset($request->id))?$request->id:'');
-			$result = $newebpay->get_sysAccountings($FeeDate,$usr_id);
-			return $result;
-		}
-		elseif($item=='invoice_tracks')
+			$newebPay = new NewebPay();
+			
+			$zipcodes = Utils::get_area_zipcode();
+			$citys = array();
+			$englishs = array();
+			$nats = array();
+			$types = Utils::get_BusinessType();
+			$min_areas = Utils::get_area();
+			$banks = Utils::get_bank_code();
+			foreach($zipcodes as $key => $value)
+			{
+				$citys[] = $key;
+				//$area = $value;
+				$englishs[] = $value['English'];
+				$nats[] = $value['Zip'];
+			}
+				
+			if($request->action=='merchant_create') //申請商店
+			{
+				if(Cookie::has('tempCookie'))
+				{
+					$cookie = Cookie::get('tempCookie');
+					$cookieData = json_decode($cookie);
+					Cookie::queue(Cookie::forget('tempCookie'));
+					if($cookieData->MerchantClass==2)
+					{
+						$ID = $cookieData->Manager_id;
+						$Number = $cookieData->Manager_id_number;
+						$IDCardDate = '';
+						$IDCardPlace = '';
+						$IDPic = '';
+						$IDFrom = '';	
+					}else
+					{
+						$ID = '';
+						$Number = '';
+						$IDCardDate = $cookieData->ID_year.$cookieData->ID_month.$cookieData->ID_day;
+						$IDCardPlace = $cookieData->IDCardPlace;
+						$IDPic = $cookieData->IDPic;
+						$IDFrom = $cookieData->IDFrom;	
+					}
+					$merchant = array('usr_id'=>$cookieData->usr_id,'MerchantClass'=>$cookieData->MerchantClass,'MemberUnified'=>$cookieData->MemberUnified,'ManagerID'=>array('ID'=>$ID,'Number'=>$Number),'IDCardDate'=>$IDCardDate,'IDCardPlace'=>$IDCardPlace,'IDPic'=>$IDPic,'IDFrom'=>$IDFrom,'MemberName'=>$cookieData->MemberName,'MemberPhone'=>array('head'=>$cookieData->telHead,'value'=>$cookieData->telValue),'ManagerName'=>$cookieData->ManagerName,'ManagerNameE'=>$cookieData->ManagerNameE,'ManagerMobile'=>$cookieData->ManagerMobile,'ManagerEmail'=>$cookieData->ManagerEmail,'MerchantID'=>$cookieData->MerchantID,'MerchantName'=>$cookieData->MerchantName,'MerchantNameE'=>$cookieData->MerchantNameE,'MerchantWebURL'=>$cookieData->MerchantWebURL,'MerchantAddrCity'=>$cookieData->MerchantAddrCity,'MerchantAddrArea'=>$cookieData->MerchantAddrArea,'MerchantAddrCode'=>$cookieData->MerchantAddrCode,'MerchantAddr'=>$cookieData->MerchantAddr,'NationalE'=>$cookieData->NationalE,'CityE'=>$cookieData->CityE,'MerchantType'=>$cookieData->MerchantType,'BusinessType'=>$cookieData->BusinessType,'MerchantDesc'=>$cookieData->MerchantDesc,'BankCode'=>$cookieData->BankCode,'SubBankCode'=>$cookieData->SubBankCode,'BankAccount'=>$cookieData->BankAccount,'PaymentType'=>array('CREDIT'=>1,'WEBATM'=>1,'VACC'=>1,'CVS'=>1,'BARCODE'=>1),'CreditAutoType'=>$cookieData->CreditAutoType,'CreditLimit'=>$cookieData->CreditLimit);
+				}else	
+					$merchant = array('usr_id'=>'','MerchantClass'=>'1','MemberUnified'=>'','ManagerID'=>array('ID'=>'','Number'=>''),'IDCardDate'=>'','IDCardPlace'=>'','IDPic'=>'','IDFrom'=>'','MemberName'=>'','MemberPhone'=>array('head'=>'','value'=>''),'ManagerName'=>'','ManagerNameE'=>'','ManagerMobile'=>'','ManagerEmail'=>'','MerchantID'=>'','MerchantName'=>'','MerchantNameE'=>'','MerchantWebURL'=>'','MerchantAddrCity'=>'','MerchantAddrArea'=>'','MerchantAddrCode'=>'','MerchantAddr'=>'','NationalE'=>'Taiwan','CityE'=>'','MerchantType'=>'2','BusinessType'=>'','MerchantDesc'=>'','BankCode'=>'','SubBankCode'=>'','BankAccount'=>'','PaymentType'=>array('CREDIT'=>1,'WEBATM'=>1,'VACC'=>1,'CVS'=>1,'BARCODE'=>1),'CreditAutoType'=>1,'CreditLimit'=>200000);
+				$title = '新增合作商店';
+			}elseif($request->action=='merchant_manager')
+			{
+				if($request->has('text') && $request->get('text'))
+				{	
+					$text = trim($request->get('text'));
+					$merchants = Merchant::join('users','merchants.u_id','=','users.id')
+						->where(function($query) use($text){
+							  $query->orWhere('merchants.ManagerID','like','%'.$text.'%');
+							  $query->orWhere('merchants.MemberName',$text);
+							  $query->orWhere('merchants.MemberPhone',$text);
+							  $query->orWhere('merchants.ManagerName',$text);
+							  $query->orWhere('merchants.ManagerMobile',$text);
+							  $query->orWhere('users.last_name',$text);
+							  $query->orWhere('users.first_name',$text);
+						})
+						->orderBy('merchants.created_at','desc')
+						->paginate(30);
+				}else	
+					$merchants = Merchant::join('users','merchants.u_id','=','users.id')->orderBy('merchants.created_at','desc')->paginate(30);
+				if(isset($merchants) && count($merchants))
+				{
+					foreach($merchants as $merchant)
+					{
+						if(isset($merchant->ManagerID) && $merchant->ManagerID)
+						{
+							$idArr = explode(';',$merchant->ManagerID);
+							$merchant->ManagerID = array('ID'=>$idArr[0],'Number'=>$idArr[1]);
+						}else
+							$merchant->ManagerID = array('ID'=>'','Number'=>'');
+							
+						if(isset($merchant->MemberPhone) && $merchant->MemberPhone)
+						{
+							$phoneArr = explode('-',$merchant->MemberPhone);
+							$merchant->MemberPhone = array('head'=>$phoneArr[0],'value'=>$phoneArr[1]);
+						}else
+							$merchant->MemberPhone = array('head'=>'','value'=>'');	
+						
+						if(isset($merchant->PaymentType) && $merchant->PaymentType)
+						{
+							$types = explode('|',$merchant->PaymentType);
+							$array = array();
+							foreach($types as $type)
+							{
+								$arr = explode(':',$type);
+								$array[$arr[0]] = $arr[1];	
+							}
+							$merchant->PaymentType = $array;;
+						}else
+							$merchant->PaymentType = array('CREDIT'=>1,'WEBATM'=>1,'VACC'=>1,'CVS'=>1,'BARCODE'=>1);
+					}
+				}
+				$title = '合作商店列表';
+				//return array('merchants'=>((isset($merchants))?$merchants:''),'title'=>((isset($title))?$title:''));
+			}elseif($request->action=='FeeInstruct' || $request->action=='Platformfee_search')
+			{
+				if($request->action=='Platformfee_search' && ($request->has('id') && $request->get('id'))) //單筆查詢
+				{
+					$result = $newebPay->get_Platformfee_search($request->id);
+					return array('platformfee'=>json_decode($result));
+				}else
+				{
+					if($request->has('text') && $request->get('text'))
+					{	
+						$start_date = $request->get('start_date');
+						$end_date = $request->get('end_date');
+						$text = trim($request->get('text'));
+						$transfers = Newebpay_mpg::join('merchants','newebpay_mpgs.MerchantID','=','merchants.MerchantID')
+							->join('users','newebpay_mpgs.u_id','=','users.id')
+							->where('newebpay_mpgs.TradeStatus',1)
+							->where('newebpay_mpgs.PayTime','>=',$start_date.' 00:00:00')
+							->where('newebpay_mpgs.PayTime','<=',$end_date.' 23:59:59')
+							->where(function($query) use($text){
+								  $query->orWhere('newebpay_mpgs.MerchantOrderNo',$text);
+								  $query->orWhere('newebpay_mpgs.MerchantID',$text);
+								  $query->orWhere('newebpay_mpgs.TradeNo',$text);
+								  $query->orWhere('newebpay_mpgs.Email',$text);
+								  $query->orWhere('newebpay_mpgs.PayTime','like','%'.$text.'%');
+								  $query->orWhere('newebpay_mpgs.ItemDesc','like','%'.$text.'%');
+								  $query->orWhere('newebpay_mpgs.IP',$text);
+								  $query->orWhere('newebpay_mpgs.PaymentType',$text);
+								  $query->orWhere('newebpay_mpgs.Amt',$text);
+								  $query->orWhere('newebpay_mpgs.EscrowBank',$text);
+								  $query->orWhere('newebpay_mpgs.Auth',$text);
+								  $query->orWhere('newebpay_mpgs.Card6No',$text);
+								  $query->orWhere('newebpay_mpgs.Card4No',$text);
+								  $query->orWhere('newebpay_mpgs.ExpireDate','like','%'.$text.'%');
+								  $query->orWhere('newebpay_mpgs.PayStore',$text);
+								  $query->orWhere('newebpay_mpgs.StoreCode',$text);
+								  $query->orWhere('newebpay_mpgs.CVSCOMName',$text);
+								  $query->orWhere('newebpay_mpgs.CVSCOMPhone',$text);
+								  $query->orWhere('merchants.MemberName',$text);
+								  $query->orWhere('merchants.MemberUnified',$text);
+								  $query->orWhere('merchants.ManagerID',$text);
+								  $query->orWhere('merchants.MemberPhone',$text);
+								  $query->orWhere('merchants.ManagerName',$text);
+								  $query->orWhere('merchants.MerchantName',$text);
+								  $query->orWhere('users.last_name',$text);
+								  $query->orWhere('users.first_name',$text);
+							})
+							->select('newebpay_mpgs.MerchantOrderNo','newebpay_mpgs.PaymentType','newebpay_mpgs.Amt','newebpay_mpgs.Email','newebpay_mpgs.PayTime','newebpay_mpgs.MerchantID','merchants.MemberName','merchants.MerchantName','newebpay_mpgs.FundTime','users.usr_id','users.last_name','users.first_name')
+							->orderBy('newebpay_mpgs.created_at','desc')
+							->paginate(30);
+					}else if($request->has('start_date') && $request->get('start_date'))
+					{	
+						$start_date = $request->get('start_date');
+						$end_date = $request->get('end_date');
+						$transfers = Newebpay_mpg::join('merchants','newebpay_mpgs.MerchantID','=','merchants.MerchantID')
+							->join('users','newebpay_mpgs.u_id','=','users.id')
+							->where('newebpay_mpgs.TradeStatus',1)
+							->where('newebpay_mpgs.PayTime','>=',$start_date.' 00:00:00')
+							->where('newebpay_mpgs.PayTime','<=',$end_date.' 23:59:59')
+							->select('newebpay_mpgs.MerchantOrderNo','newebpay_mpgs.PaymentType','newebpay_mpgs.Amt','newebpay_mpgs.Email','newebpay_mpgs.PayTime','newebpay_mpgs.MerchantID','merchants.MemberName','merchants.MerchantName','newebpay_mpgs.FundTime','users.usr_id','users.last_name','users.first_name')
+							->orderBy('newebpay_mpgs.created_at','desc')
+							->paginate(30);
+					}else if($request->has('id') && $request->get('id')) //合作商店扣撥款指示
+					{	
+						$transfer = Newebpay_mpg::join('merchants','newebpay_mpgs.MerchantID','=','merchants.merchantID')
+							->where('newebpay_mpgs.MerchantOrderNo',$request->get('id'))
+							->select('newebpay_mpgs.MerchantOrderNo','newebpay_mpgs.Amt','newebpay_mpgs.MerchantID','merchants.MemberName','merchants.MerchantName','newebpay_mpgs.FundTime')
+							->first();
+						$settingFee = Setting::select('service_fee')->first();
+						$serviceFee = ((isset($serviceFee))?$serviceFee->service_fee:20);
+						if($request->feeMode==2)
+						{
+							$fee_instruct  = ChargeInstruct::join('export_instructs','charge_instructs.MerTrade','=','export_instructs.MerchantOrderNo')->where('MerTrade',$request->get('id'))->get();
+							$transfer->fee_total = $transfer->Amt;
+							$transfer->fee = $transfer->Amt;
+						}else
+						{
+							$thisFee = round($transfer->Amt*$serviceFee*0.01);
+							
+							$fee_charges  = ChargeInstruct::where('MerTrade',$request->get('id'))->get();
+							$fee = 0;
+							if(isset($fee_charges))
+							{
+								foreach($fee_charges as $fee_charge)
+								{
+									if($fee_charge->BalanceType==0)
+										$fee += $fee_charge->Amount;
+									else
+										$fee -= $fee_charge->Amount;		
+								}
+							}
+							$fee_exports  = ExportInstruct::where('MerchantOrderNo',$request->get('id'))->get();
+							
+							$transfer->complete_fee = $fee;
+							$transfer->fee_total = round($transfer->Amt*$serviceFee*0.01);
+							$transfer->fee = round($transfer->Amt*$serviceFee*0.01)-$fee;	
+						}
+						return array('transfer'=>((isset($transfer))?$transfer:''),'fee_charges'=>((isset($fee_charges))?$fee_charges:''),'fee_exports'=>((isset($fee_exports))?$fee_exports:''),'serviceFee'=>$serviceFee);
+					}else
+						$transfers = Newebpay_mpg::join('merchants','newebpay_mpgs.MerchantID','=','merchants.MerchantID')
+						->join('users','newebpay_mpgs.u_id','=','users.id')
+						->where('newebpay_mpgs.TradeStatus',1)
+						->select('newebpay_mpgs.MerchantOrderNo','newebpay_mpgs.PaymentType','newebpay_mpgs.Amt','newebpay_mpgs.Email','newebpay_mpgs.PayTime','newebpay_mpgs.MerchantID','merchants.MemberName','merchants.MerchantName','newebpay_mpgs.FundTime','users.usr_id','users.last_name','users.first_name')
+						->orderBy('newebpay_mpgs.created_at','desc')
+						->paginate(30);
+					$title = (($action=='Platformfee_search')?'平台費用扣款單筆查詢':'商店訂單扣撥款作業');
+						
+				}
+				//return array('transfers'=>((isset($transfers))?$transfers:''),'title'=>((isset($title))?$title:''));
+			}elseif($request->action=='Platformfee_perday')
+			{
+				if($request->has('date'))
+				{
+					$result = $newebPay->get_Platformfee_perday($request->get('date'));
+					$result_data = json_decode($result);
+					if($result_data->Status=='SUCCESS')
+					{
+						
+					}else
+						$message = $result_data->Message;
+				}
+			}
+			
+			if($action == 'FeeInstruct')
+			{
+				foreach($transfers as $transfer)
+				{
+					//$ChargeInstruct = ChargeInstruct::where('MerTrade',$transfer->MerchantOrderNo)->first();
+					$charge_instructs  = ChargeInstruct::where('MerTrade',$transfer->MerchantOrderNo)->select('BalanceType','Amount')->get();
+					$fee = 0;
+					foreach($charge_instructs as $charge_instruct)
+					{
+						if($charge_instruct->BalanceType==0)
+							$fee += $charge_instruct->Amount;
+						else
+							$fee -= $charge_instruct->Amount;		
+					}
+					
+					$export_fees  = ExportInstruct::where('MerchantOrderNo',$transfer->MerchantOrderNo)->sum('Amount');
+							
+					$fee_instruct = array('charge'=>$fee,'export'=>((isset($export_fees))?$export_fees:0));
+					
+					$transfer->fee_instruct = $fee_instruct;		
+				}	
+			}
+			
+			return array('transfers'=>((isset($transfers))?$transfers:''),'merchants'=>((isset($merchants))?$merchants:''),'merchant'=>((isset($merchant))?$merchant:''),'title'=>((isset($title))?$title:''),'citys'=>$citys,'nats'=>$nats,'englishs'=>$englishs,'types'=>((isset($types))?$types:''),'banks'=>((isset($banks))?$banks:''),'min_areas'=>((isset($min_areas))?$min_areas:''),'MaxLimit'=>200000,'amounts'=>((isset($amounts))?$amounts:''),'message'=>((isset($message))?$message:''));
+		}elseif($item=='invoice_tracks')
 		{
 			$ezpay = new EzPay();
 			if($request->action=='create')
@@ -1942,9 +2505,44 @@ class AdminController extends Controller
 			return 'error';
 		}
 		
-		$buyer = User::where('email',$request->id)->select('email','first_name','last_name','phone_number','usr_id')->first();
-		
-		return array('buyer'=>((isset($buyer))?$buyer:''));
+		$buyer = User::where('email',$request->id)->select('id','usr_id','email','first_name','last_name','phone_number','usr_id')->first();
+		if(isset($buyer))
+		{
+			$merchant = Merchant::where('u_id',$buyer->id)->first();
+			if(isset($merchant))
+			{
+				if(isset($merchant->ManagerID) && $merchant->ManagerID)
+				{
+					$idArr = explode(';',$merchant->ManagerID);
+					$merchant->ManagerID = array('ID'=>$idArr[0],'Number'=>$idArr[1]);
+				}else
+					$merchant->ManagerID = array('ID'=>'','Number'=>'');
+					
+				if(isset($merchant->MemberPhone) && $merchant->MemberPhone)
+				{
+					$phoneArr = explode('-',$merchant->MemberPhone);
+					$merchant->MemberPhone = array('head'=>$phoneArr[0],'value'=>$phoneArr[1]);
+				}else
+					$merchant->MemberPhone = array('head'=>'','value'=>'');	
+				
+				if(isset($merchant->PaymentType) && $merchant->PaymentType)
+				{
+					$types = explode('|',$merchant->PaymentType);
+					$array = array();
+					foreach($types as $type)
+					{
+						$arr = explode(':',$type);
+						$array[$arr[0]] = $arr[1];	
+					}
+					$merchant->PaymentType = $array;;
+				}else
+					$merchant->PaymentType = array('CREDIT'=>1,'WEBATM'=>1,'VACC'=>1,'CVS'=>1,'BARCODE'=>1);	
+				
+				$merchant->usr_id = $buyer->usr_id;
+				$is_edit = true;
+			}
+		}
+		return array('buyer'=>((isset($buyer))?$buyer:''),'merchant'=>((isset($merchant))?$merchant:''),'is_edit'=>((isset($is_edit))?$is_edit:''));
 	}
 
 }

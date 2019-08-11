@@ -12,18 +12,15 @@ use App\User;
 
 class NewebPay extends Model
 {
-   	public $merchant_id;
-	public $partner_id;
-	public $mer_key;
-	public $mer_iv;
+   	public $partner_id;
+	public $partner_key;
+	public $partner_iv;
 	
 	public function __construct()
     {
-        $this->merchant_id = env('newebPay_merchant_id');
-		$this->mer_key = env('newebPay_HashKey');
-		$this->mer_iv = env('newebPay_HashIV');
-		$this->partner_id = env('newebPay_partner_id');
-		
+        $this->partner_id = env('newebPay_partner_id');
+		$this->partner_key = env('newebPay_partner_HashKey');
+		$this->partner_iv = env('newebPay_partner_HashIV');
 	}
 	
 	public function curl_work($url = '', $parameter = '') 
@@ -55,14 +52,14 @@ class NewebPay extends Model
 		return $return_info; 
 	} 
 	
-	public function create_mpg_aes_encrypt($post_data_array=array()) {         
+	public function create_mpg_aes_encrypt($post_data_array=array(),$key='',$iv='') {         
 		$data_str = '';
 		if (!empty($post_data_array)) { 
             //將參數經過 URL ENCODED QUERY STRING 
             $data_str = http_build_query($post_data_array);         
 		}
-		$TradeInfo =  trim(bin2hex(openssl_encrypt($this->addpadding($data_str), 'AES-256-CBC', $this->mer_key, OPENSSL_RAW_DATA|OPENSSL_ZERO_PADDING, $this->mer_iv)));
-		$TradeSha = strtoupper(hash("sha256", 'HashKey='.$this->mer_key.'&'.$TradeInfo.'&HashIV='.$this->mer_iv));
+		$TradeInfo = trim(bin2hex(openssl_encrypt($this->addpadding($data_str), 'AES-256-CBC', $key, OPENSSL_RAW_DATA|OPENSSL_ZERO_PADDING, $iv)));
+		$TradeSha = strtoupper(hash("sha256", 'HashKey='.$key.'&'.$TradeInfo.'&HashIV='.$iv));
 		 
 		return array('TradeInfo'=>$TradeInfo,'TradeSha'=>$TradeSha);
 	} 
@@ -74,8 +71,8 @@ class NewebPay extends Model
 		return $string;      
 	} 
 	
-	public function create_aes_decrypt($parameter="") {         
-		 return json_decode($this->strippadding(openssl_decrypt(hex2bin($parameter),'AES-256-CBC', $this->mer_key, OPENSSL_RAW_DATA|OPENSSL_ZERO_PADDING, $this->mer_iv))); 
+	public function create_aes_decrypt($parameter="",$key="",$iv="") {         
+		 return json_decode($this->strippadding(openssl_decrypt(hex2bin($parameter),'AES-256-CBC', $key, OPENSSL_RAW_DATA|OPENSSL_ZERO_PADDING, $iv))); 
 		     
 	} 
 	
@@ -98,10 +95,10 @@ class NewebPay extends Model
 			 'MerchantOrderNo' => $transfer->MerchantOrderNo,
 			 'Amt' =>  $transfer->Amt,
 		);  
-		$TradeSha = $this->get_tradeSha($data_array);
+		$TradeSha = $this->get_tradeSha($data_array,$transfer->MerchantID,$transfer->MerchantHashKey,$transfer->MerchantIvKey);
 		
 		$post_data_array = array(//post_data 欄位資料            
-			 'MerchantID' =>  $this->merchant_id, 
+			 'MerchantID' =>  $transfer->MerchantID, 
 			 "RespondType" => "JSON",             
 			 "Version" => "1.1",             
 			 "TimeStamp" => time(), //請以 time() 格式            
@@ -123,11 +120,12 @@ class NewebPay extends Model
 				 'TradeNo' => $data->Result->TradeNo,
 			);
 			
-			$check_code = $this->get_check_code($data_array);
+			$check_code = $this->get_check_code($data_array,$transfer->MerchantID,$transfer->MerchantHashKey,$transfer->MerchantIvKey);
 			if($data->Result->CheckCode==$check_code)
 			{
 				$input['TradeStatus'] = $data->Result->TradeStatus;
 				$input['TradeNo'] = $data->Result->TradeNo;
+				$input['Amt'] = $data->Result->Amt;
 				if($data->Result->PayTime!='0000-00-00 00:00:00')
 					$input['PayTime'] = $data->Result->PayTime;
 				$input['PaymentType'] = $data->Result->PaymentType;
@@ -188,19 +186,21 @@ class NewebPay extends Model
 	
 	public function credit_card_cancel($post_data_array=array(),$transfer=array(),$invoice='') 
 	{
+		if(!count($post_data_array))
+			return array('Status'=>'ERROR-0','Message'=>'無參數值!');
+		if(!isset($transfer) || !$transfer->MerchantHashKey)
+			return array('Status'=>'ERROR-1','Message'=>'無合作商店參數!');
+		
 		$url = 'https://ccore.newebpay.com/API/CreditCard/Cancel';
-		$Tradedata = $this->create_mpg_aes_encrypt($post_data_array);
+		$Tradedata = $this->create_mpg_aes_encrypt($post_data_array,$transfer->MerchantHashKey,$transfer->MerchantIvKey);
 		$data_str = $Tradedata['TradeInfo'];
-				
 		$post_data = array(//post_data 欄位資料            
-			 "MerchantID_" => $this->merchant_id,             
+			 "MerchantID_" => $transfer->MerchantID,             
 			 "PostData_" => $data_str
 		);
-				
 		$post_data_str = http_build_query($post_data); 
 		
 		$result = $this->curl_work($url, $post_data_str); //背景送出
-		
 		$data = json_decode($result['web_info']);
 		if($data->Status=='SUCCESS')
 		{
@@ -210,7 +210,7 @@ class NewebPay extends Model
 				 'TradeNo' => $data->Result->TradeNo,
 			);
 			
-			$check_code = $this->get_check_code($data_array);
+			$check_code = $this->get_check_code($data_array,$transfer->MerchantID,$transfer->MerchantHashKey,$transfer->MerchantIvKey);
 			if($data->Result->CheckCode==$check_code)
 			{	
 				$input['TradeStatus'] = 3;
@@ -237,25 +237,31 @@ class NewebPay extends Model
 		
 	}
 	
-	public function get_tradeSha($data_array=array())
+	public function get_tradeSha($data_array=array(),$merchant_id='',$key='',$iv='')
 	{
-		$TradeInfo = 'IV='.$this->mer_iv.'&Amt='.$data_array['Amt'].'&MerchantID='.$this->merchant_id.'&MerchantOrderNo='.$data_array['MerchantOrderNo'].'&Key='.$this->mer_key;
+		$TradeInfo = 'IV='.$iv.'&Amt='.$data_array['Amt'].'&MerchantID='.$merchant_id.'&MerchantOrderNo='.$data_array['MerchantOrderNo'].'&Key='.$key;
 		return strtoupper(hash("sha256", $TradeInfo)); 
 	}
 	
-	public function get_check_code($data_array=array())
+	public function get_check_code($data_array=array(),$merchant_id='',$key='',$iv='')
 	{
-		$check_code_str = 'HashIV='.$this->mer_iv.'&Amt='.$data_array['Amt'].'&MerchantID='.$this->merchant_id.'&MerchantOrderNo='.$data_array['MerchantOrderNo'].'&TradeNo='.$data_array['TradeNo'].'&HashKey='.$this->mer_key;
+		$check_code_str = 'HashIV='.$iv.'&Amt='.$data_array['Amt'].'&MerchantID='.$merchant_id.'&MerchantOrderNo='.$data_array['MerchantOrderNo'].'&TradeNo='.$data_array['TradeNo'].'&HashKey='.$key;
 		return strtoupper(hash("sha256", $check_code_str));
 	}
 	
-	public function return_get_tradeSha($parameter="")
+	public function return_get_tradeSha($parameter="",$key="",$iv="")
 	{
-		return  strtoupper(hash("sha256", 'HashKey='.$this->mer_key.'&'.$parameter.'&HashIV='.$this->mer_iv));
+		//ksort($parameter);
+		return  strtoupper(hash("sha256", 'HashKey='.$key.'&'.$parameter.'&HashIV='.$iv));
 	}
 	
 	public function send_credit_close($request=array()) //信用卡請退款作業
 	{
+		
+		$merchant = Merchant::where('MerchantID',$request->MerchantID)->select('MerchantHashKey','MerchantIvKey')->first();
+		if(!$merchant)
+			return array('Status'=>'ERROR-0','Message'=>'無合作商店資料!');
+			
 		$TimeStamp = time();
 		$trade_info_arr = array(  
 			'RespondType' => 'JSON',
@@ -263,22 +269,22 @@ class NewebPay extends Model
 			'TradeNo' => $request->TradeNo, 
 			'TimeStamp' => $TimeStamp,  
 			'Version' => 1.1, 
-			'Amt' =>  $request->Amt,  
-			'IndexType' =>  $request->IndexType,
-			'CloseType' =>  $request->CloseType,
+			'Amt' => $request->Amt,  
+			'IndexType' => $request->IndexType,
+			'CloseType' => $request->CloseType,
 			'Cancel' =>  ((isset($request->Cancel))?$request->Cancel:0)  
 		); 
 		$url = 'https://ccore.newebpay.com/API/CreditCard/Close';
-		$TradeData = $this->create_mpg_aes_encrypt($trade_info_arr);
+		$TradeData = $this->create_mpg_aes_encrypt($trade_info_arr,$merchant->MerchantHashKey,$merchant->MerchantIvKey);
 		$send_data = array(  
-			'MerchantID_' => $this->merchant_id,  
+			'MerchantID_' => $request->MerchantID,  
 			'PostData_' => $TradeData['TradeInfo'] 
 		);
 		$result = $this->curl_work($url, $send_data);
 		$data = json_decode($result['web_info']);
 		if($data->Status=='SUCCESS')
 		{
-			$transfer = Newebpay_mpg::where('TradeNo',$data->Result->TradeNo)->first();
+			$transfer = Newebpay_mpg::join('merchants','newebpay_mpgs.MerchantID','=','merchants.MerchantID')->where('newebpay_mpgs.TradeNo',$data->Result->TradeNo)->first();
 			$this->query_tradeInfo($transfer);
 		}
 		return array('Status'=>$data->Status,'Message'=>$data->Message);
@@ -286,11 +292,15 @@ class NewebPay extends Model
 	
 	public function newebPay_return($request=array())
 	{
-		$decode = $this->create_aes_decrypt($request->TradeInfo);
+		$merchant = Merchant::where('MerchantID',$request->MerchantID)->select('MerchantHashKey','MerchantIvKey')->first();
+		if(!$merchant)
+			return 'error';
+		$decode = $this->create_aes_decrypt($request->TradeInfo,$merchant->MerchantHashKey,$merchant->MerchantIvKey);
 		if(!$decode)
 			return 'error';
-		$TradeSha = $this->return_get_tradeSha($request->TradeInfo);
-		if($request->MerchantID==$this->merchant_id && $request->TradeSha==$TradeSha)
+		
+		$TradeSha = $this->return_get_tradeSha($request->TradeInfo,$merchant->MerchantHashKey,$merchant->MerchantIvKey);
+		if($request->TradeSha==$TradeSha)
 		{
 			$transfer = Newebpay_mpg::where('MerchantOrderNo',$decode->Result->MerchantOrderNo)->select('MerchantOrderNo','Amt')->first();
 			if(!$transfer)
@@ -299,10 +309,10 @@ class NewebPay extends Model
 				 'MerchantOrderNo' => $transfer->MerchantOrderNo,
 				 'Amt' =>  $transfer->Amt,
 			);  
-			$TradeSha = $this->get_tradeSha($data_array);
+			$TradeSha = $this->get_tradeSha($data_array,$request->MerchantID,$merchant->MerchantHashKey,$merchant->MerchantIvKey);
 			
 			$post_data_array = array(//post_data 欄位資料            
-				 'MerchantID' =>  $this->merchant_id, 
+				 'MerchantID' =>  $request->MerchantID, 
 				 "RespondType" => "JSON",             
 				 "Version" => "1.1",             
 				 "TimeStamp" => time(), //請以 time() 格式            
@@ -316,6 +326,9 @@ class NewebPay extends Model
 			$result = $this->curl_work($url, $post_data_str); //背景送出
 			$data = json_decode($result['web_info']);
 			
+			if(!$data)
+				return 'error';
+				
 			$input['TradeStatus'] = $data->Result->TradeStatus;
 			$input['TradeNo'] = $decode->Result->TradeNo;
 			$input['PaymentType'] = $decode->Result->PaymentType;
@@ -329,12 +342,14 @@ class NewebPay extends Model
 				$input['Auth'] = $decode->Result->Auth;
 				$input['Card6No'] = $decode->Result->Card6No;
 				$input['Card4No'] = $decode->Result->Card4No;
-				$input['TokenUseStatus'] = $decode->Result->TokenUseStatus;
+				if(isset($decode->Result->TokenUseStatus))
+					$input['TokenUseStatus'] = $decode->Result->TokenUseStatus;
 				$input['Inst'] = $decode->Result->Inst;
 				$input['InstFirst'] = $decode->Result->InstFirst;
 				$input['InstEach'] = $decode->Result->InstEach;
 				$input['ECI'] = $decode->Result->ECI;
-				$input['PaymentMethod'] = $decode->Result->PaymentMethod;
+				if(isset($decode->Result->PaymentMethod))
+					$input['PaymentMethod'] = $decode->Result->PaymentMethod;
 			}elseif($decode->Result->PaymentType=='WEBATM' || $decode->Result->PaymentType=='VACC')
 			{
 				$input['PayBankCode'] = $decode->Result->PayBankCode;
@@ -385,13 +400,17 @@ class NewebPay extends Model
 	
 	public function newebPay_customer($request=array()){
 		
-		$decode = $this->create_aes_decrypt($request->TradeInfo);
+		$merchant = Merchant::where('MerchantID',$request->MerchantID)->select('MerchantHashKey','MerchantIvKey')->first();
+		if(!$merchant)
+			return 'error';
+		$decode = $this->create_aes_decrypt($request->TradeInfo,$merchant->MerchantHashKey,$merchant->MerchantIvKey);
 		if(!$decode)
-			return View('web/error_message', array('message' => '回傳值有誤，請稍後在試', 'goUrl'=>'/'));
-		$TradeSha = $newebPay->return_get_tradeSha($request->TradeInfo);
+			return 'error';
 		
-		if($request->MerchantID==$this->merchant_id && $request->TradeSha==$TradeSha)
+		$TradeSha = $this->return_get_tradeSha($request->TradeInfo,$merchant->MerchantHashKey,$merchant->MerchantIvKey);
+		if($request->TradeSha==$TradeSha)
 		{
+			
 			$input['TradeNo'] = $decode->Result->TradeNo;
 			$input['PaymentType'] = $decode->Result->PaymentType;
 			$input['ExpireDate'] = $decode->Result->ExpireDate;
@@ -426,28 +445,42 @@ class NewebPay extends Model
 	public function create_mpg_form($data_arr=array()){  //交易後串藍新金流
 		if(!count($data_arr))
 			return array('Status'=>'ERROR-0','Message'=>'無參數值!');
-		if(!isset($data_arr['usr_id']) || !isset($data_arr['MerchantOrderNo'])|| !isset($data_arr['Amt']) || !isset($data_arr['ItemDesc']) || !isset($data_arr['Email']))
+		if(!isset($data_arr['usr_id']) || !isset($data_arr['MerchantID']) || !isset($data_arr['MerchantOrderNo']) || !isset($data_arr['Amt']) || !isset($data_arr['ItemDesc']) || !isset($data_arr['Email']))
 			return array('Status'=>'ERROR-1','Message'=>'傳入的參數錯誤!');
 		$user = User::where('usr_id',$data_arr['usr_id'])->select('id')->first();
 		if(!$user)
 			return array('Status'=>'ERROR-2','Message'=>'無會員資料!');
+		$merchant = Merchant::where('MerchantID',$data_arr['MerchantID'])->select('MerchantHashKey','MerchantIvKey')->first();
+		if(!$merchant)
+			return array('Status'=>'ERROR-3','Message'=>'無合作商店資料!');	
 					
 		$TimeStamp = time();
 		$trade_info_arr = array(  
-			'MerchantID' =>  $this->merchant_id,  
+			'MerchantID' =>  $data_arr['MerchantID'],  
 			'RespondType' => 'JSON', 
 			'TimeStamp' => $TimeStamp,  
-			'Version' => 1.5, 
+			'Version' => '1.5', 
 			'MerchantOrderNo' => $data_arr['MerchantOrderNo'],  
 			'Amt' =>  $data_arr['Amt'],  
-			'ItemDesc' =>  $data_arr['ItemDesc']  
-		); 
-		//交易資料經 AES 加密後取得 TradeInfo 
-		$TradeData = $this->create_mpg_aes_encrypt($trade_info_arr);
+			'ItemDesc' =>  $data_arr['ItemDesc'],
+			'Email' => $data_arr['Email'],
+			'LoginType' => '0',
+			'TokenTerm' => $data_arr['usr_id'],
+			'TokenTermDemand' => '3',
+			'ReturnURL' => env('newebPay_return_url'),
+			'NotifyURL' => env('newebPay_notify_url'),
+			'CustomerURL' => env('newebPay_customer_url'),
+			'ClientBackURL' => env('newebPay_back_url')
+			 
+		);
+		
+		//交易資料經 AES 加密後取得 TradeInfo
+		$TradeData = $this->create_mpg_aes_encrypt($trade_info_arr,$merchant->MerchantHashKey,$merchant->MerchantIvKey);
 		
 		$input = new Newebpay_mpg;
 		$input->TradeStatus = 0;
 		$input->u_id = $user->id;
+		$input->MerchantID = $data_arr['MerchantID'];
 		$input->MerchantOrderNo = $data_arr['MerchantOrderNo'];
 		$input->Amt = $data_arr['Amt'];
 		$input->ItemDesc = $data_arr['ItemDesc'];
@@ -458,42 +491,95 @@ class NewebPay extends Model
 		{
 			$url = 'https://ccore.newebpay.com/MPG/mpg_gateway';
 			echo '<form name="sendFrm"  action="'.$url.'" method="post">';
-			echo '<input type="hidden" name="MerchantID" value="'.$this->merchant_id.'" />';
+			echo '<input type="hidden" name="MerchantID" value="'.$data_arr['MerchantID'].'" />';
 			echo '<input type="hidden" name="Version" value="1.5" />';
-			echo '<input type="hidden" name="RespondType" value="JSON" />';
-			echo '<input type="hidden" name="TimeStamp" value="'.$TimeStamp.'" />';
-			echo '<input type="hidden" name="MerchantOrderNo" value="'.$data_arr['MerchantOrderNo'].'" />';
-			echo '<input type="hidden" name="Amt" value="'.$data_arr['Amt'].'" />';
-			echo '<input type="hidden" name="ItemDesc" value="'.$data_arr['ItemDesc'].'" />';
-			echo '<input type="hidden" name="LoginType" value="0" />';
-			echo '<input type="hidden" name="TokenTerm" value="'.$data_arr['usr_id'].'" />';
-			echo '<input type="hidden" name="TokenTermDemand" value="3" />';
-			echo '<input type="hidden" name="Email" value="'.$data_arr['Email'].'" />';
-			echo '<input type="hidden" name="TradeLimit" value="600" />';
-			echo '<input type="hidden" name="ReturnURL" value="'.env('newebPay_return_url').'" />';
-			echo '<input type="hidden" name="NotifyURL" value="'.env('newebPay_notify_url').'" />';
-			echo '<input type="hidden" name="CustomerURL" value="'.env('newebPay_customer_url').'" />';
-			echo '<input type="hidden" name="ClientBackURL" value="'.env('newebPay_back_url').'" />';
 			echo '<input type="hidden" name="TradeInfo" value="'.$TradeData['TradeInfo'].'" />';
 			echo '<input type="hidden" name="TradeSha" value="'.$TradeData['TradeSha'].'" />';
 			echo '</form>';
 			echo '<script>';
 			echo 'document.sendFrm.submit();';
 			echo '</script>';
+			
 		}else
 			return array('Status'=>'ERROR-3','Message'=>'系統無回應，請稍後在試!!');
 	}
 	
-	public function get_sysAccountings($FeeDate='',$usr_id=''){  //平台費用扣款單日查詢
+	public function merchantCreate($post_data_arr=array()){  //建立合作商店
+		
+		$post_data_str = '';
+		if (!empty($post_data_arr)) { 
+            //將參數經過 URL ENCODED QUERY STRING 
+            $post_data_str = http_build_query($post_data_arr);         
+		}
+		$postData = trim(bin2hex(openssl_encrypt($this->addpadding($post_data_str), 'AES-256-CBC', $this->partner_key, OPENSSL_RAW_DATA|OPENSSL_ZERO_PADDING, $this->partner_iv))); 
+		$sendData = array(
+			'PartnerID_' => $this->partner_id,
+			'PostData_' => $postData
+		);
+		$url = 'https://ccore.Newebpay.com/API/AddMerchant';
+		$result = $this->curl_work($url, $sendData); //背景送出
+		$data = json_decode($result['web_info']);
+		return $result['web_info'];	
+	}
+	
+	public function merchantModify($post_data_arr=array()){  //修改合作商店
+		
+		$post_data_str = '';
+		if (!empty($post_data_arr)) { 
+            //將參數經過 URL ENCODED QUERY STRING 
+            $post_data_str = http_build_query($post_data_arr);         
+		}
+		$postData = trim(bin2hex(openssl_encrypt($this->addpadding($post_data_str), 'AES-256-CBC', $this->partner_key, OPENSSL_RAW_DATA|OPENSSL_ZERO_PADDING, $this->partner_iv))); 
+		$sendData = array(
+			'PartnerID_' => $this->partner_id,
+			'PostData_' => $postData
+		);
+		$url = 'https://ccore.NewebPay.com/API/AddMerchant/modify';
+		$result = $this->curl_work($url, $sendData); //背景送出
+		$data = json_decode($result['web_info']);
+		return $result['web_info'];	
+	}
+	
+	public function ExportInstruct ($post_data_arr=array()){  //撥款給合作商店
+		
+		$post_data_str = '';
+		if (!empty($post_data_arr)) { 
+            //將參數經過 URL ENCODED QUERY STRING 
+            $post_data_str = http_build_query($post_data_arr);         
+		}
+		$postData = trim(bin2hex(openssl_encrypt($this->addpadding($post_data_str), 'AES-256-CBC', $this->partner_key, OPENSSL_RAW_DATA|OPENSSL_ZERO_PADDING, $this->partner_iv))); 
+		$sendData = array(
+			'PartnerID_' => $this->partner_id,
+			'PostData_' => $postData
+		);
+		$url = 'https://ccore.newebpay.com/API/ExportInstruct';
+		$result = $this->curl_work($url, $sendData); //背景送出
+		$data = json_decode($result['web_info']);
+		return $result['web_info'];	
+	}
+	
+	public function ChargeInstruct ($post_data_arr=array()){  //撥款給合作商店
+		
+		$post_data_str = '';
+		if (!empty($post_data_arr)) { 
+            //將參數經過 URL ENCODED QUERY STRING 
+            $post_data_str = http_build_query($post_data_arr);         
+		}
+		$postData = trim(bin2hex(openssl_encrypt($this->addpadding($post_data_str), 'AES-256-CBC', $this->partner_key, OPENSSL_RAW_DATA|OPENSSL_ZERO_PADDING, $this->partner_iv))); 
+		$sendData = array(
+			'PartnerID_' => $this->partner_id,
+			'PostData_' => $postData
+		);
+		$url = 'https://ccore.newebpay.com/API/ChargeInstruct';
+		$result = $this->curl_work($url, $sendData); //背景送出
+		$data = json_decode($result['web_info']);
+		return $result['web_info'];	
+	}
+	
+	public function get_Platformfee_perday ($FeeDate=''){  //平台費用扣款單日查詢
 		if(!$FeeDate)
 			return array('Status'=>'ERROR-0','Message'=>'無參數值!');
 		
-		if($usr_id)
-		{
-			$user = User::where('usr_id',$data_arr['usr_id'])->select('id')->first();
-			if(!$user)
-				return array('Status'=>'ERROR-2','Message'=>'無會員資料!');
-		}
 		$TimeStamp = time();
 		$check_code_arr = array(  
 			'FeeDate' => $FeeDate, 
@@ -501,9 +587,9 @@ class NewebPay extends Model
 			'TimeStamp' => $TimeStamp,  
 			'Version' => '1.0' 
 		);
-		ksort($check_code_arr);  
-		$check_code_str = http_build_query($check_code_arr);
-		$CheckCode = $this->return_get_tradeSha($check_code_str);
+		ksort($check_code_arr);
+		$check_code_str = 'HashKey='.$this->partner_key.'&'.http_build_query($check_code_arr).'&HashIV='.$this->partner_iv;
+		$CheckCode = strtoupper(hash("sha256", $check_code_str));
 		$post_data_str = array(  
 			'FeeDate' => $FeeDate, 
 			'PartnerID_' => $this->partner_id,
@@ -512,6 +598,36 @@ class NewebPay extends Model
 			'CheckValue' => $CheckCode  
 		);
 		$url = 'https://ccore.newebpay.com/API/Platformfee/perday';
+		$result = $this->curl_work($url, $post_data_str); //背景送出
+		$data = json_decode($result['web_info']);
+		return $result['web_info'];	
+	}
+	
+	public function get_Platformfee_search($id=''){  //平台費用扣款單筆查詢
+		if(!$id)
+			return array('Status'=>'ERROR-0','Message'=>'無參數值!');
+		
+		$transfer = Newebpay_mpg::join('merchants','newebpay_mpgs.MerchantID','=','merchants.MerchantID')->where('MerchantOrderNo',$id)->first();
+		$TimeStamp = time();
+		$check_code_arr = array(  
+			'FeeDate' => $transfer->FundTime, 
+			'PartnerID_' => $this->partner_id,
+			'MerTrade' => $id,
+			'TimeStamp' => $TimeStamp,  
+			'Version' => '1.0' 
+		);
+		ksort($check_code_arr);
+		$check_code_str = 'HashKey='.$this->partner_key.'&'.http_build_query($check_code_arr).'&HashIV='.$this->partner_iv;
+		$CheckCode = strtoupper(hash("sha256", $check_code_str));
+		$post_data_str = array(  
+			'FeeDate' => $transfer->FundTime, 
+			'PartnerID_' => $this->partner_id,
+			'MerTrade' => $id,
+			'TimeStamp' => $TimeStamp,  
+			'Version' => '1.0', 
+			'CheckValue' => $CheckCode  
+		);
+		$url = 'https://ccore.newebpay.com/API/Platformfee/search';
 		$result = $this->curl_work($url, $post_data_str); //背景送出
 		$data = json_decode($result['web_info']);
 		return $result['web_info'];	

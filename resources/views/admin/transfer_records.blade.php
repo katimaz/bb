@@ -16,31 +16,33 @@
             </div>
         	<h3 class="float-right" v-text="title"></h3>
         </div>
+        <!-----------手動新增交易-------------------------------------->
         <div class="w-100" v-if="action=='mpg_gateway'">
             <form id="mainFrm"  action="/admin/transfer_records_pt" method="post">
               @csrf
               <input type="hidden" name="item" v-model="item" />
               <input type="hidden" name="action" v-model="action" />
               <input type="hidden" name="usr_id" v-model="create_transfer.usr_id" />
+              <input type="hidden" name="MerchantOrderNo" value="{{'BB_'.time().rand(100,999)}}"/>
               <table class="table table-light table-bordered" >
                   <tr>
                     <th class="w-25 text-center align-middle">Email</th>
                     <td class="w-75">
-                        <input type="text" class="w-50 form-control d-inline" @blur="email_get_account" @keyup.enter="email_get_account"  name="Email" id="Email" v-model="create_transfer.Email" placeholder="填寫好幫手Email" />
+                        <input type="text" class="w-50 form-control d-inline" @change="email_get_account" @blur="email_get_account" @keyup.enter="email_get_account"  name="Email" id="Email" v-model="create_transfer.Email" placeholder="填寫好幫手Email" />
                         <span class="ml-2 d-inline text-danger" id="back_message" v-text="back_message"></span>
                      </td>
                   </tr>
                   <tr>
-                    <th class="w-25 text-center align-middle">好幫手名稱</th>
+                    <th class="w-25 text-center align-middle">會員名稱</th>
                     <td class="w-75">
-                        <input type="text" class="w-50 form-control" name="BuyerName" id="BuyerName" v-model="create_transfer.BuyerName" placeholder="好幫手名稱" />
+                        <input type="text" class="w-50 form-control" name="BuyerName" id="BuyerName" v-model="create_transfer.BuyerName" placeholder="會員名稱" />
                      </td>
                   </tr>
                   <tr>
-                    <th class="w-25 text-center align-middle">訂單編號</th>
+                    <th class="w-25 text-center align-middle">商店編號</th>
                     <td class="w-75">
-                        <input type="text" class="w-50 form-control d-inline" name="MerchantOrderNo" id="MerchantOrderNo" v-model="create_transfer.MerchantOrderNo" placeholder="填寫訂單編號" />
-                        <a href="javascript:void(0)" @click="today=new Date();create_transfer.MerchantOrderNo='BB_'+today.getTime()" class="btn btn-sm btn-primary d-inlie" v-text="'自動產生'"></a>
+                        <input type="text" class="w-25 form-control d-inline" name="MerchantID" id="MerchantID" v-model="MerchantID" placeholder="填寫合作商店編號" />
+                        <a href="javascript:void(0)" @click="searchMer" class="btn btn-success d-inlie ml-2" v-text="'查詢商家'"></a>
                      </td>
                   </tr>
                   <tr>
@@ -251,25 +253,21 @@
         	<table class="table table-light table-bordered table-hover" >
                 <tr class="text-center bg-secondary text-white">
                     <th>狀態</th>
-                    <th>交易序號</th>
-                    <th>支付方式</th>
+                    <th>商店ID</th>
+                    <th>商家名稱</th>
                     <th>金額</th>
-                    <th>商品資訊</th>
-                    <th>Email</th>
-                    <th>保管銀行</th>
+                    <th>撥款時間</th>
                     <th>發票</th>
                     <th>交易時間</th>
                 </tr>
                 <tr class="text-center" v-for="(transfer,index) in transfers.data" @click="getThisData(transfer.MerchantOrderNo)" style="cursor:pointer">
                     <td v-text="trades[transfer.TradeStatus]"></td>
-                    <td v-text="transfer.TradeNo"></td>
-                    <td v-text="transfer.PaymentType"></td>
+                    <td v-text="transfer.MerchantID"></td>
+                    <td v-text="transfer.MerchantName"></td>
                     <td v-text="transfer.Amt"></td>
-                    <td v-text="transfer.ItemDesc"></td>
-                    <td v-text="transfer.Email"></td>
-                    <td v-text="transfer.EscrowBank"></td>
+                    <td v-text="transfer.FundTime"></td>
                     <td v-text="((parseInt(transfer.InvoiceStatus)==1)?'開立':((parseInt(transfer.InvoiceStatus)==2))?'作廢':'未開')"></td>
-                    <td v-html="transfer.PayTime"></td>  
+                    <td v-text="transfer.PayTime"></td>  
                 </tr>
             </table>
             <div class="w-100 d-table py-2 text-center border-top" v-if="transfers.last_page>1">
@@ -284,6 +282,7 @@
                 @csrf
                 <input type="hidden" name="item" v-model="item" />
                 <input type="hidden" name="action" value="credit_close" />
+                <input type="hidden" name="MerchantID" id="MerchantID" />
                 <input type="hidden" name="MerchantOrderNo" id="MerchantOrderNo" />
                 <input type="hidden" name="Amt" id="Amt" />
                 <input type="hidden" name="TradeNo" id="TradeNo" />
@@ -293,23 +292,23 @@
             </form>              
             <table class="table table-light table-bordered table-hover" >
                 <tr class="text-center bg-secondary text-white">
-                    <th>交易單號</th>
+                    <th>商家ID</th>
+                    <th>商家名稱</th>
                     <th>請款狀態</th>
                     <th>退款狀態</th>
                     <th>金額</th>
-                    <th>商品資訊</th>
-                    <th>保管銀行</th>
-                    <th>支付時間</th>
+                    <th>交易時間</th>
+                    <th>撥款時間</th>
                     <th>處理</th>
                 </tr>
                 <tr class="text-center" v-for="(credit,index) in credits.data">
-                    <td v-text="credit.TradeNo"></td>
+                    <td v-text="credit.MerchantID"></td>
+                    <td v-text="credit.MerchantName"></td>
                     <td v-text="closeStatus[credit.CloseStatus]"></td>
                     <td v-text="backStatus[credit.BackStatus]"></td>
                     <td v-text="credit.Amt"></td>
-                    <td v-text="credit.ItemDesc"></td>
-                    <td v-text="credit.EscrowBank"></td>
                     <td v-text="credit.PayTime"></td>
+                    <td v-text="credit.FundTime"></td>
                     <td class="px-0">
                       <a href="javascript:void(0)" @click="credit_request(1,credit.CloseStatus,index)" :class="'btn btn-sm btn-primary d-inline '+((parseInt(credit.CloseStatus)==3)?'disabled':'')" v-text="((parseInt(credit.CloseStatus)==1 || parseInt(credit.CloseStatus)==2)?'取消請款':((parseInt(credit.CloseStatus)==3)?'請款完成':'請款申請'))"></a>
                       <a href="javascript:void(0)" @click="credit_request(2,credit.BackStatus,index)" :class="'btn btn-sm btn-danger d-inline '+((parseInt(credit.BackStatus)==3)?'disabled':'')" v-text="((parseInt(credit.BackStatus)==1 || parseInt(credit.BackStatus)==2)?'取消退款':((parseInt(credit.BackStatus)==3)?'退款完成':'退款申請'))"></a>
@@ -322,29 +321,25 @@
                 <a class="btn btn-light btn-sm float-right" v-if="credits.last_page>credits.current_page" href="javascript:void(0)" @click="go_content_page(parseInt(credits.current_page)+1)">下一頁</a>
             </div>
         </div>
-        <!--<div class="w-100" v-if="action=='back_recode'">
-        	<form id="mainFrm"  action="/newebPay_return_url" method="post">
-        	<input type="text" class="form-control my-1" name="Status" value=""  placeholder="狀態" />
-            <input type="text" class="form-control my-1" name="MerchantID" value="MS36097631"  placeholder="商店代號" />
-            <input type="text" class="form-control my-1" name="Version" value="1.5"  placeholder="版本" />
-        	<textarea class="form-control my-1" name="TradeInfo" placeholder="交易資料 AES 加密"></textarea>
-            <input type="text" class="form-control" name="TradeSha" placeholder="交易資料 SHA256 加密" />
-            <input type="submit" value="送出" class="btn btn-primary my-2" />
-            </form>
-        </div>-->
     </div>
-    <div class="pb-4" v-if="(action=='test')">
-        <form id="mainFrm" action="/admin/transfer_records_pt" method="post">
-          @csrf
-          <input type="hidden" name="item" v-model="item" />
-          <input type="hidden" name="action" value="test" />
-          <div class="w-100 text-center">
-              <input type="text" class="form-control w-25 mt-5 mx-auto" name="MerchantOrderNo" value="" placeholder="欲查詢的訂單編號" />
-              <input type="submit" class="btn btn-primary my-3" value="送出模擬" />
-          </div>
-        </form>
-    </div>          
     <div :class="{ bg_loding: isBg }"></div>
+    <!-----------提示框---------------------------------->
+    <div id="mark" class="position-fixed fixed-top w-100 h-100" @click="showitem=''" v-if="showitem" style="background-color:rgba(0,0,0,0.6); z-index:1030; display:none;"></div>
+    <div id="showitem" class="position-fixed fixed-top w-75 mx-auto bg-white py-4 mt-5 text-center border rounded" v-if="showitem" style="z-index:1050;display:none;">
+        <label class="d-inline">搜尋字串 : </label>
+        <input type="text" class="form-control d-inline ml-2" id="merchant_text" v-model="merchant_text" placeholder="Email或任意字串" style="width:40%" />
+        <a href="javascrip:void(0)" @click="merchant_search" class="btn btn-primary d-inline ml-2">搜尋</a>
+        <div class="w-100 p-4">
+        	<table class="table table-light table-bordered table-hover py-1" >
+            	<tr v-for="merchant in merchants.data" style="cursor:pointer" @click="chooseMerchant(merchant.MerchantID)">
+                	<td v-text="merchant.MerchantID"></td>
+                    <td v-text="merchant.MemberName"></td>
+                    <td v-text="merchant.MerchantName"></td>
+                    <td v-text="merchant.ManagerEmail"></td>
+                </tr>
+            </table>
+        </div>
+    </div>
 </div>
 <script>
 new Vue({
@@ -372,6 +367,14 @@ new Vue({
 	closeStatus: {0:'未請款',1:'等待提送請款至收單機構',2:'請款處理中',3:'請款完成'},
 	backStatus: {0:'未退款',1:'等待提送退款至收單機構',2:'退款處理中',3:'退款完成'},
 	paymentType: {CREDIT:'信用卡',WEBATM:'WebATM',VACC:'ATM 轉帳',CVS:'超商代碼繳費',BARCODE:'超商條碼繳費',CVSCOM:'超商取貨付款'},
+	showitem: '',
+	merchant_text: '',
+	merchants: '',
+	MerchantID: ''
+  },
+  beforeCreate: function(){
+  	$("#showitem").show();
+	$("#mark").show();
   },
   mounted: function () {
   	var self = this;
@@ -406,7 +409,7 @@ new Vue({
 	sendTransferAdd: function(){
 		var self = this;
 		var chk = 1;
-		if(!self.create_transfer.Email || self.back_message || !self.chk_mail(self.create_transfer.Email))
+		if(!self.create_transfer.Email || !self.create_transfer.usr_id || self.back_message || !self.chk_mail(self.create_transfer.Email))
 		{
 			$("#Email").css({"border":"1px solid #a02"});
 			$("body,html").scrollTop(0);
@@ -414,13 +417,13 @@ new Vue({
 		}else
 			$("#Email").css({"border":"1px solid #ccc"});
 			
-		if(!self.create_transfer.MerchantOrderNo)
+		if(!self.MerchantID)
 		{
-			$("#MerchantOrderNo").css({"border":"1px solid #a02"});
+			$("#MerchantID").css({"border":"1px solid #a02"});
 			$("body,html").scrollTop(0);
 			chk = 0;	
 		}else
-			$("#MerchantOrderNo").css({"border":"1px solid #ccc"});	
+			$("#MerchantID").css({"border":"1px solid #ccc"});	
 			
 		if(!self.create_transfer.Amt)
 		{
@@ -493,14 +496,16 @@ new Vue({
 				if(response.data.buyer)
 				{
 					self.create_transfer.Email = response.data.buyer.email;
-					self.create_transfer.BuyerName = response.data.buyer.last_name+response.data.buyer.first_name;
 					self.create_transfer.usr_id = response.data.buyer.usr_id;
 					$("#Email").css({"border":"1px solid #ccc"})
 					self.back_message = '';
+					self.create_transfer.BuyerName = response.data.buyer.last_name+''+response.data.buyer.first_name;
+					console.log(self.create_transfer.BuyerName)
 				}else
 				{
 					self.back_message = '查無此會員資料!!';
 					self.create_transfer.BuyerName = '';
+					self.create_transfer.usr_id = '';
 					$("#Email").css({"border":"1px solid #a02"});
 				}
 			});
@@ -538,7 +543,8 @@ new Vue({
 	credit_request: function(indexType,status,index){
 		var self = this;
 		var txt = '';
-		$("#MerchantOrderNo").val(self.credits.data[index].MerchantOrderNo) ;
+		$("#MerchantID").val(self.credits.data[index].MerchantID);
+		$("#MerchantOrderNo").val(self.credits.data[index].MerchantOrderNo);
 		$("#TradeNo").val(self.credits.data[index].TradeNo);
 		$("#Amt").val(self.credits.data[index].Amt) ;
 		
@@ -570,10 +576,34 @@ new Vue({
 			self.isBg = true;
 			$("#mainFrm").submit();	
 		}
+	},
+	searchMer: function(){
+		$("#mark").show();
+		this.showitem = true;
+	},
+	merchant_search: function(){
+		var self = this;
+		if(!self.merchant_text)
+			$("#merchant_text").css({"border":"1px solid #a02"});
+		else
+		{
+			$("#merchant_text").css({"border":"1px solid #ccc"});
+			axios.get('/admin/get_transfer_records?item='+self.item+'&action=merchant_search&text='+self.merchant_text).then(function (response){
+				console.log(response.data)		
+				self.merchants = response.data.merchants;
+				
+		   })	
+		}	 
+	},
+	chooseMerchant: function(x){
+		$("#mark").hide();
+		this.showitem = '';
+		this.MerchantID = x;
 	}
 	
   }
   
 })
+
 </script>   
 @stop

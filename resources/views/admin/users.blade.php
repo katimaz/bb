@@ -121,7 +121,7 @@
             </thead>
             <tbody>
                 <tr class="text-secondary" v-for="user in users.data" @click="get_user(user.usr_id)" style="cursor:pointer">
-                    <td v-text="user.last_name+' '+user.first_name"></td>
+                    <td v-text="((user.last_name || user.first_name)?user.last_name+' '+user.first_name:'')"></td>
                     <td v-html="((user.usr_status)?'正常':'未驗證')"></td>
                     <td v-text="user.email"></td>
                     <td v-text="user.phone_number"></td>

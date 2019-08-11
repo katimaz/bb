@@ -7,13 +7,11 @@
     
     <meta name="csrf-token" content="{{ csrf_token() }}">
 	
-    <link rel="shortcut icon" href="/images/bible.ico" />
-    
     <title>幫棒 管理後台</title>
 
     <link href="/css/app.css" rel="stylesheet">
     
-    <script src="{{asset('/js/app.js')}}"></script>
+    <script src="{{url('/js/app.js')}}"></script>
     <style>
 		li{list-style:none;}
 		.hidezone{display:none;}
@@ -40,10 +38,11 @@
             <a :class="'btn btn-secondary w-100 p-2 '+((weburi.indexOf('owner')!=-1)?'active':'')" style="font-size:1.2em;" href="/admin/owner" v-text="'基本資料'"></a>
             
             <div :class="'btn btn-secondary w-100 p-0 '+((menu_item.indexOf('admins')!=-1)?'active':'')" v-if="is_manager==9 || $.inArray('admins',system)!=-1" style="font-size:1.2em;">
-            	<div class="p-2" @click="goto_item('admins')" v-text="'系統管理者設定'"></div>
+            	<div class="p-2" @click="goto_item('admins')" v-text="'系統管理者'"></div>
             	<div id="admins" class="w-100 mb-0 bg-white h6" v-if="menu_item.indexOf('admins')!=-1 && !menu_close">
                 	<a :class="'w-100 d-block py-2 aHover '+((weburi.indexOf('managers')!=-1)?'action':'')" href="/admin/managers" v-text="'帳號管理'"></a>
-            		<a :class="'w-100 d-block py-2 aHover '+((weburi.indexOf('groups')!=-1)?'action':'')" href="/admin/groups" v-text="'群組權限管理'"></a>
+            		<a :class="'w-100 d-block py-2 aHover '+((weburi.indexOf('groups')!=-1)?'action':'')" href="/admin/groups" v-text="'群組管理'"></a>
+                    <a :class="'w-100 d-block py-2 aHover '+((weburi.indexOf('serviceFee')!=-1)?'action':'')" href="/admin/serviceFee" v-text="'手續費設定'"></a>
                 </div>
             </div>    
             
@@ -81,8 +80,18 @@
                             <a class="w-100 d-block py-2 aHover" href="/admin/accountings?item=invoice_tracks&action=manage" v-text="'字軌資料管理'"></a>
                         </div>
                     </div>
-                    <a :class="'w-100 d-block py-2 aHover '+((weburi.indexOf('feeperday')!=-1)?'action':'')" href="/admin/accountings?item=sysAccounting&action=feeperday" v-text="'系統帳務'"></a>
-            		<a :class="'w-100 d-block py-2 aHover '+((weburi.indexOf('accountings_2')!=-1)?'action':'')" href="#" v-text="'會員帳務'"></a>
+                    
+                    <div @mouseover="mouseOver('systemAccount')" @mouseout="mouseOut('systemAccount')" :class="'w-100 py-2 position-relative aHover '+((weburi.indexOf('systemAccount')!=-1)?'action':'')">
+                    	<span v-text="'系統帳務'"></span>
+                        <div id="systemAccount" class="w-100 position-absolute border border-info" style="top:0px; right:-100%; display:none;">
+                        	<a class="w-100 d-block py-2 aHover" href="/admin/accountings?item=systemAccount&action=Platformfee_perday" v-text="'費用單日查詢'"></a>
+                            <a class="w-100 d-block py-2 aHover" href="/admin/accountings?item=systemAccount&action=Platformfee_search" v-text="'費用單筆查詢'"></a>
+                            <a class="w-100 d-block py-2 aHover" href="/admin/accountings?item=systemAccount&action=FeeInstruct" v-text="'商店扣撥款作業'"></a>
+                            <a class="w-100 d-block py-2 aHover" href="/admin/accountings?item=systemAccount&action=merchant_manager" v-text="'管理合作商店'"></a>
+                            <a class="w-100 d-block py-2 aHover" href="/admin/accountings?item=systemAccount&action=merchant_create" v-text="'建立合作商店'"></a>
+                        </div>
+                    </div>
+                    <a :class="'w-100 d-block py-2 aHover '+((weburi.indexOf('accountings_2')!=-1)?'action':'')" href="#" v-text="'會員帳務'"></a>
                     <a :class="'w-100 d-block py-2 aHover '+((weburi.indexOf('accountings_3')!=-1)?'action':'')" href="#" v-text="'好幫手帳務'"></a>
                     <a :class="'w-100 d-block py-2 aHover '+((weburi.indexOf('accountings_4')!=-1)?'action':'')" href="#" v-text="'年度獎金'"></a>
                     <a :class="'w-100 d-block py-2 aHover '+((weburi.indexOf('accountings_5')!=-1)?'action':'')" href="#" v-text="'回饋金'"></a>

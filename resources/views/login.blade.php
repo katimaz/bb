@@ -2,9 +2,9 @@
 @section('content')
   <div class="item-title">註冊登入</div>
   <div id="app" class="login-box">
-    <a href="profile.html" class="fb-login"> 使用FaceBook登入</a>
-    <a href="profile.html"  class="line-login">使用Line登入</a>
-    <a href="profile.html"  class="google-login"> 使用Google登入</a>
+    <a href="{{ url('auth/facebook') }}" class="fb-login"> 使用FaceBook登入</a>
+    <a href="{{ url('auth/line') }}"  class="line-login">使用Line登入</a>
+    <a href="{{ url('auth/google') }}"  class="google-login"> 使用Google登入</a>
     <form id="mainFrm" action="<?=URL::to('/')?>/web/login_pt" method="post">
       @csrf
       <div class="form-group">

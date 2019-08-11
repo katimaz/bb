@@ -425,6 +425,14 @@ class WebController extends Controller
 		$distance = 10;
 		$lat = Session::get('lat');
 		$lng = Session::get('lng');
+		if(empty($lat)) {
+			$lat = '25.0477756';
+			$lng = '121.5127512';
+		}
+		if(empty($lng)) {
+			$lat = '25.0477756';
+			$lng = '121.5127512';
+		}
 
 		// 用戶
 		if($user->usr_type == "0") {

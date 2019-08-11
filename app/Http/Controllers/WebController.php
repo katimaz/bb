@@ -461,7 +461,7 @@ class WebController extends Controller
 	public function helper_detail($usr_id = '', $distance = 0)
 	{
 		// 使用者資訊
-		$user = Users::where('usr_id', $usr_id)->first()->get();
+		$user = Users::where('usr_id', $usr_id)->get();
 		// 服務
 		$olo = OfferListObj::where('mem_id', $user[0]->id)->get();
 		// 評價

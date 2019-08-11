@@ -30,171 +30,155 @@ class User extends Authenticatable
 
     public function fbLogin($input)
     {
-        if(!static::where('fb_id', $input['fb_id'])->orWhere('email',$input['email'])->count())
+        if(!static::where('FB_login_token', $input['FB_login_token'])->orWhere('email',$input['email'])->count())
 		{
-            $chk=true;
+            $chk=true; 
 			while($chk==true) {
-			  $id = Utils::createTimeId(time());
-			  if(!static::where('account', $id)->count())
-			  	$chk=false;
+				  $account = Utils::create_name_id(time());;
+				  if(!static::where('usr_id', $account)->count())
+					$chk=false;
 			}
-			$input['account'] = $id;
-			$input['level'] = 1;
-			$input['status'] = 1;
-			$input['record_count'] = 0;
-
-            $this->createFbAvatar($input['account'], $input['avatar']);
-
+			$input['usr_id'] = $account;
+			$input['usr_status'] = 0;
+			$input['password'] = Utils::set_password(time(),trim($account));
+			if($input['avatar'])
+			{
+				$avatar = Utils::getAvatarFileName($account);
+				$input['usr_photo'] = $avatar;
+				$this->createFbAvatar($avatar, $input['avatar']);
+			}
 			return static::create($input);
 		}elseif(static::where('email', $input['email'])->count())
 		{
-			static::where('email', $input['email'])->update(array('fb_id'=>$input['fb_id']));
-			$userData = static::where('fb_id', $input['fb_id'])->first();
+			static::where('email', $input['email'])->update(array('FB_login_token'=>$input['FB_login_token']));
+			$userData = static::where('email', $input['email'])->first();
 		}else
-			$userData = static::where('fb_id', $input['fb_id'])->first();
+			$userData = static::where('FB_login_token', $input['FB_login_token'])->first();
 
-        $this->createFbAvatar($userData->account, $input['avatar']);
-
-		return $userData;
-
-		/*$userData = static::where('fb_id', $input['fb_id'])->first();
-
-		if (is_null($userData)) {
-            $input['account'] = Utils::createTimeId(time());
-			return static::create($input);
-        }elseif(!$userData->account)
+        if($input['avatar'] && !$userData->usr_photo)
 		{
-			static::where('fb_id', $input['fb_id'])->update(array('account'=>Utils::createTimeId(time())));
-			$userData = static::where('fb_id', $input['fb_id'])->first();
-		}*/
-
-		// return $userData;
-    }
+			$avatar = Utils::getAvatarFileName($userData->usr_id);
+			static::where('FB_login_token', $input['FB_login_token'])->update(array('usr_photo'=>$avatar)); 
+			$this->createFbAvatar($avatar, $input['avatar']);
+		}
+		return $userData;
+	}
 
     public function googleLogin($input)
     {
-        //$userData = static::where('google_id', $input['google_id'])->first();
-
-		if(!static::where('google_id', $input['google_id'])->orWhere('email',$input['email'])->count())
+        if(!static::where('Google_login_token', $input['Google_login_token'])->orWhere('email',$input['email'])->count())
 		{
-            $chk=true;
+            $chk=true; 
 			while($chk==true) {
-			  $id = Utils::createTimeId(time());
-			  if(!static::where('account', $id)->count())
-			  	$chk=false;
+				  $account = Utils::create_name_id(time());;
+				  if(!static::where('usr_id', $account)->count())
+					$chk=false;
 			}
-			$input['account'] = $id;
-			$input['level'] = 1;
-			$input['status'] = 1;
-            $input['record_count'] = 0;
-
-            $this->createGoogleAvatar($input['account'], $input['avatar']);
-
+			$input['usr_id'] = $account;
+			$input['usr_status'] = 0;
+			$input['password'] = Utils::set_password(time(),trim($account));
+			if($input['avatar'])
+			{
+				$avatar = Utils::getAvatarFileName($account);
+				$input['usr_photo'] = $avatar;
+				$this->createFbAvatar($avatar, $input['avatar']);
+			}
 			return static::create($input);
-        }elseif(static::where('email', $input['email'])->count())
+		}elseif(static::where('email', $input['email'])->count())
 		{
-			static::where('email', $input['email'])->update(array('google_id'=>$input['google_id']));
-			$userData = static::where('google_id', $input['google_id'])->first();
+			static::where('email', $input['email'])->update(array('Google_login_token'=>$input['Google_login_token']));
+			$userData = static::where('email', $input['email'])->first();
 		}else
-			$userData = static::where('google_id', $input['google_id'])->first();
+			$userData = static::where('Google_login_token', $input['Google_login_token'])->first();
 
-        $this->createGoogleAvatar($userData->account, $input['avatar']);
-
+        if($input['avatar'] && !$userData->usr_photo)
+		{
+			$avatar = Utils::getAvatarFileName($userData->usr_id);
+			static::where('Google_login_token', $input['Google_login_token'])->update(array('usr_photo'=>$avatar)); 
+			$this->createFbAvatar($avatar, $input['avatar']);
+		}
 		return $userData;
-    }
+	}
 
     public function lineLogin($input)
     {
-
-		if(!static::where('line_id', $input['line_id'])->orWhere('email',$input['email'])->count())
+        if(!static::where('Line_login_token', $input['Line_login_token'])->orWhere('email',$input['email'])->count()) 
 		{
-            $chk=true;
+            $chk=true; 
 			while($chk==true) {
-			  $id = Utils::createTimeId(time());
-			  if(!static::where('account', $id)->count())
-			  	$chk=false;
+				  $account = Utils::create_name_id(time());;
+				  if(!static::where('usr_id', $account)->count())
+					$chk=false;
 			}
-			$input['account'] = $id;
-			$input['level'] = 1;
-			$input['status'] = 1;
-            $input['record_count'] = 0;
-
-			$this->createLineAvatar($input['account'], $input['avatar']);
-
+			$input['usr_id'] = $account;
+			$input['usr_status'] = 0;
+			$input['password'] = Utils::set_password(time(),trim($account));
+			if($input['avatar'])
+			{
+				$avatar = Utils::getAvatarFileName($account);
+				$input['usr_photo'] = $avatar;
+				$this->createLineAvatar($avatar, $input['avatar']);
+			}
 			return static::create($input);
         }elseif(static::where('email', $input['email'])->count())
 		{
-			static::where('email', $input['email'])->update(array('line_id'=>$input['line_id']));
-			$userData = static::where('line_id', $input['line_id'])->first();
+			static::where('email', $input['email'])->update(array('Line_login_token'=>$input['Line_login_token']));
+			$userData = static::where('email', $input['email'])->first();	
 		}else
-			$userData = static::where('line_id', $input['line_id'])->first();
+			$userData = static::where('Line_login_token', $input['Line_login_token'])->first();
 
-        $this->createLineAvatar($userData->account, $input['avatar']);
-
+        if($input['avatar'] && !$userData->usr_photo)
+		{
+			$avatar = Utils::getAvatarFileName($userData->usr_id);
+			static::where('Line_login_token', $input['Line_login_token'])->update(array('usr_photo'=>$avatar)); 
+			$this->createLineAvatar($avatar, $input['avatar']);
+		}
 		return $userData;
     }
-
-	public function cookieLogin($input)
-    {
-
-		$userData = static::where($input['stage'], $input['id'])->where('tel',$input['tel'])->first();
-
-		return ((isset($userData))?$userData:NULL);
-    }
-
-    private function createFbAvatar($userAccount, $inputAvatarUrl) {
+	
+	private function createFbAvatar($avatar, $inputAvatarUrl) {
         // 使用者大頭像
-        $avatarBigLocalPath = storage_path('files/pic/avatar/photoBig/' . Utils::getAvatarFileName($userAccount));
-        if (!File::exists($avatarBigLocalPath)) {
-            $avatarUrlArr = explode("?", $inputAvatarUrl);
-            $avatarUrl = $avatarUrlArr[0] . "?type=large";
-            $fileContents = file_get_contents($avatarUrl);
-            File::put($avatarBigLocalPath, $fileContents);
-        }
+        $avatarBigLocalPath = storage_path('files/pic/avatar/photoBig/'.$avatar);
+        $avatarUrlArr = explode("?", $inputAvatarUrl);
+		$avatarUrl = $avatarUrlArr[0] . "?type=normal";
+		$fileContents = file_get_contents($avatarUrl);
+		File::put($avatarBigLocalPath, $fileContents);
 
         // 使用者小頭像
-        $avatarSmallLocalPath = storage_path('files/pic/avatar/photoSmall/' . Utils::getAvatarFileName($userAccount));
-        if (!File::exists($avatarSmallLocalPath)) {
-            $avatarUrlArr = explode("?", $inputAvatarUrl);
-            $avatarUrl = $avatarUrlArr[0] . "?type=small";
-            $fileContents = file_get_contents($avatarUrl);
-            File::put($avatarSmallLocalPath, $fileContents);
-        }
+        $avatarSmallLocalPath = storage_path('files/pic/avatar/photoSmall/'.$avatar);
+        $avatarUrlArr = explode("?", $inputAvatarUrl);
+		$avatarUrl = $avatarUrlArr[0] . "?type=normal";
+		$fileContents = file_get_contents($avatarUrl);
+		File::put($avatarSmallLocalPath, $fileContents);
     }
 
-    private function createGoogleAvatar($userAccount, $inputAvatarUrl) {
+    private function createGoogleAvatar($avatar, $inputAvatarUrl) {
         // 使用者大頭像
-		$avatarBigLocalPath = storage_path('files/pic/avatar/photoBig/' . Utils::getAvatarFileName($userAccount));
-        if (!File::exists($avatarBigLocalPath)) {
-            $avatarUrlArr = explode("?", $inputAvatarUrl);
-            $avatarUrl = $avatarUrlArr[0] . "?sz=200";
-            $fileContents = file_get_contents($avatarUrl);
-            File::put($avatarBigLocalPath, $fileContents);
-        }
+		$avatarBigLocalPath = storage_path('files/pic/avatar/photoBig/'.$avatar);
+        $avatarUrlArr = explode("?", $inputAvatarUrl);
+		$avatarUrl = $avatarUrlArr[0] . "?sz=600";
+		$fileContents = file_get_contents($avatarUrl);
+		File::put($avatarBigLocalPath, $fileContents);
 
         // 使用者小頭像
-        $avatarSmallLocalPath = storage_path('files/pic/avatar/photoSmall/' . Utils::getAvatarFileName($userAccount));
-        if (!File::exists($avatarSmallLocalPath)) {
-            $avatarUrlArr = explode("?", $inputAvatarUrl);
-            $avatarUrl = $avatarUrlArr[0] . "?sz=50";
-            $fileContents = file_get_contents($avatarUrl);
-            File::put($avatarSmallLocalPath, $fileContents);
-        }
+        $avatarSmallLocalPath = storage_path('files/pic/avatar/photoSmall/'.$avatar);
+        $avatarUrlArr = explode("?", $inputAvatarUrl);
+		$avatarUrl = $avatarUrlArr[0] . "?sz=200";
+		$fileContents = file_get_contents($avatarUrl);
+		File::put($avatarSmallLocalPath, $fileContents);
 	}
 
-    private function createLineAvatar($userAccount, $inputAvatarUrl) {
+    private function createLineAvatar($avatar, $inputAvatarUrl) {
         // 使用者大頭像
-        $avatarBigLocalPath = storage_path('files/pic/avatar/photoBig/' . Utils::getAvatarFileName($userAccount));
+        $avatarBigLocalPath = storage_path('files/pic/avatar/photoBig/'.$avatar);
         if (!File::exists($avatarBigLocalPath)) {
             $fileContents = file_get_contents($inputAvatarUrl);
             File::put($avatarBigLocalPath, $fileContents);
-            Utils::ImageResize($avatarBigLocalPath, $avatarBigLocalPath, 200, 200);
+            Utils::ImageResize($avatarBigLocalPath, $avatarBigLocalPath, 600, 600);
         }
 
         // 使用者小頭像
-        $avatarSmallLocalPath = storage_path('files/pic/avatar/photoSmall/' . Utils::getAvatarFileName($userAccount));
-        if (!File::exists($avatarSmallLocalPath)) {
-            Utils::ImageResize($avatarBigLocalPath, $avatarSmallLocalPath, 50, 50);
-        }
+        $avatarSmallLocalPath = storage_path('files/pic/avatar/photoSmall/'.$avatar);
+	    Utils::ImageResize($avatarBigLocalPath, $avatarSmallLocalPath, 200, 200);
     }
 }

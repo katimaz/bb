@@ -32,7 +32,7 @@ class User extends Authenticatable
     {
         if(!static::where('fb_id', $input['fb_id'])->orWhere('email',$input['email'])->count())
 		{
-            $chk=true; 
+            $chk=true;
 			while($chk==true) {
 			  $id = Utils::createTimeId(time());
 			  if(!static::where('account', $id)->count())
@@ -49,35 +49,35 @@ class User extends Authenticatable
 		}elseif(static::where('email', $input['email'])->count())
 		{
 			static::where('email', $input['email'])->update(array('fb_id'=>$input['fb_id']));
-			$userData = static::where('fb_id', $input['fb_id'])->first();	
+			$userData = static::where('fb_id', $input['fb_id'])->first();
 		}else
 			$userData = static::where('fb_id', $input['fb_id'])->first();
 
         $this->createFbAvatar($userData->account, $input['avatar']);
-		
+
 		return $userData;
-		
+
 		/*$userData = static::where('fb_id', $input['fb_id'])->first();
-		
+
 		if (is_null($userData)) {
             $input['account'] = Utils::createTimeId(time());
 			return static::create($input);
         }elseif(!$userData->account)
 		{
 			static::where('fb_id', $input['fb_id'])->update(array('account'=>Utils::createTimeId(time())));
-			$userData = static::where('fb_id', $input['fb_id'])->first();	
-		}*/	
+			$userData = static::where('fb_id', $input['fb_id'])->first();
+		}*/
 
-//		return $userData;
+		// return $userData;
     }
 
     public function googleLogin($input)
     {
         //$userData = static::where('google_id', $input['google_id'])->first();
 
-		if(!static::where('google_id', $input['google_id'])->orWhere('email',$input['email'])->count()) 
+		if(!static::where('google_id', $input['google_id'])->orWhere('email',$input['email'])->count())
 		{
-            $chk=true; 
+            $chk=true;
 			while($chk==true) {
 			  $id = Utils::createTimeId(time());
 			  if(!static::where('account', $id)->count())
@@ -89,12 +89,12 @@ class User extends Authenticatable
             $input['record_count'] = 0;
 
             $this->createGoogleAvatar($input['account'], $input['avatar']);
-			
+
 			return static::create($input);
         }elseif(static::where('email', $input['email'])->count())
 		{
 			static::where('email', $input['email'])->update(array('google_id'=>$input['google_id']));
-			$userData = static::where('google_id', $input['google_id'])->first();	
+			$userData = static::where('google_id', $input['google_id'])->first();
 		}else
 			$userData = static::where('google_id', $input['google_id'])->first();
 
@@ -105,10 +105,10 @@ class User extends Authenticatable
 
     public function lineLogin($input)
     {
-        
-		if(!static::where('line_id', $input['line_id'])->orWhere('email',$input['email'])->count()) 
+
+		if(!static::where('line_id', $input['line_id'])->orWhere('email',$input['email'])->count())
 		{
-            $chk=true; 
+            $chk=true;
 			while($chk==true) {
 			  $id = Utils::createTimeId(time());
 			  if(!static::where('account', $id)->count())
@@ -120,12 +120,12 @@ class User extends Authenticatable
             $input['record_count'] = 0;
 
 			$this->createLineAvatar($input['account'], $input['avatar']);
-			
+
 			return static::create($input);
         }elseif(static::where('email', $input['email'])->count())
 		{
 			static::where('email', $input['email'])->update(array('line_id'=>$input['line_id']));
-			$userData = static::where('line_id', $input['line_id'])->first();	
+			$userData = static::where('line_id', $input['line_id'])->first();
 		}else
 			$userData = static::where('line_id', $input['line_id'])->first();
 
@@ -133,12 +133,12 @@ class User extends Authenticatable
 
 		return $userData;
     }
-	
+
 	public function cookieLogin($input)
     {
-        
+
 		$userData = static::where($input['stage'], $input['id'])->where('tel',$input['tel'])->first();
-			
+
 		return ((isset($userData))?$userData:NULL);
     }
 

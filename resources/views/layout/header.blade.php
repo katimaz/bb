@@ -77,7 +77,7 @@
                 <a href="order-statu.html">我的訂單<i class="nl-badge">1</i></a>
             </li>
             <li>
-                <a href="h-set.html">服務設定</a>
+                <a href="<?=URL::to('/')?>/web/h_set">服務設定</a>
             </li>
             <li class="submenu" id="subA">
             <a href="javascript:void(0)">

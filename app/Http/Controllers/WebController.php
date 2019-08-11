@@ -97,7 +97,7 @@ class WebController extends Controller
 		  if(!User::where('email', '=', $request->email)->count()) {
 			  return View('web/error', array('message' => '很抱歉，帳密有問題喔!'));
 		  } else {
-			  $user = User::where('email', '=', trim($request->email))->select('id','usr_id','password','usr_status','last_name','first_name','phone_number','email','remember_token','cookie_id', 'usr_photo')->first();
+			  $user = User::where('email', '=', trim($request->email))->select('id','usr_id','password','usr_status','last_name','first_name','phone_number','email','remember_token','cookie_id', 'usr_photo', 'usr_type')->first();
 			  $password = trim($request->password) . ":" . $user->usr_id;
 
 			  $request->session()->flush();
@@ -401,7 +401,7 @@ class WebController extends Controller
 			$loc = [];
 			foreach ($offer as $key => $value) {
 				$loc[$key]['addr'] = [$value->lat, $value->lng];
-				$loc[$key]['text'] = '<div  class="user_map"><div class="map-up"><div class="up-face"><img src="' . URL::to('/') . '/images/' . $value->usr_photo . '"></div><div class="up-left"><span class="user-name">' . $value->last_name . $value->first_name . '</span><span class="start"><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i> </span><span class="avg">4.9</span><div class="income"><i class="fa fa-map-marker" aria-hidden="true"></i><span class="text-success"> 距離：</span><span class="text-danger">' . (int)($value->distance * 1000) . '</span>公尺</div></div></div><div class="map-score"><div class="income"><span class="text-success"> 受雇次數：</span><span class="text-danger">21</span>次</div><div class="income"><span class="text-success"> 當地導遊：</span><span class="text-danger">500元</span>/小時</div><div class="income"><span class="text-success">其他服務：</span>居家清掃、水電工程、木工...<a href="' . URL::to('/') . '/web/helper_detail/' . $value->usr_id . '/' . (int)($value->distance * 1000) . '">詳細說明</a><div class="map-bt"><a href="#" class="lmbt" data-toggle="modal"              data-target="#exampleModalLong">線上諮詢</a><a href="#" class="rmbt" data-toggle="modal"              data-target="#exampleModalLong">雇用</a></div></div></div>';
+				$loc[$key]['text'] = '<div class="user_map"><div class="map-up"><div class="up-face"><img src="' . URL::to('/') . '/images/' . $value->usr_photo . '"></div><div class="up-left"><span class="user-name">' . $value->last_name . $value->first_name . '</span><span class="start"><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i> </span><span class="avg">4.9</span><div class="income"><i class="fa fa-map-marker" aria-hidden="true"></i><span class="text-success"> 距離：</span><span class="text-danger">' . (int)($value->distance * 1000) . '</span>公尺</div></div></div><div class="map-score"><div class="income"><span class="text-success"> 受雇次數：</span><span class="text-danger">21</span>次</div><div class="income"><span class="text-success"> 當地導遊：</span><span class="text-danger">500元</span>/小時</div><div class="income"><span class="text-success">其他服務：</span>居家清掃、水電工程、木工...<a href="' . URL::to('/') . '/web/helper_detail/' . $value->usr_id . '/' . (int)($value->distance * 1000) . '">詳細說明</a><div class="map-bt"><a href="#" class="lmbt" data-toggle="modal"              data-target="#exampleModalLong">線上諮詢</a><a href="#" class="rmbt" data-toggle="modal" data-target="#exampleModalLong">雇用</a></div></div></div>';
 				$loc[$key]['icon'] = URL::to('/') . '/images/mark.png';
 				$loc[$key]['newLabel'] = '<img src="' . URL::to('/') . '/images/' . $value->usr_photo . '" style="border-radius:50%;width:30px;height:30px;margin-top: -95px;border: 2px solid #b30b06;">';
 			}
@@ -468,6 +468,26 @@ class WebController extends Controller
 		$service_rate = [];
 
 		return View('web/helper_detail', ['distance' => $distance, 'user' => $user[0], 'olo' => $olo]);
+	}
+
+	public function h_set()
+	{
+		$user = User::where('usr_id',Session::get('usrID'))->first();
+
+		if(!$user)
+		{
+		  return View('web/error_message', array('message' => '你的等級不足喔，請洽網站管理員!', 'goUrl'=>'/'));
+		}
+
+		// 會員資料
+		$user = User::where('usr_id', session()->get('usrID'))->first();
+		// 會員地址
+		$member_addr_recode = Member_addr_recode::where('u_id', session()->get('uID'))->get();
+		// 服務設定
+		$OfferListObj = OfferListObj::where('mem_id', session()->get('uID'))->get();
+		// 服務評分…表格再找
+
+		return View('web/h-set', array('user'=>$user, 'member_addr_recode' => $member_addr_recode, 'olo' => $OfferListObj));
 	}
 
 	public function einvoice_info()

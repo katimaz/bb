@@ -17,6 +17,11 @@ use App\Models\Users;
 use App\Models\einvoice_info;
 use App\Models\collection_info;
 use App\Models\member_notify_setting;
+use App\Models\OfferListObj;
+use App\Models\olo_img;
+use App\Models\olo_license_img;
+use App\Models\olo_video;
+use App\Models\olo_food;
 use Session;
 use App\User;
 use Auth;
@@ -352,6 +357,289 @@ class ApiController extends Controller
 		}
 
 		return response()->json([]);
+	}
+
+	public function set_helper(Request $request)
+	{
+		$open_offer_setting = 0;
+		if(isset($request->open_offer_setting)) {
+			$open_offer_setting = $request->open_offer_setting;
+		}
+		$set = [
+			'personal_brief' => $request->personal_brief,
+			'open_offer_setting' => $open_offer_setting
+		];
+		User::where('usr_id', session()->get('usrID'))->update($set);
+
+		$mar = Member_addr_recode::where('id', '=', $request->address)->get();
+
+		$set = [];
+		$set = [
+			'mem_addr' => $mar[0]->city . $mar[0]->nat . $mar[0]->addr,
+		];
+		OfferListObj::where('mem_id', session()->get('uID'))->update($set);
+
+		return response()->json(['msg' => '成功']);
+	}
+
+	public function get_olo(Request $request)
+	{
+		$olo = OfferListObj::where('id', $request->id)->get();
+		$olo_license_img = olo_license_img::where('olo_id', $request->id)->get();
+		$olo_img = olo_img::where('olo_id', $request->id)->get();
+		$olo_video = olo_video::where('olo_id', $request->id)->get();
+		$olo_food = olo_food::where('olo_id', $request->id)->get();
+
+		return response()->json(['olo' => $olo[0], 'olo_license_img' => $olo_license_img, 'olo_img' => $olo_img, 'olo_video' => $olo_video, 'olo_food' => $olo_food]);
+	}
+
+	public function set_olo(Request $request)
+	{
+		$olo_id = $request->id;
+		// 計價方式
+		$price_type = $request->price_type;
+		$price = $request->price;
+		// 服務簡介
+		$offer_description = $request->offer_description;
+		// 最高學歷
+		$education = $request->education;
+		$set = [
+			'price' => $price,
+			'price_type' => $price_type,
+			'offer_description' => $offer_description,
+			'education' => $education
+		];
+		OfferListObj::where('id', $olo_id)->update($set);
+
+		// 證照照片
+		if(isset($request->old_license_img)) {
+			$old_license_img = $request->old_license_img;
+			$old_license_img_str = implode(',', $old_license_img);
+			olo_license_img::whereRaw("id NOT IN ($old_license_img_str) AND olo_id = $olo_id")->delete();
+		} else {
+			olo_license_img::whereRaw("olo_id = $olo_id")->delete();
+		}
+
+		if($request->file('license_img') !== null) {
+			if(!file_exists(storage_path()."/files"))
+				mkdir(storage_path()."/files", 0775);
+			if(!file_exists(storage_path()."/files/pic"))
+				mkdir(storage_path()."/files/pic", 0775);
+			if(!file_exists(storage_path()."/files/pic/license_img"))
+				mkdir(storage_path()."/files/pic/license_img", 0775);
+			if(!file_exists(storage_path()."/files/pic/license_img/photoBig"))
+				mkdir(storage_path()."/files/pic/license_img/photoBig", 0775);
+			if(!file_exists(storage_path()."/files/pic/license_img/photoSmall"))
+				mkdir(storage_path()."/files/pic/license_img/photoSmall", 0775);
+
+			foreach ($request->file('license_img') as $key => $value) {
+				$time = strval(time());
+				$file = $value;
+				$file_name = strtolower($value->getClientOriginalName());
+				$subDot = strtolower($value->getClientOriginalExtension());
+				if($subDot == 'jpeg' || $subDot == 'jpg' || $subDot == 'JPG') {
+					$Fn_name = Utils::getFileName($file_name.$time, $subDot);
+					$path = storage_path()."/files/pic/license_img/photoBig/";
+					$value->move($path, $Fn_name);
+					//chmod($path.$Fn_name, 0775);
+					Utils::ImageResize($path.$Fn_name, $path.$Fn_name, 600,600,72);
+
+					copy($path.$Fn_name, storage_path()."/files/pic/license_img/photoSmall/".$Fn_name);
+					//chmod(storage_path()."/files/pic/license_img/photoSmall/".$Fn_name, 0775);
+					Utils::ImageResize(storage_path()."/files/pic/license_img/photoSmall/".$Fn_name, storage_path()."/files/pic/license_img/photoSmall/".$Fn_name, 200,200,72);
+
+					$olo_license_img_db = new olo_license_img;
+					$olo_license_img_db->olo_id = $olo_id;
+					$olo_license_img_db->img = $Fn_name;
+					$olo_license_img_db->save();
+				} else {
+					// return View('web/error_message', array('message' => '錯誤的影像格式，請使用JPG圖檔!', 'goUrl'=>'/register'));
+					return response()->json(['success' => false, 'msg' => '錯誤的影像格式，請使用JPG圖檔!']);
+				}
+			}
+		}
+
+		// 作品照片
+		if(isset($request->old_img)) {
+			$old_img = $request->old_img;
+			$old_img_str = implode(',', $old_img);
+			olo_img::whereRaw("id NOT IN ($old_img_str) AND olo_id = $olo_id")->delete();
+		} else {
+			olo_img::whereRaw("olo_id = $olo_id")->delete();
+		}
+
+		if($request->file('img') !== null) {
+			if(!file_exists(storage_path()."/files"))
+				mkdir(storage_path()."/files", 0775);
+			if(!file_exists(storage_path()."/files/pic"))
+				mkdir(storage_path()."/files/pic", 0775);
+			if(!file_exists(storage_path()."/files/pic/img"))
+				mkdir(storage_path()."/files/pic/img", 0775);
+			if(!file_exists(storage_path()."/files/pic/img/photoBig"))
+				mkdir(storage_path()."/files/pic/img/photoBig", 0775);
+			if(!file_exists(storage_path()."/files/pic/img/photoSmall"))
+				mkdir(storage_path()."/files/pic/img/photoSmall", 0775);
+
+			foreach ($request->file('img') as $key => $value) {
+				$time = strval(time());
+				$file = $value;
+				$file_name = strtolower($value->getClientOriginalName());
+				$subDot = strtolower($value->getClientOriginalExtension());
+				if($subDot == 'jpeg' || $subDot == 'jpg' || $subDot == 'JPG') {
+					$Fn_name = Utils::getFileName($file_name.$time, $subDot);
+					$path = storage_path()."/files/pic/img/photoBig/";
+					$value->move($path, $Fn_name);
+					//chmod($path.$Fn_name, 0775);
+					// dd(mime_content_type($path.$Fn_name));
+					Utils::ImageResize($path.$Fn_name, $path.$Fn_name, 600,600,72);
+
+					copy($path.$Fn_name, storage_path()."/files/pic/img/photoSmall/".$Fn_name);
+					//chmod(storage_path()."/files/pic/img/photoSmall/".$Fn_name, 0775);
+					Utils::ImageResize(storage_path()."/files/pic/img/photoSmall/".$Fn_name, storage_path()."/files/pic/img/photoSmall/".$Fn_name, 200,200,72);
+
+					$olo_img_db = new olo_img;
+					$olo_img_db->olo_id = $olo_id;
+					$olo_img_db->img = $Fn_name;
+					$olo_img_db->save();
+				} else {
+					return response()->json(['success' => false, 'msg' => '錯誤的影像格式，請使用JPG圖檔!']);
+				}
+			}
+		}
+
+		// yt影片
+		$olo_video = $request->olo_video;
+		$olo_video_id = $request->olo_video_id;
+
+		if(isset($request->old_video)) {
+			$old_video = $request->old_video;
+			$old_video_str = implode(',', $old_video);
+			olo_video::whereRaw("id NOT IN ($old_video_str) AND olo_id = $olo_id")->delete();
+		} else {
+			olo_video::whereRaw("olo_id = $olo_id")->delete();
+		}
+
+		if(isset($olo_video_id)) {
+			foreach ($olo_video_id as $key => $value) {
+				if($value != 0) {
+					olo_video::where('id', $value)->update(['url' => $olo_video[$key]]);
+				} else {
+					$olo_video_db = new olo_video;
+					$olo_video_db->url = $olo_video[$key];
+					$olo_video_db->olo_id = $olo_id;
+					$olo_video_db->save();
+				}
+			}
+		}
+
+		// 家常菜
+		$food_title = $request->food_title;
+		$food_price = $request->food_price;
+		$olo_food_id = $request->olo_food_id;
+		$food_img = [];
+
+		if(isset($request->old_food)) {
+			$old_food = $request->old_food;
+			$old_food_str = implode(',', $old_food);
+			olo_food::whereRaw("id NOT IN ($old_food_str) AND olo_id = $olo_id")->delete();
+		} else {
+			olo_food::whereRaw("olo_id = $olo_id")->delete();
+		}
+
+		if($request->file('food_img') !== null) {
+			if(!file_exists(storage_path()."/files"))
+				mkdir(storage_path()."/files", 0775);
+			if(!file_exists(storage_path()."/files/pic"))
+				mkdir(storage_path()."/files/pic", 0775);
+			if(!file_exists(storage_path()."/files/pic/img"))
+				mkdir(storage_path()."/files/pic/img", 0775);
+			if(!file_exists(storage_path()."/files/pic/img/photoBig"))
+				mkdir(storage_path()."/files/pic/img/photoBig", 0775);
+			if(!file_exists(storage_path()."/files/pic/img/photoSmall"))
+				mkdir(storage_path()."/files/pic/img/photoSmall", 0775);
+
+			foreach ($request->file('food_img') as $key => $value) {
+				$time = strval(time());
+				$file = $value;
+				$file_name = strtolower($value->getClientOriginalName());
+				$subDot = strtolower($value->getClientOriginalExtension());
+				if($subDot == 'jpeg' || $subDot == 'jpg' || $subDot == 'JPG') {
+					$Fn_name = Utils::getFileName($file_name.$time, $subDot);
+					$path = storage_path()."/files/pic/img/photoBig/";
+					$value->move($path, $Fn_name);
+					//chmod($path.$Fn_name, 0775);
+					// dd(mime_content_type($path.$Fn_name));
+					Utils::ImageResize($path.$Fn_name, $path.$Fn_name, 600,600,72);
+
+					copy($path.$Fn_name, storage_path()."/files/pic/img/photoSmall/".$Fn_name);
+					//chmod(storage_path()."/files/pic/img/photoSmall/".$Fn_name, 0775);
+					Utils::ImageResize(storage_path()."/files/pic/img/photoSmall/".$Fn_name, storage_path()."/files/pic/img/photoSmall/".$Fn_name, 200,200,72);
+
+					$food_img[$key] = $Fn_name;
+				} else {
+					return response()->json(['success' => false, 'msg' => '錯誤的影像格式，請使用JPG圖檔!']);
+				}
+			}
+		}
+		foreach ($olo_food_id as $key => $value) {
+			if($value != 0) {
+				if(isset($food_img[$key])) {
+					olo_food::where('id', $value)->update(['title' => $food_title[$key], 'price' => $food_price[$key], 'img' => $food_img[$key]]);
+				} else {
+					olo_food::where('id', $value)->update(['title' => $food_title[$key], 'price' => $food_price[$key]]);
+				}
+			} else {
+				$olo_food_db = new olo_food;
+				$olo_food_db->img = $food_img[$key];
+				$olo_food_db->title = $food_title[$key];
+				$olo_food_db->price = $food_price[$key];
+				$olo_food_db->olo_id = $olo_id;
+				$olo_food_db->save();
+			}
+		}
+
+		return response()->json(['success' => true]);
+	}
+
+	public function add_olo(Request $request)
+	{
+		$service_type_sub = $request->service_type_sub;
+		$service_type = '*[' . $request->service_type_main . ',' . $service_type_sub . ']*';
+		$mar = Member_addr_recode::where('id', '=', $request->address)->get();
+
+		$mem_addr = $mar[0]->city . $mar[0]->nat . $mar[0]->addr;
+
+		// class_flag = 0, 1, 2
+		//
+		$class_flag = 0;
+
+		if(isset($request->service_type_sub) && $request->service_type_sub == '美味家常菜') {
+			$class_flag = 1;
+		}
+		if($request->service_type_main == '創意市集' || $request->service_type_main == '二手平台') {
+			$class_flag = 1;
+		}
+		if($request->service_type_main == '專業設計' || $request->service_type_main == '文字工作' || $request->service_type_main == '專業顧問') {
+			$class_flag = 2;
+		}
+
+		$offer_title = $request->service_type_main;
+		if(isset($request->service_type_sub)) {
+			$offer_title = $request->service_type_sub;
+		}
+
+		$olo = new OfferListObj;
+		$olo->mem_id = session()->get('uID');
+		$olo->service_type = $service_type;
+		$olo->mem_addr = $mem_addr;
+		$olo->lat = $mar[0]->lat;
+		$olo->lng = $mar[0]->lng;
+		$olo->status = 4;
+		$olo->class_flag = $class_flag;
+		$olo->offer_title = $offer_title;
+		$olo->save();
+
+		return response()->json(['success' => true, 'class_flag' => $class_flag, 'offer_title' => $offer_title, 'id' => $olo->id]);
 	}
 
 	public function change()

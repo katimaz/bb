@@ -51,6 +51,7 @@ Route::prefix('web')->group(function () {
 
 	Route::any('certification', 'WebController@certification');
 	Route::get('job_detail/{u_id}/{distance}', 'WebController@job_detail');
+	Route::get('h_set', 'WebController@h_set');
 });
 
 Route::prefix('admin')->group(function () {
@@ -110,6 +111,11 @@ Route::prefix('api')->group(function () {
 	Route::post('del_bank', 'ApiController@del_bank');
 	Route::post('set_notify', 'ApiController@set_notify');
 	Route::post('change', 'ApiController@change');
+
+	Route::post('set_helper', 'ApiController@set_helper');
+	Route::post('get_olo', 'ApiController@get_olo');
+	Route::post('add_olo', 'ApiController@add_olo');
+	Route::post('set_olo', 'ApiController@set_olo');
 });
 
 Route::get('home/big/{filename}', array(function ($filename)
@@ -159,6 +165,74 @@ Route::get('avatar/big/{filename}', function ($filename)
 Route::get('avatar/small/{filename}', function ($filename)
 {
     $path = storage_path('files/pic/avatar/photoSmall/' . $filename);
+
+    if (!File::exists($path)) {
+        abort(404);
+    }
+
+    $file = File::get($path);
+    $type = File::mimeType($path);
+
+    $response = Response::make($file, 200);
+    $response->header("Content-Type", $type);
+
+    return $response;
+});
+
+Route::get('license_img/big/{filename}', function ($filename)
+{
+    $path = storage_path('files/pic/license_img/photoBig/' . $filename);
+
+    if (!File::exists($path)) {
+        abort(404);
+    }
+
+    $file = File::get($path);
+    $type = File::mimeType($path);
+
+    $response = Response::make($file, 200);
+    $response->header("Content-Type", $type);
+
+    return $response;
+});
+
+Route::get('license_img/small/{filename}', function ($filename)
+{
+    $path = storage_path('files/pic/license_img/photoSmall/' . $filename);
+
+    if (!File::exists($path)) {
+        abort(404);
+    }
+
+    $file = File::get($path);
+    $type = File::mimeType($path);
+
+    $response = Response::make($file, 200);
+    $response->header("Content-Type", $type);
+
+    return $response;
+});
+
+Route::get('img/big/{filename}', function ($filename)
+{
+    $path = storage_path('files/pic/img/photoBig/' . $filename);
+
+    if (!File::exists($path)) {
+        abort(404);
+    }
+
+    $file = File::get($path);
+    $type = File::mimeType($path);
+
+    $response = Response::make($file, 200);
+    $response->header("Content-Type", $type);
+
+    return $response;
+});
+
+Route::get('img/small/{filename}', function ($filename)
+{
+    $path = storage_path('files/pic/img/photoSmall/' . $filename);
 
     if (!File::exists($path)) {
         abort(404);

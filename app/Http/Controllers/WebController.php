@@ -35,14 +35,7 @@ class WebController extends Controller
 {
     public function login(Request $request)
 	{
-		Utils::check_cookie();
-		$login_cookie = base64_decode($request->p);
-		if(isset($login_cookie))
-		{
-		   Cookie::queue('owed_login_cookie', $login_cookie, 10);
-		}
-
-		return view('login');
+		return view('login',array('message'=>(($request->has('message'))?$request->get('message'):'')));
 	}
 
 	public function logout(Request $request)
@@ -88,29 +81,38 @@ class WebController extends Controller
 				$center_pics[] = $pic->home_frontpage_pic;
 		}
 
+/*
 		return View('web/index', array('home'=>1,'top_pics'=>$top_pics,'center_pics'=>$center_pics,'videoid'=>$videoid,'videotype'=>$video_type));
+*/
+		
+		return View('web/'.((Session::has('offer') && Session::get('offer'))?'h-index':'index'), array('home'=>1,'top_pics'=>$top_pics,'center_pics'=>$center_pics,'videoid'=>$videoid,'videotype'=>$video_type));		
+			
 	}
 
 	public function login_pt(Request $request)
     {
-		if ($request->has('email') && $request->email && $request->has ( 'password' )) {
-		  if(!User::where('email', '=', $request->email)->count()) {
-			  return View('web/error', array('message' => '很抱歉，帳密有問題喔!'));
-		  } else {
-			  $user = User::where('email', '=', trim($request->email))->select('id','usr_id','password','usr_status','last_name','first_name','phone_number','email','remember_token','cookie_id', 'usr_photo', 'usr_type')->first();
+		if ($request->has('email') && $request->email && $request->has ( 'password' ))
+	   	{
+		  if(!User::where('email', '=', $request->email)->count()){
+			  return View('/login', array('message'=>json_encode(array('title'=>'喔喔 帳戶或密碼錯誤了 !!','body'=>'您的帳戶或密碼不正確。請重新登入。'))));
+		  }else
+		  {
+			  $user = User::where('email', '=', trim($request->email))->select('id','usr_id','password','usr_status','last_name','first_name','nickname','phone_number','email','remember_token','cookie_id','open_offer_setting','usr_photo')->first();
 			  $password = trim($request->password) . ":" . $user->usr_id;
 
 			  $request->session()->flush();
-			  if (Auth::attempt(array('email' => trim($request->email), 'password' => $password), ((isset($request->remember)) ? true : false))) {
+			  if (Auth::attempt(array('email' => trim($request->email), 'password' => $password),((isset($request->remember))?true:false)))
+			  {
 				  session()->put('uID', $user->id);
 				  session()->put('usrID', $user->usr_id);
 				  session()->put('usrStatus', $user->usr_status);
-				  session()->put('usrName', array('first'=>$user->first_name,'last'=>$user->last_name));
-				  session()->put('usrPhoto', $user->usr_photo);
-				  session()->put('usr_type', $user->usr_type);
-
-				  if(isset($user) && $user->cookie_id) {
-					  if($user->cookie_id != Cookie::get('BB_cookie_id')) {
+				  session()->put('profile', array('first'=>$user->first_name,'last'=>$user->last_name,'nick'=>$user->nickname,'photo'=>$user->usr_photo));
+				  session()->put('offer', ((isset($user) && $user->usr_type)?true:false));
+				  
+				  if(isset($user) && $user->cookie_id)
+				  {
+					  if($user->cookie_id != Cookie::get('BB_cookie_id'))
+					  {
 						Cookie::queue(
 							Cookie::forever('BB_cookie_id', $user->cookie_id)
 						);
@@ -122,25 +124,23 @@ class WebController extends Controller
 						  Cookie::forever('BB_cookie_id', $new_cookie)
 					  );
 				  }
-				  if(!$user->usr_status) {
-					  return redirect('/');
-				  } else {
+				  if(!$user->usr_status)
+					  return redirect('/web/profile');
+				  else	  
+				  {
 					  $url = ((Cookie::has('BB_login_cookie'))?Cookie::get('BB_login_cookie'):'/');
 					  Cookie::queue(Cookie::forget('BB_login_cookie'));
-					  return redirect($url);
-				  }
-
-			  }else {
-			 	return View('web/error', array('message' => '很抱歉，帳密有問題喔!', 'data'=>''));
-			  }
-
-			  if($user->usr_status<0) {
-			  	return View('web/error', array('message' => '很抱歉，您的權限不足請聯絡官方服務人員!', 'data'=>''));
-			  }
+					  return redirect($url);		  
+				  }		
+			  
+			  }else
+			  	return redirect()->action('WebController@login', array('message'=>json_encode(array('title'=>'喔喔 帳戶或密碼錯誤了 !!','body'=>'您的帳戶或密碼不正確。請重新登入。'))));
+				
+			  if($user->usr_status<0)
+			  	return View('/login', array('message'=>json_encode(array('title'=>'喔喔 錯誤了 !!','body'=>'很抱歉，您的權限不足請聯絡官方服務人員。'))));
 			}
-		}else {
-			return View('web/error', array('message' => '很抱歉，帳密有問題喔!'));
-		}
+		}else
+			return redirect()->action('WebController@login', array('message'=>json_encode(array('title'=>'喔喔 帳戶或密碼錯誤了 !!','body'=>'您的帳戶或密碼不正確。請重新登入。'))));
 	}
 
 	public function signup_pt(Request $request)
@@ -181,7 +181,8 @@ class WebController extends Controller
 			session()->put('uID', $user->id);
 			session()->put('usrID', $user->usr_id);
 			session()->put('usrStatus', $user->usr_status);
-			session()->put('usrName', array('first'=>'','last'=>''));
+			session()->put('profile', array('first'=>'','last'=>'','nick'=>'','photo'=>''));
+			session()->put('offer', ((isset($user) && $user->open_offer_setting)?true:false));
 		}
 
 		//寄發歡迎加入信件

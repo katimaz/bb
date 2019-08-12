@@ -428,7 +428,7 @@ new Vue({
   el: "#app",
   data: {
 	email: '',
-	user: {open_offer_setting:'',first_name:'',last_name:'',email:'',password:'',sex:'',phone_nat_code:'886',phone_number:'',usr_status:0},
+	user: {usr_type:'',first_name:'',last_name:'',email:'',password:'',sex:'',phone_nat_code:'886',phone_number:'',usr_status:0},
 	chk_password: '',
 	old_email: '',
 	is_tomail: '',

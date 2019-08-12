@@ -97,7 +97,7 @@ class WebController extends Controller
 			  return View('/login', array('message'=>json_encode(array('title'=>'喔喔 帳戶或密碼錯誤了 !!','body'=>'您的帳戶或密碼不正確。請重新登入。'))));
 		  }else
 		  {
-			  $user = User::where('email', '=', trim($request->email))->select('id','usr_id','password','usr_status','last_name','first_name','nickname','phone_number','email','remember_token','cookie_id','open_offer_setting','usr_photo')->first();
+			  $user = User::where('email', '=', trim($request->email))->select('id','usr_id','password','usr_status','last_name','first_name','nickname','phone_number','email','remember_token','cookie_id','usr_type','usr_photo')->first();
 			  $password = trim($request->password) . ":" . $user->usr_id;
 
 			  $request->session()->flush();

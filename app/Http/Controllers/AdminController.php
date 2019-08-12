@@ -1616,7 +1616,7 @@ class AdminController extends Controller
 		$mode = (($request->has('mode'))?$request->mode:'');
 		if($mode=='edit')
 		{
-			$user = User::where('usr_id',$request->id)->select('id','usr_id','usr_status','first_name','last_name','email','phone_number','phone_nat_code','email_validated','open_offer_setting','usr_photo','sex','created_at')->first();
+			$user = User::where('usr_id',$request->id)->select('id','usr_id','usr_status','first_name','last_name','email','phone_number','phone_nat_code','email_validated','usr_type','usr_photo','sex','created_at')->first();
 				
 			if($user->addr)
 				$user->addr = json_decode($user->addr);

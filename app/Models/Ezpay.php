@@ -83,7 +83,7 @@ class Ezpay extends Model
 		return $this->curl_work($url, $post_data_str); //背景送出
 	}
 	
-	public function invoice_post($url='',$post_data_array=array(),$MerchantID='') 
+	public function invoice_post($url='',$post_data_array=array()) 
 	{
 		$post_data_str = http_build_query($post_data_array);
 		$key = $this->invoice_key;

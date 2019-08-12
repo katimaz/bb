@@ -31,7 +31,7 @@ use Cookie;
 use DB;
 use URL;
 
-class WebController extends Controller
+class FrontController extends Controller
 {
     public function login(Request $request)
 	{

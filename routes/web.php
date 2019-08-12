@@ -38,20 +38,21 @@ Route::prefix('web')->group(function () {
 	Route::post( 'signup_pt', 'WebController@signup_pt' );
 	Route::get( 'logout', 'WebController@logout' );
 	Route::post( 'login_pt', 'WebController@login_pt' );
-	Route::get( 'profile', 'WebController@profile' );
 	Route::post( 'register_pt', 'WebController@register_pt' );
-	Route::get( 'map', 'WebController@map' );
-	Route::get( 'list', 'WebController@list' );
-	Route::post( 'set_forgot_passwd_pt', 'WebController@set_forgot_passwd_pt' );
+    Route::post( 'set_forgot_passwd_pt', 'WebController@set_forgot_passwd_pt' );
+	Route::get( 'profile', 'WebController@profile' );
 
-	Route::get('helper_detail/{u_id}/{distance}', 'WebController@helper_detail');
-	Route::get('einvoice_info', 'WebController@einvoice_info');
-	Route::get('collection_info', 'WebController@collection_info');
-	Route::get('set_notify', 'WebController@set_notify');
+    Route::get( 'map', 'FrontController@map' );
+	Route::get( 'list', 'FrontController@list' );
 
-	Route::any('certification', 'WebController@certification');
-	Route::get('job_detail/{u_id}/{distance}', 'WebController@job_detail');
-	Route::get('h_set', 'WebController@h_set');
+	Route::get('helper_detail/{u_id}/{distance}', 'FrontController@helper_detail');
+	Route::get('einvoice_info', 'FrontController@einvoice_info');
+	Route::get('collection_info', 'FrontController@collection_info');
+	Route::get('set_notify', 'FrontController@set_notify');
+
+	Route::any('certification', 'FrontController@certification');
+	Route::get('job_detail/{u_id}/{distance}', 'FrontController@job_detail');
+	Route::get('h_set', 'FrontController@h_set');
 });
 
 Route::prefix('admin')->group(function () {
@@ -102,20 +103,20 @@ Route::prefix('api')->group(function () {
 	Route::get( 'get_index', 'ApiController@get_index' );
 	Route::get( 'get_newebPay_info_code', 'ApiController@get_newebPay_info_code' );
 
-	Route::post('search_offer', 'ApiController@search_offer');
-	Route::post('search_offer_list', 'ApiController@search_offer_list');
-	Route::post('set_need', 'ApiController@set_need');
-	Route::post('set_invoice', 'ApiController@set_invoice');
-	Route::post('del_invoice', 'ApiController@del_invoice');
-	Route::post('set_bank', 'ApiController@set_bank');
-	Route::post('del_bank', 'ApiController@del_bank');
-	Route::post('set_notify', 'ApiController@set_notify');
-	Route::post('change', 'ApiController@change');
+	Route::post('search_offer', 'AjaxController@search_offer');
+	Route::post('search_offer_list', 'AjaxController@search_offer_list');
+	Route::post('set_need', 'AjaxController@set_need');
+	Route::post('set_invoice', 'AjaxController@set_invoice');
+	Route::post('del_invoice', 'AjaxController@del_invoice');
+	Route::post('set_bank', 'AjaxController@set_bank');
+	Route::post('del_bank', 'AjaxController@del_bank');
+	Route::post('set_notify', 'AjaxController@set_notify');
+	Route::post('change', 'AjaxController@change');
 
-	Route::post('set_helper', 'ApiController@set_helper');
-	Route::post('get_olo', 'ApiController@get_olo');
-	Route::post('add_olo', 'ApiController@add_olo');
-	Route::post('set_olo', 'ApiController@set_olo');
+	Route::post('set_helper', 'AjaxController@set_helper');
+	Route::post('get_olo', 'AjaxController@get_olo');
+	Route::post('add_olo', 'AjaxController@add_olo');
+	Route::post('set_olo', 'AjaxController@set_olo');
 });
 
 Route::get('home/big/{filename}', array(function ($filename)

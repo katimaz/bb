@@ -86,7 +86,7 @@ class OAuthController extends Controller
 			session()->put('uID', $result->id);
 			session()->put('usrID', $result->usr_id);
 			session()->put('usrStatus', $result->usr_status);
-			session()->put('usrName', array('first'=>$result->first_name,'last'=>$result->last_name));
+			session()->put('profile', array('first'=>$result->first_name,'last'=>$result->last_name,'nick'=>$result->nickname,'photo'=>$result->usr_photo));
 			session()->put('offer', ((isset($result) && $result->open_offer_setting)?true:false));
 			
 			if(isset($result) && $result->cookie_id)
@@ -163,7 +163,7 @@ class OAuthController extends Controller
 			session()->put('uID', $result->id);
 			session()->put('usrID', $result->usr_id);
 			session()->put('usrStatus', $result->usr_status);
-			session()->put('usrName', array('first'=>$result->first_name,'last'=>$result->last_name));
+			session()->put('profile', array('first'=>$result->first_name,'last'=>$result->last_name,'nick'=>$result->nickname,'photo'=>$result->usr_photo));
 			session()->put('offer', ((isset($result) && $result->open_offer_setting)?true:false));
 			
 			if(isset($result) && $result->cookie_id)
@@ -338,7 +338,7 @@ class OAuthController extends Controller
 			session()->put('uID', $result->id);
 			session()->put('usrID', $result->usr_id);
 			session()->put('usrStatus', $result->usr_status);
-			session()->put('usrName', array('first'=>$result->first_name,'last'=>$result->last_name));
+			session()->put('profile', array('first'=>$result->first_name,'last'=>$result->last_name,'nick'=>$result->nickname,'photo'=>$result->usr_photo));
 			session()->put('offer', ((isset($result) && $result->open_offer_setting)?true:false));
 			
 			if(isset($result) && $result->cookie_id)

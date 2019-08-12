@@ -202,14 +202,18 @@ class WebController extends Controller
 		return redirect('/web/profile');
 
 	}
-
-	public function register_pt(Request $request)
+	
+	public function profile_pt(Request $request)
     {
-
+		if(!Auth::check())
+			return View('web/error', array('message' => '很抱歉，您無帳號權限喔! 請重新登入'));
+		
 		$user = User::where('usr_id',Session::get('usrID'))->select('usr_id','email_validated','usr_status')->first();
 		if(!$user)
+		{
+			Auth::logout();
 			return View('web/error', array('message' => '很抱歉，無此帳號權限喔! 請重新登入'));
-
+		}
 		$validator = Validator::make($request->all(), array(
 			'first_name' => 'string|max:30',
 			'last_name' => 'string|max:30',
@@ -276,72 +280,82 @@ class WebController extends Controller
 			$input['email_validated'] = 0;
 		}
 		User::where('usr_id',$account)->update($input);
-
-		$new_user = User::where('usr_id',$account)->select('id','usr_id','usr_status','email','last_name','first_name')->first();
+		
+		$new_user = User::where('usr_id',$account)->select('id','usr_id','usr_status','email','last_name','first_name','nickname','usr_type','referral_from','usr_photo')->first();
 		if(!$new_user)
 			return View('web/error', array('message' => '很抱歉，無此帳號權限喔! 請重新登入'));
-
-		$address = json_decode($request->all_address);
+		
 		$ids = array();
 		$member_addrs = Member_addr_recode::where('u_id',$new_user->id)->select('id')->get();
 		if(isset($member_addrs))
 		{
 			foreach($member_addrs as $member_addr)
 			{
-				$ids[] = $member_addr->id;
+				$ids[] = $member_addr->id;		
 			}
 		}
-		if(isset($address) && count($address))
+		
+		for($i=0;$i<$request->count;$i++)
 		{
-			$cun = 0;
-			foreach($address as $addr)
+			if($i<count($ids))
 			{
-				if($cun<count($ids))
-				{
-					unset($input);
-					$input['u_id'] = $new_user->id;
-					$input['city'] = $addr->county;
-					$input['nat'] = $addr->nat;
-					$input['zip'] = $addr->zipcode;
-					$input['addr'] = $addr->addr;
-					$input['lat'] = $addr->lat;
-					$input['lng'] = $addr->lng;
-					Member_addr_recode::where('id',$ids[$cun])->update($input);
-				}else
-				{
-					$input = new Member_addr_recode;
-					$input->u_id = $new_user->id;
-					$input->city = $addr->county;
-					$input->nat = $addr->nat;
-					$input->zip = $addr->zipcode;
-					$input->addr = $addr->addr;
-					$input->lat = $addr->lat;
-					$input->lng = $addr->lng;
-					$input->save();
-				}
-				$cun++;
+				unset($input);
+				$input['u_id'] = $new_user->id;
+				$input['city'] = $request['city'.$i];
+				$input['nat'] = $request['nat'.$i];
+				$input['zip'] = $request['zip'.$i];
+				$input['addr'] = $request['addr'.$i];
+				$input['lat'] = $request['lat'.$i];
+				$input['lng'] = $request['lng'.$i];
+				Member_addr_recode::where('id',$ids[$i])->update($input);
+			}else
+			{
+				$input = new Member_addr_recode;
+				$input->u_id = $new_user->id;
+				$input->city = $request['city'.$i];
+				$input->nat = $request['nat'.$i];
+				$input->zip = $request['zip'.$i];
+				$input->addr = $request['addr'.$i];
+				$input->lat = $request['lat'.$i];
+				$input->lng = $request['lng'.$i];
+				$input->save();	
 			}
 		}
-		$num = count($ids)-count($address);
+		
+		$num = count($ids)-$request->count;
 		for($i=0;$i<$num;$i++)
 		{
 			$id = $ids[count($ids)-$i-1];
-			Member_addr_recode::where('id',$id)->delete();
+			Member_addr_recode::where('id',$id)->delete();	
 		}
-
+			
 		session()->put('uID', $new_user->id);
 		session()->put('usrID', $new_user->usr_id);
 		session()->put('usrStatus', $new_user->usr_status);
-		session()->put('usrName', array('first'=>$new_user->first_name,'last'=>$new_user->last_name));
-
+		session()->put('profile', array('first'=>$new_user->first_name,'last'=>$new_user->last_name,'nick'=>$new_user->nickname,'photo'=>$new_user->usr_photo));
+		session()->put('offer', ((isset($new_user) && $new_user->usr_type)?true:false));
+		
 		if($new_user->usr_status && $new_user->usr_status!=$user->usr_status)
 		{
 			$setting = Setting::select('email_veri_comp_subj','email_veri_comp_body')->first();
 			$btn = json_encode(array('url'=>env('APP_URL'),'name'=>'連結幫棒'));
 			Mail::to($new_user->email)->queue(new toMail(env('APP_URL'),$btn,((isset($new_user))?$new_user->first_name:''),((isset($setting) && $setting->email_veri_comp_subj)?$setting->email_veri_comp_subj:'BounBang 幫棒 – 您已完成註冊驗證信'),((isset($setting) && $setting->email_veri_comp_body)?$setting->email_veri_comp_body:'歡迎加入 BounBang 幫棒家族，您已完成電子郵件信箱設定<br />歡迎您由此進入幫棒')));
+			
+			if($new_user->referral_from)
+			{
+				$referral = User::where('usr_id',$new_user->referral_from)->select('first_name','email')->first();
+				if($referral)
+				{
+					$class = Utils::get_email_class('1-006');
+					Mail::to($referral->email)->queue(new toMail(env('APP_URL'),'',$referral->first_name, $class['title'], str_replace('\n','<br />',str_replace("<NAME>",' '.$new_user->last_name.''.$new_user->first_name.' ', $class['body']))));	
+				}
+			}
+			
 			return redirect('/web/map');
-		}else
-			return redirect('/web/profile');
+		}else if($new_user->usr_status)
+			return redirect('/web/map');
+		else
+			return redirect('/web/profile');	
 
 	}
 
@@ -352,11 +366,14 @@ class WebController extends Controller
 		$user = User::where('usr_id',Session::get('usrID'))->first();
 		if(!$user)
 		{
-		  return View('web/error_message', array('message' => '你的等級不足喔，請洽網站管理員!', 'goUrl'=>'/'));
+			Auth::logout();
+			return View('web/error_message', array('message' => '你的等級不足喔，請洽網站管理員!', 'goUrl'=>'/'));
 		}
-		return View('web/profile', array('user'=>$user));
-
+		
+		return View('web/profile', array('user'=>$user,'offer'=>(($user->usr_type))?true:false));
+		
 	}
+/* start move to FrontController */
 
 	public function map(Request $request)
     {
@@ -625,6 +642,8 @@ class WebController extends Controller
 
 		return View('web/job_detail', ['distance' => $distance, 'user' => $user[0], 'nlo' => $nlo]);
 	}
+
+/* End move to FrontController */
 
 	public function veri_mail(Request $request)
     {

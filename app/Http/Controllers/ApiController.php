@@ -127,7 +127,8 @@ class ApiController extends Controller
 
 	public function is_existed(Request $request)
     {
-		return User::where('email',$request->id)->count();
+		$num = User::where('usr_id','!=',Session::get('usrID'))->where('email',$request->id)->count();
+		return ((isset($num) && $num)?$num:0);
 	}
 
 	public function set_latlng(Request $request)

@@ -631,30 +631,49 @@ class WebController extends Controller
 		$data = json_decode(Utils::decrypt(base64_decode($request->data), config('bbpro.iv')));
 		if(!$data)
 			return View('web/error_message', array('message' => 'Email驗證不成功，請重新執行驗證一次', 'goUrl'=>'/web/profile'));
-		if(User::where('email',$data->email)->where('email_validated',1)->where('email_valid_key','!=','')->count())
-			return View('web/error_message', array('message' => 'Email驗證已完成，無須再驗證!', 'goUrl'=>'/web/profile'));
-		if(Session::get('veri_id')!=$data->key)
+		
+		$veri = User::where('email',$data->email)->select('email_validated','email_valid_key','updated_at')->first();
+		
+		if(!$veri || $veri->email_valid_key!=$data->key)
 			return View('web/error_message', array('message' => 'Email驗證不成功，請重新執行驗證一次', 'goUrl'=>'/web/profile'));
-
-		$user = User::where('email',$data->email)->select('first_name','last_name','phone_number','usr_id','usr_status')->first();
+		
+		if($veri->email_validated==1)
+			return View('web/error_message', array('message' => 'Email驗證已完成，無須再驗證!', 'goUrl'=>'/web/profile'));
+		
+		if($veri->updated_at<date("Y-m-d H:i:s", strtotime('-1 day')))
+			return View('web/error_message', array('message' => '驗證碼已逾期失效，請重新執行驗證一次', 'goUrl'=>'/web/profile'));
+		
+		$user = User::where('email',$data->email)->select('first_name','last_name','phone_number','usr_id','usr_status','referral_from')->first();
 		if(!$user)
 			return View('web/error_message', array('message' => 'Email驗證不成功，請重新執行驗證一次', 'goUrl'=>'/web/profile'));
-
+			
 		if($user->first_name!=''&&$user->last_name!=''&& $user->phone_number!='')
 			$input['usr_status'] = 1;
 		$input['email_validated'] = 1;
-		$input['email_valid_key'] = Session::get('veri_id');
+		$input['email_valid_key'] = Session::get('veri_id');	
 		User::where('email',$data->email)->update($input);
-		$request->session()->forget('veri_id');
-
+		//$request->session()->forget('veri_id');
+		
 		if(isset($input['usr_status']))
 		{
 			$setting = Setting::select('email_veri_comp_subj','email_veri_comp_body')->first();
 			$btn = json_encode(array('url'=>env('APP_URL'),'name'=>'連結幫棒'));
-			Mail::to($data->email)->queue(new toMail(env('APP_URL'), $btn,$user->last_name.$user->first_name, ((isset($setting) && $setting->email_veri_comp_subj) ? $setting->email_veri_comp_subj : 'BounBang 幫棒 – 您已完成註冊驗證信'), ((isset($setting) && $setting->email_veri_comp_body) ? $setting->email_veri_comp_body : '歡迎加入 BounBang 幫棒家族，您已完成電子郵件信箱設定<br />歡迎您由此進入幫棒')));
-		}
-		return redirect('/web/profile');
-
+			Mail::to($data->email)->queue(new toMail(env('APP_URL'),$btn,$user->last_name.$user->first_name,((isset($setting) && $setting->email_veri_comp_subj)?$setting->email_veri_comp_subj:'BounBang 幫棒 – 您已完成註冊驗證信'),((isset($setting) && $setting->email_veri_comp_body)?$setting->email_veri_comp_body:'歡迎加入 BounBang 幫棒家族，您已完成電子郵件信箱設定<br />歡迎您由此進入幫棒')));
+			
+			if($user->referral_from)
+			{
+				$referral = User::where('usr_id',$user->referral_from)->select('first_name','email')->first();
+				if($referral)
+				{
+					$class = Utils::get_email_class('1-006');
+					Mail::to($referral->email)->queue(new toMail(env('APP_URL'),'',$referral->first_name, $class['title'], str_replace('\n','<br />',str_replace("<NAME>",' '.$user->last_name.''.$user->first_name.' ', $class['body']))));	
+				}
+			}
+			
+			return redirect('/web/map');
+		}else
+			return redirect('/web/profile');
+				
 	}
 
 	public function test()
@@ -725,7 +744,7 @@ class WebController extends Controller
 		if(!count($request->all()))
 		{
 			$request->session()->flush();
-			return View('admin/error', array('message' => '回傳值錯誤，請稍後在試!!'));
+			return View('web/error', array('message' => '回傳值錯誤，請稍後在試!!'));
 		}
 
 		$result = $newebPay->newebPay_return($request);
@@ -749,7 +768,7 @@ class WebController extends Controller
 		if(!count($request->all()))
 		{
 			$request->session()->flush();
-			return View('admin/error', array('message' => '回傳值錯誤，請稍後在試!!'));
+			return View('web/error', array('message' => '回傳值錯誤，請稍後在試!!'));
 		}
 		$result = $newebPay->newebPay_return($request);
 		//Notify::via('notify','此訂單返回為 : NOTIFY_URL 前往查看 : ! <'.env('APP_URL').'/admin/transfer_records?item=newebPay&action=manage'.'|Click here> for details!');
@@ -761,7 +780,7 @@ class WebController extends Controller
 		if(!count($request->all()))
 		{
 			$request->session()->flush();
-			return View('admin/error', array('message' => '回傳值錯誤，請稍後在試!!'));
+			return View('web/error', array('message' => '回傳值錯誤，請稍後在試!!'));
 		}
 
 		$result = $newebPay->newebPay_customer($request);

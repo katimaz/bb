@@ -45,11 +45,11 @@
                     <th class="w-25 text-center">登入身份</th>
                     <td class="w-75">
                       <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" name="open_offer_setting" value="0" v-model="user.open_offer_setting" id="c" >
+                        <input class="form-check-input" type="radio" name="usr_type" value="0" v-model="user.usr_type" id="c" >
                         <label class="form-check-label" for="c">客戶</label>
                         </div>
                         <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" name="open_offer_setting" value="1" v-model="user.open_offer_setting" id="h">
+                        <input class="form-check-input" type="radio" name="usr_type" value="1" v-model="user.usr_type" id="h">
                         <label class="form-check-label" for="h">好幫手</label>
                       </div>
                     </td>

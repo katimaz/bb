@@ -9,7 +9,7 @@
     <div class="alert alert-warning alert-dismissible fade show px-2" v-if="is_tomail" role="alert">
       <strong>信件已送出!</strong>接下來請您前往收取您的信件並更換新密碼。
     </div>
-    <a href="/signup" class="txtbtn"><i class="fa fa-chevron-left" aria-hidden="true"></i> 註冊新的帳號</a></div>
+    <a href="/login" class="txtbtn"><i class="fa fa-chevron-left" aria-hidden="true"></i> 回到登入頁面 </a></div>
 <script>
 new Vue({
   el: "#app",

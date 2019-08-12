@@ -87,32 +87,25 @@ class WebController extends Controller
 			if($pic->pic_type==2)
 				$center_pics[] = $pic->home_frontpage_pic;
 		}
-		
-		return View('web/'.((Session::has('offer') && Session::get('offer'))?'h-index':'index'), array('home'=>1,'top_pics'=>$top_pics,'center_pics'=>$center_pics,'videoid'=>$videoid,'videotype'=>$video_type));		
-			
+
+		return View('web/index', array('home'=>1,'top_pics'=>$top_pics,'center_pics'=>$center_pics,'videoid'=>$videoid,'videotype'=>$video_type));
 	}
 
 	public function login_pt(Request $request)
     {
-		if ($request->has('email') && $request->email && $request->has ( 'password' ))
-	   	{
-		  if(!User::where('email', '=', $request->email)->count()){
+		if ($request->has('email') && $request->email && $request->has ( 'password' )) {
+		  if(!User::where('email', '=', $request->email)->count()) {
 			  return View('web/error', array('message' => '很抱歉，帳密有問題喔!'));
-		  }else
-		  {
+		  } else {
 			  $user = User::where('email', '=', trim($request->email))->select('id','usr_id','password','usr_status','last_name','first_name','phone_number','email','remember_token','cookie_id', 'usr_photo', 'usr_type')->first();
 			  $password = trim($request->password) . ":" . $user->usr_id;
-			  
+
 			  $request->session()->flush();
-			  if (Auth::attempt(array('email' => trim($request->email), 'password' => $password),((isset($request->remember))?true:false)))
-			  {
+			  if (Auth::attempt(array('email' => trim($request->email), 'password' => $password), ((isset($request->remember)) ? true : false))) {
 				  session()->put('uID', $user->id);
 				  session()->put('usrID', $user->usr_id);
 				  session()->put('usrStatus', $user->usr_status);
 				  session()->put('usrName', array('first'=>$user->first_name,'last'=>$user->last_name));
-//				  session()->put('offer', ((isset($user) && $user->open_offer_setting)?true:false));
-/* 下一行暫時這樣用,對應fun index()的return  */
-				  session()->put('offer', ((isset($user) && $user->usr_type)?true:false));
 				  session()->put('usrPhoto', $user->usr_photo);
 				  session()->put('usr_type', $user->usr_type);
 
@@ -120,20 +113,18 @@ class WebController extends Controller
 					  if($user->cookie_id != Cookie::get('BB_cookie_id')) {
 						Cookie::queue(
 							Cookie::forever('BB_cookie_id', $user->cookie_id)
-						);	
-					  }		
-				  }else
-				  {
+						);
+					  }
+				  } else {
 					  $new_cookie = Utils::v4();
 					  User::where('usr_id',Session::get('usrID'))->update(array('cookie_id'=>$new_cookie));
 					  Cookie::queue(
 						  Cookie::forever('BB_cookie_id', $new_cookie)
 					  );
 				  }
-				  if(!$user->usr_status)
-					  return redirect('/web/profile');
-				  else	  
-				  {
+				  if(!$user->usr_status) {
+					  return redirect('/');
+				  } else {
 					  $url = ((Cookie::has('BB_login_cookie'))?Cookie::get('BB_login_cookie'):'/');
 					  Cookie::queue(Cookie::forget('BB_login_cookie'));
 					  return redirect($url);
@@ -191,10 +182,6 @@ class WebController extends Controller
 			session()->put('usrID', $user->usr_id);
 			session()->put('usrStatus', $user->usr_status);
 			session()->put('usrName', array('first'=>'','last'=>''));
-//			session()->put('offer', ((isset($user) && $user->open_offer_setting)?true:false));
-/* 下一行暫時這樣用,對應fun index()的return  */
-			session()->put('offer', ((isset($user) && $user->usr_type)?true:false));
-
 		}
 
 		//寄發歡迎加入信件
@@ -215,18 +202,14 @@ class WebController extends Controller
 		return redirect('/web/profile');
 
 	}
-	
-	public function profile_pt(Request $request)
+
+	public function register_pt(Request $request)
     {
-		if(!Auth::check())
-			return View('web/error', array('message' => '很抱歉，您無帳號權限喔! 請重新登入'));
-		
+
 		$user = User::where('usr_id',Session::get('usrID'))->select('usr_id','email_validated','usr_status')->first();
 		if(!$user)
-		{
-			Auth::logout();
 			return View('web/error', array('message' => '很抱歉，無此帳號權限喔! 請重新登入'));
-		}
+
 		$validator = Validator::make($request->all(), array(
 			'first_name' => 'string|max:30',
 			'last_name' => 'string|max:30',
@@ -279,7 +262,6 @@ class WebController extends Controller
 
 		session()->put('usr_type', $request->usr_type);
 		$input['usr_type'] = $request->usr_type;
-//		$input['open_offer_setting'] = $request->open_offer_setting;
 		$input['last_name'] = $request->last_name;
 		$input['first_name'] = $request->first_name;
 		if($user->email_validated)
@@ -294,12 +276,12 @@ class WebController extends Controller
 			$input['email_validated'] = 0;
 		}
 		User::where('usr_id',$account)->update($input);
-		
-		$new_user = User::where('usr_id',$account)->select('id','usr_id','usr_status','email','last_name','first_name','usr_type')->first();
+
+		$new_user = User::where('usr_id',$account)->select('id','usr_id','usr_status','email','last_name','first_name')->first();
 		if(!$new_user)
 			return View('web/error', array('message' => '很抱歉，無此帳號權限喔! 請重新登入'));
 
-//		$address = json_decode($request->all_address);
+		$address = json_decode($request->all_address);
 		$ids = array();
 		$member_addrs = Member_addr_recode::where('u_id',$new_user->id)->select('id')->get();
 		if(isset($member_addrs))
@@ -309,35 +291,38 @@ class WebController extends Controller
 				$ids[] = $member_addr->id;
 			}
 		}
-		
-		for($i=0;$i<$request->count;$i++)
+		if(isset($address) && count($address))
 		{
-			if($i<count($ids))
+			$cun = 0;
+			foreach($address as $addr)
 			{
-				unset($input);
-				$input['u_id'] = $new_user->id;
-				$input['city'] = $request['city'.$i];
-				$input['nat'] = $request['nat'.$i];
-				$input['zip'] = $request['zip'.$i];
-				$input['addr'] = $request['addr'.$i];
-				$input['lat'] = $request['lat'.$i];
-				$input['lng'] = $request['lng'.$i];
-				Member_addr_recode::where('id',$ids[$i])->update($input);
-			}else
-			{
-				$input = new Member_addr_recode;
-				$input->u_id = $new_user->id;
-				$input->city = $request['city'.$i];
-				$input->nat = $request['nat'.$i];
-				$input->zip = $request['zip'.$i];
-				$input->addr = $request['addr'.$i];
-				$input->lat = $request['lat'.$i];
-				$input->lng = $request['lng'.$i];
-				$input->save();	
+				if($cun<count($ids))
+				{
+					unset($input);
+					$input['u_id'] = $new_user->id;
+					$input['city'] = $addr->county;
+					$input['nat'] = $addr->nat;
+					$input['zip'] = $addr->zipcode;
+					$input['addr'] = $addr->addr;
+					$input['lat'] = $addr->lat;
+					$input['lng'] = $addr->lng;
+					Member_addr_recode::where('id',$ids[$cun])->update($input);
+				}else
+				{
+					$input = new Member_addr_recode;
+					$input->u_id = $new_user->id;
+					$input->city = $addr->county;
+					$input->nat = $addr->nat;
+					$input->zip = $addr->zipcode;
+					$input->addr = $addr->addr;
+					$input->lat = $addr->lat;
+					$input->lng = $addr->lng;
+					$input->save();
+				}
+				$cun++;
 			}
 		}
-		
-		$num = count($ids)-$request->count;
+		$num = count($ids)-count($address);
 		for($i=0;$i<$num;$i++)
 		{
 			$id = $ids[count($ids)-$i-1];
@@ -348,11 +333,7 @@ class WebController extends Controller
 		session()->put('usrID', $new_user->usr_id);
 		session()->put('usrStatus', $new_user->usr_status);
 		session()->put('usrName', array('first'=>$new_user->first_name,'last'=>$new_user->last_name));
-//		session()->put('offer', ((isset($new_user) && $new_user->open_offer_setting)?true:false));
-/* 下一行暫時這樣用,對應fun index()的return  */
-		session()->put('offer', ((isset($new_user) && $new_user->usr_type)?true:false));
 
-		
 		if($new_user->usr_status && $new_user->usr_status!=$user->usr_status)
 		{
 			$setting = Setting::select('email_veri_comp_subj','email_veri_comp_body')->first();
@@ -371,207 +352,22 @@ class WebController extends Controller
 		$user = User::where('usr_id',Session::get('usrID'))->first();
 		if(!$user)
 		{
-			Auth::logout();
-			return View('web/error_message', array('message' => '你的等級不足喔，請洽網站管理員!', 'goUrl'=>'/'));
+		  return View('web/error_message', array('message' => '你的等級不足喔，請洽網站管理員!', 'goUrl'=>'/'));
 		}
-		
-//		return View('web/profile', array('user'=>$user,'offer'=>(($user->open_offer_setting))?true:false));
-/* 下一行暫時這樣用,對應fun index()的return  */
-		return View('web/profile', array('user'=>$user,'offer'=>(($user->usr_type))?true:false));
+		return View('web/profile', array('user'=>$user));
 
-		
 	}
-
-	public function veri_mail(Request $request)
-    {
-		$data = json_decode(Utils::decrypt(base64_decode($request->data), config('bbpro.iv')));
-		if(!$data)
-			return View('web/error_message', array('message' => 'Email驗證不成功，請重新執行驗證一次', 'goUrl'=>'/web/profile'));
-		if(User::where('email',$data->email)->where('email_validated',1)->where('email_valid_key','!=','')->count())
-			return View('web/error_message', array('message' => 'Email驗證已完成，無須再驗證!', 'goUrl'=>'/web/profile'));
-		if(Session::get('veri_id')!=$data->key)
-			return View('web/error_message', array('message' => 'Email驗證不成功，請重新執行驗證一次', 'goUrl'=>'/web/profile'));
-		
-		$user = User::where('email',$data->email)->select('first_name','last_name','phone_number','usr_id','usr_status')->first();
-		if(!$user)
-			return View('web/error_message', array('message' => 'Email驗證不成功，請重新執行驗證一次', 'goUrl'=>'/web/profile'));
-			
-		if($user->first_name!=''&&$user->last_name!=''&& $user->phone_number!='')
-			$input['usr_status'] = 1;
-		$input['email_validated'] = 1;
-		$input['email_valid_key'] = Session::get('veri_id');	
-		User::where('email',$data->email)->update($input);
-		$request->session()->forget('veri_id');
-		
-		if(isset($input['usr_status']))
-		{
-			$setting = Setting::select('email_veri_comp_subj','email_veri_comp_body')->first();
-			$btn = json_encode(array('url'=>env('APP_URL'),'name'=>'連結幫棒'));
-			Mail::to($data->email)->queue(new toMail(env('APP_URL'),$btn,$user->last_name.$user->first_name,((isset($setting) && $setting->email_veri_comp_subj)?$setting->email_veri_comp_subj:'BounBang 幫棒 – 您已完成註冊驗證信'),((isset($setting) && $setting->email_veri_comp_body)?$setting->email_veri_comp_body:'歡迎加入 BounBang 幫棒家族，您已完成電子郵件信箱設定<br />歡迎您由此進入幫棒')));
-		}
-		return redirect('/web/profile');
-				
-	}
-	
-	public function set_forgot_passwd(Request $request)
-    {
-		$data = json_decode(Utils::decrypt(base64_decode($request->data), config('bbpro.iv')));
-		if(!$data)
-			return View('web/error_message', array('message' => 'Email驗證不成功，請重新執行一次', 'goUrl'=>'/web/forgot'));
-		if(Session::get('veri_id')!=$data->key)
-			return View('web/error_message', array('message' => '驗證碼已經有效時間已過，請重新執行一次變更密碼', 'goUrl'=>'/forgot'));
-		
-		$user = User::where('email',$data->email)->select('first_name','last_name','usr_id')->first();
-		if(!$user)
-			return View('web/error_message', array('message' => '您的權限不足，請重新執行一次', 'goUrl'=>'/forgot'));
-		
-		$request->session()->forget('veri_id');
-		
-		return View('web/set_forgot_passwd', array('user'=>$user));
-				
-	}
-	
-	public function set_forgot_passwd_pt(Request $request)
-    {
-		
-		$validator = Validator::make($request->all(), array(
-			'id' => 'required',
-			'password' => 'required|string|min:6|max:20',
-			'chk_password' => 'required_with:password|same:password|min:6|max:20'
-		));
-	
-		if ($validator->fails()) {
-		  return View('web/error_message', array('message' => '輸入表單欄位驗證錯誤!!', 'goUrl'=>'/forgot'));
-		}
-		
-		
-		$user = User::where('usr_id',$request->id)->update(array('password'=>Utils::set_password(trim($request->password),trim($request->id))));
-		
-		return redirect('/login');
-				
-	}
-	
-	public function term_of_use(Request $request)
-    {
-		
-		if($request->has('back'))
-			$back = $request->get('back');
-		$use = Setting::select('term_of_use')->first();
-		return View('web/term_of_use', array('term_of_use'=>((isset($use))?$use->term_of_use:NULL),'back'=>((isset($back))?$back:NULL)));
-		
-	}
-	
-	public function how2help_post_list(Request $request)
-    {
-		if($request->has('back'))
-			$back = $request->get('back');
-		$use = Setting::select('how2_help_post_list')->first();
-		return View('web/how2help_post_list', array('how2help_post_list'=>((isset($use))?$use->how2_help_post_list:NULL),'back'=>((isset($back))?$back:NULL)));
-		
-	}
-	
-	public function newebPay_return_url(Request $request)
-    {
-		$newebPay = new NewebPay();
-		if(!count($request->all()))
-		{
-			$request->session()->flush();
-			return View('web/error', array('message' => '回傳值錯誤，請稍後在試!!'));
-		}
-		
-		$result = $newebPay->newebPay_return($request);
-		if(isset($result) && $result!='error')
-		{
-			if($result->Status!='SUCCESS')
-				$message = $result->Message;
-					
-			$noArr = explode('_',$result->Result->MerchantOrderNo);
-			if(count($noArr)>1&&$noArr[0]=='BB')
-				return redirect('/admin/transfer_records?item=newebPay&action=manage&message='.((isset($message))?$message:''));	
-			else
-				return redirect('/');
-		}else
-			return redirect('/');
-	}
-	
-	public function newebPay_notify_url(Request $request)
-    {
-		$newebPay = new NewebPay();
-		if(!count($request->all()))
-		{
-			$request->session()->flush();
-			return View('web/error', array('message' => '回傳值錯誤，請稍後在試!!'));
-		}
-		$result = $newebPay->newebPay_return($request);
-		//Notify::via('notify','此訂單返回為 : NOTIFY_URL 前往查看 : ! <'.env('APP_URL').'/admin/transfer_records?item=newebPay&action=manage'.'|Click here> for details!');
-	}
-	
-	public function newebPay_customer_url(Request $request)
-    {
-		$newebPay = new NewebPay();
-		if(!count($request->all()))
-		{
-			$request->session()->flush();
-			return View('web/error', array('message' => '回傳值錯誤，請稍後在試!!'));
-		}
-		
-		$result = $newebPay->newebPay_customer($request);
-		
-		//Notify::via('notify','此訂單返回為 : CUSTOMER_URL 前往查看 : ! <'.env('APP_URL').'/admin/transfer_records?item=newebPay&action=manage'.'|Click here> for details!');
-		/*$noArr = explode('_',$result->Result->MerchantOrderNo);
-		if(count($noArr)>1&&$noArr[0]=='BB')
-			return redirect('/admin/transfer_records?item=newebPay&action=manage');	
-		else
-			return redirect('/');*/
-	}
-	
-	public function newebPay_back_url(Request $request)
-    {
-		return redirect('/');
-	}
-	
-	public function newebPay_creditCancel_url(Request $request)
-    {
-		
-		if($request->Status=='SUCCESS')
-		{
-			$data = json_decode($request->Result);
-			$merchant_id = env('newebPay_merchant_id');
-			$mer_key = env('newebPay_HashKey');  
-			$mer_iv = env('newebPay_HashIV');		
-			$check_code_str = 'HashIV='.$mer_iv.'&Amt='.$data->Amt.'&MerchantID='.$merchant_id.'&MerchantOrderNo='.$data->MerchantOrderNo.'&TradeNo='.$data->TradeNo.'&HashKey='.$mer_key;
-			$check_code = strtoupper(hash("sha256", $check_code_str));
-			if($data->Result->CheckCode==$check_code)
-			{	
-				$input['TradeStatus'] = 3;
-				Newebpay_mpg::where('MerchantOrderNo',$data->MerchantOrderNo)->update($input);
-			}else
-				Log::alert("藍新驗證碼失敗(".Session::get('ownerID')." >> ".basename(url()->current(),".php")." >> ".$_SERVER["REMOTE_ADDR"].")");
-		}
-		
-	}
-	
-	
-	//-----------------------------------------------------------前端
-
 
 	public function map(Request $request)
     {
-		
 		//Utils::check_cookie();
-		if(!Auth::check())
-			return View('web/error', array('message' => '請先登入系統才能繼續喔!!'));
-		
-//		$user = User::where('usr_id',Session::get('usrID'))->select('usr_status','open_offer_setting')->first();
-/* 下一行暫時這樣用,對應fun index()的return  */
-		$user = User::where('usr_id',Session::get('usrID'))->select('usr_status','usr_type')->first();
+		$user = User::where('usr_id',Session::get('usrID'))->first();
 
-		if(!$user || !$user->usr_status)
-		  return View('web/error_message', array('message' => '還沒驗證嗎，請前往個人資訊頁面完成驗證程序!', 'goUrl'=>'/web/profile'));
-/* 下一行暫時這樣用,對應fun index()的return  */
-//		$offer = ((isset($user) && $user->open_offer_setting)?true:false);
-		$offer = ((isset($user) && $user->usr_type)?true:false);
-		
+		if(!$user)
+		{
+		  return View('web/error_message', array('message' => '你的等級不足喔，請洽網站管理員!', 'goUrl'=>'/'));
+		}
+
 		$keyword = $request->keyword;
 		$distance = 10;
 		$lat = Session::get('lat');
@@ -611,8 +407,8 @@ class WebController extends Controller
 			}
 		}
 
-		return View('web/'.(($offer)?'h-map':'map'), array('user'=>$user, 'loc' => $loc));
-		
+		return View('web/map', array('user'=>$user, 'loc' => $loc, 'keyword' => $keyword));
+
 	}
 
 	public function list(Request $request)
@@ -638,7 +434,8 @@ class WebController extends Controller
 			$lng = '121.5127512';
 		}
 
-		if($user->open_offer_setting == "0") {
+		// 用戶
+		if($user->usr_type == "0") {
 			if($keyword != '') {
 				$offer = DB::table('OfferListObj AS olo')->select(DB::raw('olo.id, ( 6371 * acos( cos( radians('.$lat.') ) * cos( radians( lat ) ) * cos( radians( lng ) - radians('.$lng.') ) + sin( radians('.$lat.') )* sin( radians( lat ) ) ) ) AS distance, lat, lng, usr_photo, last_name, first_name, u.usr_id'))->join('users AS u', 'olo.mem_id', '=', 'u.id')->where('offer_title', 'like', "%$keyword%")->having('distance','<', $distance)->orderBy('distance')->get();
 			} else {
@@ -672,7 +469,7 @@ class WebController extends Controller
 	public function helper_detail($usr_id = '', $distance = 0)
 	{
 		// 使用者資訊
-		$user = Users::where('usr_id', $usr_id)->first()->get();
+		$user = Users::where('usr_id', $usr_id)->get();
 		// 服務
 		$olo = OfferListObj::where('mem_id', $user[0]->id)->get();
 		// 評價
@@ -820,5 +617,178 @@ class WebController extends Controller
 		return View('web/job_detail', ['distance' => $distance, 'user' => $user[0], 'nlo' => $nlo]);
 	}
 
+	public function veri_mail(Request $request)
+    {
+		$data = json_decode(Utils::decrypt(base64_decode($request->data), config('bbpro.iv')));
+		if(!$data)
+			return View('web/error_message', array('message' => 'Email驗證不成功，請重新執行驗證一次', 'goUrl'=>'/web/profile'));
+		if(User::where('email',$data->email)->where('email_validated',1)->where('email_valid_key','!=','')->count())
+			return View('web/error_message', array('message' => 'Email驗證已完成，無須再驗證!', 'goUrl'=>'/web/profile'));
+		if(Session::get('veri_id')!=$data->key)
+			return View('web/error_message', array('message' => 'Email驗證不成功，請重新執行驗證一次', 'goUrl'=>'/web/profile'));
+
+		$user = User::where('email',$data->email)->select('first_name','last_name','phone_number','usr_id','usr_status')->first();
+		if(!$user)
+			return View('web/error_message', array('message' => 'Email驗證不成功，請重新執行驗證一次', 'goUrl'=>'/web/profile'));
+
+		if($user->first_name!=''&&$user->last_name!=''&& $user->phone_number!='')
+			$input['usr_status'] = 1;
+		$input['email_validated'] = 1;
+		$input['email_valid_key'] = Session::get('veri_id');
+		User::where('email',$data->email)->update($input);
+		$request->session()->forget('veri_id');
+
+		if(isset($input['usr_status']))
+		{
+			$setting = Setting::select('email_veri_comp_subj','email_veri_comp_body')->first();
+			$btn = json_encode(array('url'=>env('APP_URL'),'name'=>'連結幫棒'));
+			Mail::to($data->email)->queue(new toMail(env('APP_URL'), $btn,$user->last_name.$user->first_name, ((isset($setting) && $setting->email_veri_comp_subj) ? $setting->email_veri_comp_subj : 'BounBang 幫棒 – 您已完成註冊驗證信'), ((isset($setting) && $setting->email_veri_comp_body) ? $setting->email_veri_comp_body : '歡迎加入 BounBang 幫棒家族，您已完成電子郵件信箱設定<br />歡迎您由此進入幫棒')));
+		}
+		return redirect('/web/profile');
+
+	}
+
+	public function test()
+	{
+		Mail::to('iamgodc@gmail.com')->queue(new toMail(env('APP_URL'), 'test', 'BounBang 幫棒 – 您已完成註冊驗證信', '歡迎加入 BounBang 幫棒家族，您已完成電子郵件信箱設定<br />歡迎您由此進入幫棒'));
+	}
+
+	public function set_forgot_passwd(Request $request)
+    {
+		$data = json_decode(Utils::decrypt(base64_decode($request->data), config('bbpro.iv')));
+		if(!$data)
+			return View('web/error_message', array('message' => 'Email驗證不成功，請重新執行一次', 'goUrl'=>'/web/forgot'));
+		if(Session::get('veri_id')!=$data->key)
+			return View('web/error_message', array('message' => '驗證碼已經有效時間已過，請重新執行一次變更密碼', 'goUrl'=>'/forgot'));
+
+		$user = User::where('email',$data->email)->select('first_name','last_name','usr_id')->first();
+		if(!$user)
+			return View('web/error_message', array('message' => '您的權限不足，請重新執行一次', 'goUrl'=>'/forgot'));
+
+		$request->session()->forget('veri_id');
+
+		return View('web/set_forgot_passwd', array('user'=>$user));
+
+	}
+
+	public function set_forgot_passwd_pt(Request $request)
+    {
+
+		$validator = Validator::make($request->all(), array(
+			'id' => 'required',
+			'password' => 'required|string|min:6|max:20',
+			'chk_password' => 'required_with:password|same:password|min:6|max:20'
+		));
+
+		if ($validator->fails()) {
+		  return View('web/error_message', array('message' => '輸入表單欄位驗證錯誤!!', 'goUrl'=>'/forgot'));
+		}
+
+
+		$user = User::where('usr_id',$request->id)->update(array('password'=>Utils::set_password(trim($request->password),trim($request->id))));
+
+		return redirect('/login');
+
+	}
+
+	public function term_of_use(Request $request)
+    {
+
+		if($request->has('back'))
+			$back = $request->get('back');
+		$use = Setting::select('term_of_use')->first();
+		return View('web/term_of_use', array('term_of_use'=>((isset($use))?$use->term_of_use:NULL),'back'=>((isset($back))?$back:NULL)));
+
+	}
+
+	public function how2help_post_list(Request $request)
+    {
+		if($request->has('back'))
+			$back = $request->get('back');
+		$use = Setting::select('how2_help_post_list')->first();
+		return View('web/how2help_post_list', array('how2help_post_list'=>((isset($use))?$use->how2_help_post_list:NULL),'back'=>((isset($back))?$back:NULL)));
+
+	}
+
+	public function newebPay_return_url(Request $request)
+    {
+		$newebPay = new NewebPay();
+		if(!count($request->all()))
+		{
+			$request->session()->flush();
+			return View('admin/error', array('message' => '回傳值錯誤，請稍後在試!!'));
+		}
+
+		$result = $newebPay->newebPay_return($request);
+		if(isset($result) && $result!='error')
+		{
+			if($result->Status!='SUCCESS')
+				$message = $result->Message;
+
+			$noArr = explode('_',$result->Result->MerchantOrderNo);
+			if(count($noArr)>1&&$noArr[0]=='BB')
+				return redirect('/admin/transfer_records?item=newebPay&action=manage&message='.((isset($message))?$message:''));
+			else
+				return redirect('/');
+		}else
+			return redirect('/');
+	}
+
+	public function newebPay_notify_url(Request $request)
+    {
+		$newebPay = new NewebPay();
+		if(!count($request->all()))
+		{
+			$request->session()->flush();
+			return View('admin/error', array('message' => '回傳值錯誤，請稍後在試!!'));
+		}
+		$result = $newebPay->newebPay_return($request);
+		//Notify::via('notify','此訂單返回為 : NOTIFY_URL 前往查看 : ! <'.env('APP_URL').'/admin/transfer_records?item=newebPay&action=manage'.'|Click here> for details!');
+	}
+
+	public function newebPay_customer_url(Request $request)
+    {
+		$newebPay = new NewebPay();
+		if(!count($request->all()))
+		{
+			$request->session()->flush();
+			return View('admin/error', array('message' => '回傳值錯誤，請稍後在試!!'));
+		}
+
+		$result = $newebPay->newebPay_customer($request);
+
+		//Notify::via('notify','此訂單返回為 : CUSTOMER_URL 前往查看 : ! <'.env('APP_URL').'/admin/transfer_records?item=newebPay&action=manage'.'|Click here> for details!');
+		/*$noArr = explode('_',$result->Result->MerchantOrderNo);
+		if(count($noArr)>1&&$noArr[0]=='BB')
+			return redirect('/admin/transfer_records?item=newebPay&action=manage');
+		else
+			return redirect('/');*/
+	}
+
+	public function newebPay_back_url(Request $request)
+    {
+		return redirect('/');
+	}
+
+	public function newebPay_creditCancel_url(Request $request)
+    {
+
+		if($request->Status=='SUCCESS')
+		{
+			$data = json_decode($request->Result);
+			$merchant_id = env('newebPay_merchant_id');
+			$mer_key = env('newebPay_HashKey');
+			$mer_iv = env('newebPay_HashIV');
+			$check_code_str = 'HashIV='.$mer_iv.'&Amt='.$data->Amt.'&MerchantID='.$merchant_id.'&MerchantOrderNo='.$data->MerchantOrderNo.'&TradeNo='.$data->TradeNo.'&HashKey='.$mer_key;
+			$check_code = strtoupper(hash("sha256", $check_code_str));
+			if($data->Result->CheckCode==$check_code)
+			{
+				$input['TradeStatus'] = 3;
+				Newebpay_mpg::where('MerchantOrderNo',$data->MerchantOrderNo)->update($input);
+			}else
+				Log::alert("藍新驗證碼失敗(".Session::get('ownerID')." >> ".basename(url()->current(),".php")." >> ".$_SERVER["REMOTE_ADDR"].")");
+		}
+
+	}
 
 }

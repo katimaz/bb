@@ -1,5 +1,4 @@
 <?php
-
 namespace App;
 
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -40,7 +39,7 @@ class User extends Authenticatable
 			}
 			$input['usr_id'] = $account;
 			$input['usr_status'] = 0;
-			$input['usr_type'] = 0;
+			$input['open_offer_setting'] = 0;
 			$input['password'] = Utils::set_password(time(),trim($account));
 			if($input['avatar'])
 			{
@@ -80,7 +79,7 @@ class User extends Authenticatable
 			}*/
 			$input['usr_id'] = $account;
 			$input['usr_status'] = 0;
-			$input['usr_type'] = 0;
+			$input['open_offer_setting'] = 0;
 			$input['password'] = Utils::set_password(time(),trim($account));
 			if($input['avatar'])
 			{
@@ -118,9 +117,10 @@ class User extends Authenticatable
 			}
 			$input['usr_id'] = $account;
 			$input['usr_status'] = 0;
-			$input['usr_type'] = 0;
+			$input['open_offer_setting'] = 0;
 			$input['password'] = Utils::set_password(time(),trim($account));
 			if($input['avatar'])
+
 			{
 				$this->create_storage();
 				$avatar = Utils::getAvatarFileName($account);

@@ -116,10 +116,10 @@ a:hover,.btn-link:hover{
 .payway{
 	font-weight: bold;
 	color: #8EC555;
-	padding-bottom: 10px;
+	/*padding-bottom: 10px;
 	border-bottom-width: 1px;
 	border-bottom-style: solid;
-	border-bottom-color: #8EC555;
+	border-bottom-color: #8EC555;*/
 	margin-bottom: 10px;
 }
 .bankpay{

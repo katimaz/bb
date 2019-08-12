@@ -22,6 +22,7 @@ class CreateNewebpayMpgsTable extends Migration
 			$table->increments('id');
 			$table->unsignedInteger('u_id')->comment('對應到使用者資料表的id');
 			$table->foreign('u_id')->references('id')->on('users');
+			$table->string('MerchantID', 16)->comment('合作商家編號');
 			$table->string('MerchantOrderNo', 32)->unique()->comment('自訂編號');
 			$table->tinyInteger('TradeStatus')->comment('狀態0=未付 1=成功 2=失敗 3=取消 ');
 			$table->string('TradeNo', 24)->nullable()->comment('藍新金流交易序號');

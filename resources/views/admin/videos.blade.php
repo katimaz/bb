@@ -2,7 +2,7 @@
 @section('content')
 <div id="app">
 	<div class="w-100 p-2 d-table">
-        <a class="btn btn-primary pull-right" href="javascript:void(0)" @click="((!mode)?add_video():list_video())" v-text="((!mode)?'新增影片':'返回')"></a>  
+        <a class="btn btn-primary pull-right" href="javascript:void(0)" @click="((!mode)?add_video():list_video())" v-text="((!mode)?'新增影片':'返回上一頁')"></a>  
         <h3 class="float-right" v-text="'影片'+((mode=='add')?'新增':((mode=='edit'))?'修改':'列表')"></h3>
     </div>
     <div class="w-100" v-if="mode">
@@ -36,8 +36,8 @@
                     <td class="w-75">
                       <div class="w-75 float-left mb-5 pr-2">
                           <div class="w-100 d-table">
-                          	<a :class="'btn float-left btn-'+((item==1)?'primary':'secondary')" href="javascript:void(0)" v-text="'Youtube'" @click="item=1;video.vimeo_id=''"></a>
-                            <a :class="'btn float-left ml-2 disabled btn-'+((item==2)?'primary':'secondary')" href="javascript:void(0)" @click="item=2; video.youtube_id=''" v-text="'Vimeo'" aria-disabled="true"></a>
+                          	<a :class="'btn float-left btn-'+((item==1)?'primary':'secondary')" href="javascript:void(0)" v-text="'Youtube'" @click="item=1;video.vimeo_id"></a>
+                            <a :class="'btn float-left ml-2 btn-'+((item==2)?'primary':'secondary')" href="javascript:void(0)" v-text="'Vimeo'" @click="item=2; video.youtube_id=''"></a>
                           </div>
                           <input type="text" class="w-100 form-control d-inline mt-2" v-if="item==1" name="youtube_id" id="youtube_id" v-model="video.youtube_id" @change="youtubeBtn" placeholder="Youtube影片網址" />
                           <input type="text" class="w-100 form-control d-inline mt-2" v-else="item==1" name="vimeo_id" id="vimeo_id" v-model="video.vimeo_id" @change="vimeoBtn" placeholder="Vimeo影片網址" />

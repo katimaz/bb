@@ -76,34 +76,17 @@ class ApiController extends Controller
 		$user = User::where('usr_id',Session::get('usrID'))->select('id','usr_status','first_name','last_name','usr_type', 'open_offer_setting','usr_id','phone_number','phone_nat_code','sex','email','usr_photo','email_validated')->first();;
 		if(!$user)
 			return 'error';
-		$zipcodes = Utils::get_area_zipcode();
-		$citys = array();
-		$areas = array();
-		foreach($zipcodes as $key => $value)
-		{
-			$citys[] = $key;
-			$areas[] = $value['Zip'];
-		}
+
 		$addrs = Member_addr_recode::where('u_id',$user->id)->get();
-		$positions = array();
-		if(isset($addrs) && count($addrs))
-		{
-			foreach($addrs as $addr)
-			{
-				$index = array_search($addr->city,$citys);
-				$positions[] = array('city'=>$addr->city,'areas'=>$areas[$index],'nat'=>$addr->nat,'zip'=>$addr->zip,'addr'=>$addr->addr,'lat'=>$addr->lat,'lng'=>$addr->lng);
-			}
-		}else
-		{
-			$positions[] = array('city'=>'','areas'=>array(),'nat'=>'','zip'=>'','addr'=>'','lat'=>'','lng'=>'');
-		}
+
+		$user->addr = ((isset($addrs))?$addrs:'');
 		$user->password = '';
-		$user->usr_type = ((!$user->usr_type)?0:$user->usr_type);
+		$user->usr_type = ((!$user->usr_type) ? 0 : $user->usr_type);
 		$user->sex = ((!$user->sex)?0:$user->sex);
 		$user->phone_nat_code = ((!$user->phone_nat_code)?'886':$user->phone_nat_code);
-		
-		return array('user'=>((isset($user))?$user:''),'positions'=>$positions,'citys'=>((isset($citys))?$citys:''),'areas'=>((isset($areas))?$areas:''));
-		
+
+		return array('user'=>((isset($user))?$user:''));
+
 	}
 
 	public function set_veri_mail(Request $request)
@@ -122,7 +105,6 @@ class ApiController extends Controller
 
 		$data = base64_encode(Utils::encrypt('{"email":"'.$request->id.'","key":"'.$key.'"}', config('bbpro.iv')));
 		$btn = json_encode(array('url'=>env('APP_URL').'/veri_mail?data='.$data,'name'=>'完成驗證'));
-		
 		Mail::to($request->id)->queue(new toMail(env('APP_URL'),$btn,$user->last_name.$user->first_name,((isset($setting) && $setting->email_veri_subj)?$setting->email_veri_subj:'BounBang 幫棒 - 會員註冊驗證信'),((isset($setting) && $setting->email_veri_body)?$setting->email_veri_body:'歡迎加入 BounBang 幫棒家族<br />您正在進行電子郵件信箱設定，請盡快完成電子郵件信箱驗證。<br />請點擊下面"按鈕"開始驗證Email作業')));
 
 		return array('is_tomail'=>((Session::has('veri_id')?1:0)));
@@ -131,12 +113,9 @@ class ApiController extends Controller
 
 	public function is_existed(Request $request)
     {
-		$num = User::where('usr_id','!=',Session::get('usrID'))->where('email',$request->id)->count();
-		return ((isset($num) && $num)?$num:0);
+		return User::where('email',$request->id)->count();
 	}
-	
-	
-	//--------------------------------------------------前端
+
 	public function set_latlng(Request $request)
 	{
 		$lat = $request->lat;

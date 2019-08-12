@@ -4,13 +4,10 @@
 <file name="index.blade.php" server="192.168.0.253//home/bbproject/public_html/" local="132046967713360336" remote="132046968150000000" Dst="0" />
 <file name="error_message.blade.php" server="192.168.0.253//home/bbproject/public_html/" local="132047127382608849" remote="132047127820000000" Dst="0" />
 <file name="error.blade.php" server="192.168.0.253//home/bbproject/public_html/" local="132047069917743405" remote="132047070350000000" Dst="0" />
-<file name="base.blade.php" server="192.168.0.253//home/bbpro/public_html/" local="132073965080028959" remote="132073966700000000" Dst="0" />
+<file name="base.blade.php" server="192.168.0.253//home/bbpro/public_html/" local="132048039566577492" remote="132048040040000000" Dst="0" />
 <file name="error.blade.php" server="192.168.0.253//home/bbpro/public_html/" local="132047069917743405" remote="132047306410000000" Dst="0" />
 <file name="error_message.blade.php" server="192.168.0.253//home/bbpro/public_html/" local="132047127382608849" remote="132047306410000000" Dst="0" />
-<file name="index.blade.php" server="192.168.0.253//home/bbpro/public_html/" local="132052974895108718" remote="132052975580000000" Dst="0" />
-<file name="profile.blade.php" server="192.168.0.253//home/bbpro/public_html/" local="132076377196331261" remote="132076378870000000" Dst="0" />
+<file name="index.blade.php" server="192.168.0.253//home/bbpro/public_html/" local="132047444176316179" remote="132047444620000000" Dst="0" />
+<file name="profile.blade.php" server="192.168.0.253//home/bbpro/public_html/" local="132048056270054765" remote="132048056740000000" Dst="0" />
 <file name="map.blade.php" server="192.168.0.253//home/bbpro/public_html/" local="132048034196664656" remote="132048034670000000" Dst="0" />
-<file name="set_forgot_passwd.blade.php" server="192.168.0.253//home/bbpro/public_html/" local="132049011348589787" remote="132049011870000000" Dst="0" />
-<file name="term_of_use.blade.php" server="192.168.0.253//home/bbpro/public_html/" local="132053174689623858" remote="132053175380000000" Dst="0" />
-<file name="how2help_post_list.blade.php" server="192.168.0.253//home/bbpro/public_html/" local="132053249577528661" remote="132053250270000000" Dst="0" />
 </dwsync>

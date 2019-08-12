@@ -14,7 +14,7 @@
           <input type="password" class="form-control" name="password" id="password" v-model="passwd" placeholder="輸入密碼">
       </div>
       <button type="button" class="login-bt" @click="sendform">登入</button>
-      <button type="button" id="alertBtn" data-toggle="modal" data-target="#errorAlertModal" style="display:none;" />
+      <button type="button" id="alertBtn" data-toggle="modal" data-target="#errorAlertModal" style="display:none;" /></button>
     </form>    
      <a href="/forgot" class="txtbtn"><i class="fa fa-question-circle-o" aria-hidden="true"></i> 忘記密碼 </a>
      <a href="/signup" class="text-right txtbtn"><i class="fa fa-envelope-o" aria-hidden="true"></i> 使用E-mail註冊 </a>   

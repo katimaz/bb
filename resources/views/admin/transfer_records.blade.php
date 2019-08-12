@@ -7,6 +7,11 @@
                 <a class="btn btn-primary pull-right" v-if="action=='detail'" href="javascript:void(0)" @click="action='manage';title='交易查詢管理'" v-text="'返回'"></a>
             </div>    
             <div class="w-50 float-left mx-auto" v-if="action!='create' && action!='credit_close'">
+                <div class="w-100 mb-2">
+                    <input type="date" id="startdate" class="form-control d-inline px-1" v-model="start_date" style="width:150px;" />
+                    <b class="d-inline px-1">~</b>
+                    <input type="date" id="enddate" class="form-control d-inline px-1" v-model="end_date" style="width:150px;" />
+                </div>
                 <input type="text" class="form-control float-left w-50" id="search" v-model="search_text" @keyup.enter="searchBtn" placeholder="搜尋交易單任一字串" />
                 <select class="form-control float-left w-25 ml-1" v-model="tradeStatus">
                 	<option value="" v-text="'全部'"></option>
@@ -355,6 +360,8 @@ new Vue({
 	transfer: '',
 	invoice: '',
 	credits: '',
+	start_date: '<?php echo ((date("d")>='01' && date("d")<='05')?date("Y-m-01",strtotime("-1 month")):date("Y-m-01"))?>',
+	end_date: '{{date("Y-m-d")}}',
 	search_text: '',
 	payment_item: '',
 	back_message: '',
@@ -466,7 +473,7 @@ new Vue({
 		var self = this;
 		self.isBg = true;
 		self.action = 'search';
-		axios.get('/admin/get_transfer_records?item='+self.item+'&action='+self.action+'&text='+self.search_text+'&tradeStatus='+self.tradeStatus).then(function (response){
+		axios.get('/admin/get_transfer_records?item='+self.item+'&action='+self.action+'&start_date='+self.start_date+'&end_date='+self.end_date+'&text='+self.search_text+'&tradeStatus='+self.tradeStatus).then(function (response){
 			console.log(response.data)
 			if(response.data=='error')
 				window.location = '/error';
@@ -515,7 +522,7 @@ new Vue({
 	go_content_page: function(page){
 	  
 		var self = this;
-		axios.get('/admin/get_transfer_records?item='+self.item+'&action='+self.action+'&text='+self.search_text+'&tradeStatus='+self.tradeStatus+'&page='+page).then(function (response){
+		axios.get('/admin/get_transfer_records?item='+self.item+'&action='+self.action+'&start_date='+self.start_date+'&end_date='+self.end_date+'&text='+self.search_text+'&tradeStatus='+self.tradeStatus+'&page='+page).then(function (response){
 			console.log(response.data)		
 			self.transfers = response.data.transfers;
 			

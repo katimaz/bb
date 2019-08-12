@@ -75,6 +75,7 @@
                     	<span v-text="'發票管理'"></span>
                         <div id="invoice_track" class="w-100 position-absolute border border-info" style="top:0px; right:-100%; display:none;">
                         	<a class="w-100 d-block py-2 aHover" href="/admin/accountings?item=invoices&action=manage" v-text="'發票資料管理'"></a>
+                            <a class="w-100 d-block py-2 aHover" href="/admin/accountings?item=invoices&action=transfer" v-text="'訂單開立發票'"></a>
                             <a class="w-100 d-block py-2 aHover" href="/admin/accountings?item=invoices&action=create" v-text="'手動開立發票'"></a>
                             <a class="w-100 d-block py-2 aHover" href="/admin/accountings?item=invoice_tracks&action=create" v-text="'新增發票字軌'"></a>
                             <a class="w-100 d-block py-2 aHover" href="/admin/accountings?item=invoice_tracks&action=manage" v-text="'字軌資料管理'"></a>

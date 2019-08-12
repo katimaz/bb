@@ -13,7 +13,7 @@
 new Vue({
   el: "#app",
   data: {
-	serviceFee: '<?php echo ((isset($fee) && $fee)?$fee:20)?>'
+	serviceFee: '<?php echo ((isset($fee) && $fee)?$fee:0)?>'
 	
   },
   methods: {

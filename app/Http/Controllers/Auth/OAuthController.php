@@ -110,7 +110,7 @@ class OAuthController extends Controller
 				return redirect('/web/profile');
 			else	  
 			{
-				$url = ((Cookie::has('BB_login_cookie'))?Cookie::get('BB_login_cookie'):'/');
+				$url = ((Cookie::has('BB_login_cookie'))?Cookie::get('BB_login_cookie'):'/web/map');
 				Cookie::queue(Cookie::forget('BB_login_cookie'));
 				return redirect($url);		  
 			}
@@ -187,7 +187,7 @@ class OAuthController extends Controller
 				return redirect('/web/profile');
 			else	  
 			{
-				$url = ((Cookie::has('BB_login_cookie'))?Cookie::get('BB_login_cookie'):'/');
+				$url = ((Cookie::has('BB_login_cookie'))?Cookie::get('BB_login_cookie'):'/web/map');
 				Cookie::queue(Cookie::forget('BB_login_cookie'));
 				return redirect($url);		  
 			}  
@@ -270,7 +270,7 @@ class OAuthController extends Controller
 			return redirect('/web/profile');
 		else	  
 		{
-			$url = ((Cookie::has('BB_login_cookie'))?Cookie::get('BB_login_cookie'):'/');
+			$url = ((Cookie::has('BB_login_cookie'))?Cookie::get('BB_login_cookie'):'/web/map');
 			Cookie::queue(Cookie::forget('BB_login_cookie'));
 			return redirect($url);		  
 		}

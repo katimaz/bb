@@ -43,7 +43,25 @@ return [
             'tolerance' => env('STRIPE_WEBHOOK_TOLERANCE', 300),
         ],
     ],
-	'google_api' => [
+    'facebook' => [
+        'client_id' => env('FACEBOOK_CHANNEL_ID'),
+        'client_secret' => env('FACEBOOK_CHANNEL_SECRET'),
+        'redirect' => env('FACEBOOK_CALLBACK_URL'),
+    ],
+    'google' => [
+        'client_id' => env('GOOGLE_CHANNEL_ID'),
+        'client_secret' => env('GOOGLE_CHANNEL_SECRET'),
+        'redirect' => env('GOOGLE_CALLBACK_URL'),
+    ],
+    'line' => [
+        'client_id' => env('LINE_CHANNEL_ID'),
+        'client_secret' => env('LINE_CHANNEL_SECRET'),
+        'redirect' => env('LINE_CALLBACK_URL'),
+    ],
+    'ga' => [
+        'track_id' => env('GOOGLE_ANALYTICS_TRACK_ID'),
+    ],
+    'google_api' => [
         'key' => env('GOOGLE_API_KEY'),
     ],
 

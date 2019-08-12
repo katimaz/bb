@@ -16,17 +16,17 @@ class User extends Authenticatable
      *
      * @var array
      */
-    protected $fillable = [
-        'usr_id','usr_status','email','first_name','last_name','password','FB_login_token','Google_login_token','Line_login_token','cookie_id'
-	];
+    protected $fillable = array(
+        'usr_id','usr_status','email','first_name','last_name','password','FB_login_token','Google_login_token','Line_login_token','cookie_id','open_offer_setting','usr_photo'
+	);
 	/**
      * The attributes that should be hidden for arrays.
      *
      * @var array
      */
-    protected $hidden = [
+    protected $hidden = array(
         'password', 'remember_token',
-    ];
+    );
 
     public function fbLogin($input)
     {
@@ -40,13 +40,16 @@ class User extends Authenticatable
 			}
 			$input['usr_id'] = $account;
 			$input['usr_status'] = 0;
+			$input['usr_type'] = 0;
 			$input['password'] = Utils::set_password(time(),trim($account));
 			if($input['avatar'])
 			{
+				$this->create_storage();
 				$avatar = Utils::getAvatarFileName($account);
 				$input['usr_photo'] = $avatar;
 				$this->createFbAvatar($avatar, $input['avatar']);
 			}
+			//dd($input);
 			return static::create($input);
 		}elseif(static::where('email', $input['email'])->count())
 		{
@@ -68,17 +71,20 @@ class User extends Authenticatable
     {
         if(!static::where('Google_login_token', $input['Google_login_token'])->orWhere('email',$input['email'])->count())
 		{
-            $chk=true; 
+            
+			/*$chk=true; 
 			while($chk==true) {
 				  $account = Utils::create_name_id(time());;
 				  if(!static::where('usr_id', $account)->count())
 					$chk=false;
-			}
+			}*/
 			$input['usr_id'] = $account;
 			$input['usr_status'] = 0;
+			$input['usr_type'] = 0;
 			$input['password'] = Utils::set_password(time(),trim($account));
 			if($input['avatar'])
 			{
+				$this->create_storage();
 				$avatar = Utils::getAvatarFileName($account);
 				$input['usr_photo'] = $avatar;
 				$this->createFbAvatar($avatar, $input['avatar']);
@@ -112,9 +118,11 @@ class User extends Authenticatable
 			}
 			$input['usr_id'] = $account;
 			$input['usr_status'] = 0;
+			$input['usr_type'] = 0;
 			$input['password'] = Utils::set_password(time(),trim($account));
 			if($input['avatar'])
 			{
+				$this->create_storage();
 				$avatar = Utils::getAvatarFileName($account);
 				$input['usr_photo'] = $avatar;
 				$this->createLineAvatar($avatar, $input['avatar']);
@@ -135,7 +143,18 @@ class User extends Authenticatable
 		}
 		return $userData;
     }
-	
+	private function create_storage(){
+		if(!file_exists(storage_path()."/files"))
+			mkdir(storage_path()."/files", 0775);
+		if(!file_exists(storage_path()."/files/pic"))
+			mkdir(storage_path()."/files/pic", 0775);	
+		if(!file_exists(storage_path()."/files/pic/avatar"))
+			mkdir(storage_path()."/files/pic/avatar", 0775);
+		if(!file_exists(storage_path()."/files/pic/avatar/photoBig"))
+			mkdir(storage_path()."/files/pic/avatar/photoBig", 0775);
+		if(!file_exists(storage_path()."/files/pic/avatar/photoSmall"))
+			mkdir(storage_path()."/files/pic/avatar/photoSmall", 0775);
+	}
 	private function createFbAvatar($avatar, $inputAvatarUrl) {
         // 使用者大頭像
         $avatarBigLocalPath = storage_path('files/pic/avatar/photoBig/'.$avatar);

@@ -864,7 +864,7 @@ class AdminController extends Controller
 		}elseif($item=='invoices')
 		{
 			$ezpay = new EzPay();
-			$merchant_id = env('ezPay_invoice_merchant_id');
+			//$merchant_id = env('ezPay_invoice_merchant_id');
 			if($action=='create')
 			{
 				$validator = Validator::make($request->all(), array(
@@ -927,9 +927,11 @@ class AdminController extends Controller
 					 "NotifyEmail" => "1", //1=通知，0=不通知 
 				); 
 				
-				//dd($post_data_array);
+				//dd($request->MerchantID);
 				$url = 'https://cinv.pay2go.com/API/invoice_issue';
-				$result = $ezpay->invoice_post($url,$post_data_array);
+				$result = $ezpay->invoice_post($url, $post_data_array, $request->MerchantID);
+				if($result=='error')
+					return View('admin/error_message', array('message' => '查無此合作商店資料', 'goUrl'=>'/admin/accountings','item'=>$item, 'action'=>$action));
 				
 				$result_data = json_decode($result['web_info']);
 				if($result_data->Status=='SUCCESS')
@@ -1961,51 +1963,17 @@ class AdminController extends Controller
 				$title = '手動開立交易新增';	
 			}elseif($action=='search')
 			{
-				$text = trim($request->text);
-				if($text)
-				{
-				  $transfers = Newebpay_mpg::join('users','newebpay_mpgs.u_id','=','users.id')
-					  ->join('merchants','newebpay_mpgs.MerchantID','=','merchants.MerchantID')
-					  ->where(function($query) use($request){
-					  	if($request->tradeStatus!='')
-							$query->orWhere('newebpay_mpgs.TradeStatus',$request->tradeStatus);
-					  })
-					  ->where(function($query) use($text){
-						  $query->orWhere('newebpay_mpgs.MerchantOrderNo',$text);
-						  $query->orWhere('newebpay_mpgs.MerchantID',$text);
-						  $query->orWhere('newebpay_mpgs.TradeNo',$text);
-						  $query->orWhere('newebpay_mpgs.Email',$text);
-						  $query->orWhere('newebpay_mpgs.PayTime','like','%'.$text.'%');
-						  $query->orWhere('newebpay_mpgs.ItemDesc','like','%'.$text.'%');
-						  $query->orWhere('newebpay_mpgs.IP',$text);
-						  $query->orWhere('newebpay_mpgs.PaymentType',$text);
-						  $query->orWhere('newebpay_mpgs.Amt',$text);
-						  $query->orWhere('newebpay_mpgs.EscrowBank',$text);
-						  $query->orWhere('newebpay_mpgs.Auth',$text);
-						  $query->orWhere('newebpay_mpgs.Card6No',$text);
-						  $query->orWhere('newebpay_mpgs.Card4No',$text);
-						  $query->orWhere('newebpay_mpgs.ExpireDate','like','%'.$text.'%');
-						  $query->orWhere('newebpay_mpgs.PayStore',$text);
-						  $query->orWhere('newebpay_mpgs.StoreCode',$text);
-						  $query->orWhere('newebpay_mpgs.CVSCOMName',$text);
-						  $query->orWhere('newebpay_mpgs.CVSCOMPhone',$text);
-						  $query->orWhere('users.last_name',$text);
-						  $query->orWhere('users.first_name',$text);
-					  })
-					   ->select('newebpay_mpgs.MerchantOrderNo','newebpay_mpgs.TradeStatus','newebpay_mpgs.TradeNo','newebpay_mpgs.PaymentType','newebpay_mpgs.Amt','newebpay_mpgs.ItemDesc','newebpay_mpgs.Email','newebpay_mpgs.EscrowBank','newebpay_mpgs.PayTime','newebpay_mpgs.MerchantID','merchants.MemberName','merchants.MerchantName','newebpay_mpgs.FundTime')
-					  ->orderBy('newebpay_mpgs.created_at','desc')
-					  ->paginate(30);
-				}else
-					 $transfers = Newebpay_mpg::join('merchants','newebpay_mpgs.MerchantID','=','merchants.MerchantID')
-					  	->where(function($query) use($request){
-					  	if($request->tradeStatus!='')
-							$query->orWhere('newebpay_mpgs.TradeStatus',$request->tradeStatus);
-					  })
-					  ->select('newebpay_mpgs.MerchantOrderNo','newebpay_mpgs.TradeStatus','newebpay_mpgs.TradeNo','newebpay_mpgs.PaymentType','newebpay_mpgs.Amt','newebpay_mpgs.ItemDesc','newebpay_mpgs.Email','newebpay_mpgs.EscrowBank','newebpay_mpgs.PayTime','newebpay_mpgs.MerchantID','merchants.MemberName','merchants.MerchantName','newebpay_mpgs.FundTime')
-					  ->orderBy('newebpay_mpgs.created_at','desc')
-					  ->paginate(30);
-					  
-				$title = '交易搜尋管理';	
+				$start_date = (($request->has('start_date') && $request->get('start_date'))?$request->get('start_date'):'');
+				$end_date = (($request->has('end_date') && $request->get('end_date'))?$request->get('end_date'):'');
+				$status = (($request->has('tradeStatus') && $request->get('tradeStatus')!='')?$request->get('tradeStatus'):'');
+				$text = (($request->has('text') && $request->get('text'))?trim($request->get('text')):'');
+				
+				$search_date = array('start'=>$start_date,'end'=>$end_date);
+				
+				$mpgs = new Newebpay_mpg;
+				$transfers = $mpgs->mpgs_search($search_date, $text, $status); //搜尋交易單資料
+				$title = '交易搜尋管理';
+					
 			}elseif($action=='manage' || !$action)
 			{	
 				$transfers = Newebpay_mpg::join('merchants','newebpay_mpgs.MerchantID','=','merchants.MerchantID')
@@ -2193,59 +2161,17 @@ class AdminController extends Controller
 					return array('platformfee'=>json_decode($result));
 				}else
 				{
-					if($request->has('text') && $request->get('text'))
-					{	
-						$start_date = $request->get('start_date');
-						$end_date = $request->get('end_date');
-						$text = trim($request->get('text'));
-						$transfers = Newebpay_mpg::join('merchants','newebpay_mpgs.MerchantID','=','merchants.MerchantID')
-							->join('users','newebpay_mpgs.u_id','=','users.id')
-							->where('newebpay_mpgs.TradeStatus',1)
-							->where('newebpay_mpgs.PayTime','>=',$start_date.' 00:00:00')
-							->where('newebpay_mpgs.PayTime','<=',$end_date.' 23:59:59')
-							->where(function($query) use($text){
-								  $query->orWhere('newebpay_mpgs.MerchantOrderNo',$text);
-								  $query->orWhere('newebpay_mpgs.MerchantID',$text);
-								  $query->orWhere('newebpay_mpgs.TradeNo',$text);
-								  $query->orWhere('newebpay_mpgs.Email',$text);
-								  $query->orWhere('newebpay_mpgs.PayTime','like','%'.$text.'%');
-								  $query->orWhere('newebpay_mpgs.ItemDesc','like','%'.$text.'%');
-								  $query->orWhere('newebpay_mpgs.IP',$text);
-								  $query->orWhere('newebpay_mpgs.PaymentType',$text);
-								  $query->orWhere('newebpay_mpgs.Amt',$text);
-								  $query->orWhere('newebpay_mpgs.EscrowBank',$text);
-								  $query->orWhere('newebpay_mpgs.Auth',$text);
-								  $query->orWhere('newebpay_mpgs.Card6No',$text);
-								  $query->orWhere('newebpay_mpgs.Card4No',$text);
-								  $query->orWhere('newebpay_mpgs.ExpireDate','like','%'.$text.'%');
-								  $query->orWhere('newebpay_mpgs.PayStore',$text);
-								  $query->orWhere('newebpay_mpgs.StoreCode',$text);
-								  $query->orWhere('newebpay_mpgs.CVSCOMName',$text);
-								  $query->orWhere('newebpay_mpgs.CVSCOMPhone',$text);
-								  $query->orWhere('merchants.MemberName',$text);
-								  $query->orWhere('merchants.MemberUnified',$text);
-								  $query->orWhere('merchants.ManagerID',$text);
-								  $query->orWhere('merchants.MemberPhone',$text);
-								  $query->orWhere('merchants.ManagerName',$text);
-								  $query->orWhere('merchants.MerchantName',$text);
-								  $query->orWhere('users.last_name',$text);
-								  $query->orWhere('users.first_name',$text);
-							})
-							->select('newebpay_mpgs.MerchantOrderNo','newebpay_mpgs.PaymentType','newebpay_mpgs.Amt','newebpay_mpgs.Email','newebpay_mpgs.PayTime','newebpay_mpgs.MerchantID','merchants.MemberName','merchants.MerchantName','newebpay_mpgs.FundTime','users.usr_id','users.last_name','users.first_name')
-							->orderBy('newebpay_mpgs.created_at','desc')
-							->paginate(30);
-					}else if($request->has('start_date') && $request->get('start_date'))
-					{	
-						$start_date = $request->get('start_date');
-						$end_date = $request->get('end_date');
-						$transfers = Newebpay_mpg::join('merchants','newebpay_mpgs.MerchantID','=','merchants.MerchantID')
-							->join('users','newebpay_mpgs.u_id','=','users.id')
-							->where('newebpay_mpgs.TradeStatus',1)
-							->where('newebpay_mpgs.PayTime','>=',$start_date.' 00:00:00')
-							->where('newebpay_mpgs.PayTime','<=',$end_date.' 23:59:59')
-							->select('newebpay_mpgs.MerchantOrderNo','newebpay_mpgs.PaymentType','newebpay_mpgs.Amt','newebpay_mpgs.Email','newebpay_mpgs.PayTime','newebpay_mpgs.MerchantID','merchants.MemberName','merchants.MerchantName','newebpay_mpgs.FundTime','users.usr_id','users.last_name','users.first_name')
-							->orderBy('newebpay_mpgs.created_at','desc')
-							->paginate(30);
+					if($request->has('text') && $request->get('text') || $request->has('start_date') && $request->get('start_date')){	
+						$start_date = (($request->has('start_date') && $request->get('start_date'))?$request->get('start_date'):'');
+						$end_date = (($request->has('end_date') && $request->get('end_date'))?$request->get('end_date'):'');
+						$status = (($request->has('tradeStatus') && $request->get('tradeStatus')!='')?$request->get('tradeStatus'):'');
+						$text = (($request->has('text') && $request->get('text'))?trim($request->get('text')):'');
+						
+						$search_date = array('start'=>$start_date,'end'=>$end_date);
+						
+						$mpgs = new Newebpay_mpg;
+						$transfers = $mpgs->mpgs_search($search_date, $text, $status); //搜尋交易單資料
+						
 					}else if($request->has('id') && $request->get('id')) //合作商店扣撥款指示
 					{	
 						$transfer = Newebpay_mpg::join('merchants','newebpay_mpgs.MerchantID','=','merchants.merchantID')
@@ -2373,6 +2299,42 @@ class AdminController extends Controller
 		}elseif($item=='invoices')
 		{
 			$ezpay = new EzPay();
+			$mode = (($request->has('mode'))?$request->get('mode'):'');
+			if(isset($mode) && $mode=='search') //搜尋
+			{
+				if($action=='transfer')
+				{
+					$start_date = (($request->has('start_date') && $request->get('start_date'))?$request->get('start_date'):'');
+					$end_date = (($request->has('end_date') && $request->get('end_date')!='')?$request->get('end_date'):'');
+					$status = (($request->has('tradeStatus') && $request->get('tradeStatus')!='')?$request->get('tradeStatus'):'');
+					$text = (($request->has('text') && $request->get('text'))?trim($request->get('text')):'');
+					
+					$search_date = array('start'=>$start_date,'end'=>$end_date);
+					$mpgs = new Newebpay_mpg;
+					$transfers = $mpgs->mpgs_search($search_date, $text, $status); //搜尋交易單資料
+					
+					$title = '訂單搜尋管理';	
+				}else
+				{
+					$text = trim($request->text);
+					$invoices = Invoice::where('InvoiceTransNo',$text)
+						->orWhere('TransNum',$text)
+						->orWhere('MerchantOrderNo',$text)
+						->orWhere('Category',$text)
+						->orWhere('BuyerName',$text)
+						->orWhere('BuyerUBN',$text)
+						->orWhere('BuyerEmail',$text)
+						->orWhere('BuyerAddress','like','%'.$text.'%')
+						->orWhere('CarrierNum',$text)
+						->orWhere('LoveCode',$text)
+						->orWhere('PrintFlag',$text)
+						->orWhere('InvoiceNumber',$text)
+						->orderBy('CreateTime','desc')->paginate(30);
+					$title = '發票搜尋管理';
+				}
+				return array('invoices'=>((isset($invoices))?$invoices:''),'transfers'=>((isset($transfers))?$transfers:''),'title'=>((isset($title))?$title:''));
+				
+			}
 			if($action=='create')
 			{
 				if($id)
@@ -2396,23 +2358,30 @@ class AdminController extends Controller
 				$arr[] = array('ItemName'=>'手續費','ItemCount'=>1,'ItemUnit'=>'筆','ItemPrice'=>$ItemPrice,'ItemAmt'=>$ItemAmt);
 				$create_invoice = array('usr_id'=>((isset($transfer))?$transfer->usr_id:''),'TransNum'=>$id,'MerchantOrderNo'=>'','Status'=>'1','CarrierType'=>'2','Category'=>'B2C','Category'=>'B2C','PrintFlag'=>'N','BuyerName'=>'','BuyerEmail'=>((isset($transfer))?$transfer->Email:''),'BuyerUBN'=>'','BuyerAddress'=>'','Amt'=>$Amt,'TaxAmt'=>$TaxAmt,'TotalAmt'=>$TotalAmt,'BuyerName'=>((isset($transfer))?$transfer->last_name.$transfer->first_name:''),'details'=>$arr);
 				$title = '手動開立發票新增';	
-			}elseif($action=='search')
+			}elseif($action=='transfer')
 			{
-				$text = trim($request->text);
-				$invoices = Invoice::where('InvoiceTransNo',$text)
-					->orWhere('TransNum',$text)
-					->orWhere('MerchantOrderNo',$text)
-					->orWhere('Category',$text)
-					->orWhere('BuyerName',$text)
-					->orWhere('BuyerUBN',$text)
-					->orWhere('BuyerEmail',$text)
-					->orWhere('BuyerAddress','like','%'.$text.'%')
-					->orWhere('CarrierNum',$text)
-					->orWhere('LoveCode',$text)
-					->orWhere('PrintFlag',$text)
-					->orWhere('InvoiceNumber',$text)
-					->orderBy('CreateTime','desc')->paginate(30);
-				$title = '發票搜尋管理';	
+				$transfers = Newebpay_mpg::join('merchants','newebpay_mpgs.MerchantID','=','merchants.MerchantID')
+					  ->join('users','newebpay_mpgs.u_id','=','users.id')
+					  ->where('TradeStatus',1)
+					  ->select('newebpay_mpgs.MerchantOrderNo','newebpay_mpgs.TradeStatus','newebpay_mpgs.TradeNo','newebpay_mpgs.PaymentType','newebpay_mpgs.Amt','newebpay_mpgs.ItemDesc','newebpay_mpgs.Email','newebpay_mpgs.EscrowBank','newebpay_mpgs.PayTime','newebpay_mpgs.MerchantID','merchants.MemberName','merchants.MerchantName','newebpay_mpgs.FundTime','users.usr_id')
+					  ->orderBy('newebpay_mpgs.created_at','desc')
+					  ->paginate(30);
+					  
+				//$transfers = Newebpay_mpg::orderBy('created_at','desc')->paginate(30);
+				$setting = Setting::select('service_fee')->first();
+				if(isset($transfers))
+				{
+					foreach($transfers as $transfer)
+					{
+						$invo = Invoice::where('TransNum',$transfer->TradeNo)->select('InvoiceStatus')->first();
+						if(isset($invo))
+							$transfer->InvoiceStatus = $invo->InvoiceStatus;
+						else
+							$transfer->InvoiceStatus = 0;
+					}	
+				}
+				
+				$title = '訂單開立發票作業';
 			}elseif($action=='manage' || !$action)
 			{	
 				$invoices = Invoice::orderBy('CreateTime','desc')->paginate(30);
@@ -2493,7 +2462,7 @@ class AdminController extends Controller
 				return array('allowances'=>((isset($allowances))?$allowances:''));
 			}
 			
-			return array('invoices'=>((isset($invoices))?$invoices:''),'create_invoice'=>((isset($create_invoice))?$create_invoice:''),'title'=>((isset($title))?$title:''));
+			return array('invoices'=>((isset($invoices))?$invoices:''),'create_invoice'=>((isset($create_invoice))?$create_invoice:''),'transfers'=>((isset($transfers))?$transfers:''),'service_fee'=>((isset($setting))?$setting->service_fee:''),'title'=>((isset($title))?$title:''));
 		}
 	}
 	

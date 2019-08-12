@@ -1,3 +1,21 @@
+$( document ).ready(function() {	
+$('#comm').modal('show'); 
+$('#star1').on('click', function() {
+  $(this).toggleClass('active');
+  });
+$('#star2').on('click', function() {
+ $('.com-start').find('i').slice(0,2).toggleClass('active');
+  });
+$('#star3').on('click', function() {
+ $('.com-start').find('i').slice(0,3).toggleClass('active');
+  });  
+$('#star4').on('click', function() {
+ $('.com-start').find('i').slice(0,4).toggleClass('active');
+  }); 
+$('#star5').on('click', function() {
+ $('.com-start').find('i').slice(0,5).toggleClass('active');
+  });   
+   });  
  $('.search-bt').on('click', function() {
  $('.search-frame').addClass('fixed') ;
  $( 'input[type=search]' ).focus();
@@ -9,12 +27,25 @@
         $("html, body").animate({ scrollTop: 0 }, 300);
         return false;
     });
-$('.button_container').on('click', function() {
+$('.button_container,.btbg').on('click', function() {
 	$('.btbg').toggle();
-	 $(this).toggleClass('active');
+	 $('.button_container').toggleClass('active');
 	 $('.main-menu').slideToggle(100);
 	 $('.user-box,.userbg').hide();
   });
+$( document ).ready(function() {
+  if ($(window).width() > 991) {
+	  $('.user').hover(function(){
+           $('.user-box').toggle();
+        })       
+        }else{
+	 $( ".user a.user-icon,.userbg" ).on('click', function() {
+	$('.userbg').toggle();	 
+	$('.user-box').toggle();
+    $('.btbg,.main-menu').hide();
+	$('.button_container').removeClass('active');
+});
+	   }})   
 $('#base a').on('click', function() {
 	 $('.user-sub').toggle();
 	 $(this).find('i').toggleClass('fa fa-angle-down fa fa-angle-up')
@@ -41,8 +72,7 @@ $( document ).ready(function() {
 	$('#boxB').toggle();
 	$(this).find('i').toggleClass('fa fa-angle-down fa fa-angle-up')
     $('#boxA,.user-box').hide();
-});
-	   }})
+})}}) 	   
 
 $( document ).ready(function() {
   	if ($(window).width() > 991) {
@@ -76,8 +106,8 @@ $(function(){
     });
 
 $(function(){
- $('.input-group').click(function(e) {
-
+ $('.input-group').on('click', function(e) {
+    
     e.preventDefault();
 
     var button = e.target;

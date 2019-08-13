@@ -182,7 +182,7 @@ class WebController extends Controller
 			session()->put('usrID', $user->usr_id);
 			session()->put('usrStatus', $user->usr_status);
 			session()->put('profile', array('first'=>'','last'=>'','nick'=>'','photo'=>''));
-			session()->put('offer', ((isset($user) && $usr_type)?true:false));
+			session()->put('offer', ((isset($user) && $user->$usr_type)?true:false));
 		}
 
 		//寄發歡迎加入信件

@@ -166,6 +166,7 @@ class WebController extends Controller
 		$input->usr_id = $account;
 		$input->password = Utils::set_password(trim($request->password),trim($account));
 		$input->usr_status = 0;
+		$input->usr_type = 1;  /* DB usr_type doesn't allow null */
 		$input->email = trim($request->email);
 
 		$input->save();

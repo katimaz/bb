@@ -18,10 +18,7 @@
         <input type="hidden" name="count" id="count" v-model="positions.length" />
         <div class="containers">
             <div class="imageWrapper">
-<!-- Disable dur to merge from Stage0812
                 <img class="image" :src="((user.usr_photo)?'/avatar/small/'+user.usr_photo:'/images/person-icon.jpg')">
--->
-                <img class="image" src="{{(($user->usr_photo) ? URL::to('/') . '/avatar/small/' . $user->usr_photo : 'asset("/images/person-icon.jpg")')}}">
                 <div class="file-upload">           
                     <input type="file" name="avatar" id="avatar" class="file-input">
                     <i class="fa fa-camera" aria-hidden="true"></i>
@@ -47,15 +44,21 @@
             </div>
         </div>
         <div class="form-group row">
-        <label for="inputPassword3" class="col-sm-2 col-form-label">真實姓名 <b class="text-danger">*</b></label>
-        <div class="form-row col-sm-10">
-        <div class="col">
-        <input type="text" class="form-control" placeholder="姓" name="last_name" id="last_name" v-model="user.last_name">
+            <label class="col-sm-2 col-form-label">真實姓名 <b class="text-danger">*</b></label>
+            <div class="form-row col-sm-10">
+                <div class="col">
+                	<input type="text" class="form-control" placeholder="姓" name="last_name" id="last_name" v-model="user.last_name">
+                </div>
+                <div class="col">
+                	<input type="text" class="form-control add5" placeholder="名" name="first_name" id="first_name" v-model="user.first_name">
+                </div>
+            </div>
         </div>
-        <div class="col">
-        <input type="text" class="form-control add5" placeholder="名" name="first_name" id="first_name" v-model="user.first_name">
-        </div>
-        </div>
+        <div class="form-group row">
+            <label class="col-sm-2 col-form-label">暱稱</label>
+            <div class="form-row col-sm-10">
+                <input type="text" class="form-control" placeholder="暱稱" name="nickname" v-model="user.nickname">
+            </div>
         </div>
         <div class="form-group row">
         <label  class="col-sm-2 col-form-label">手機號碼 <b class="text-danger">*</b></label>
@@ -145,6 +148,24 @@
       </form>     
     </div>
   </div>    
+  <!--------Error Dialog---------------------------------------------------------------------------->
+  <div class="modal fade" id="errorAlertModal" tabindex="-1" role="dialog" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+                <h5 id="alert_title" class="modal-title" v-text="msg.title"></h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div id="alert_body" class="modal-body" v-text="msg.body"></div>
+            <div class="modal-footer">
+               <button type="button" class="btn btn-success" data-dismiss="modal">關閉視窗</button>
+               <button type="button" id="alertBtn" data-toggle="modal" data-target="#errorAlertModal" style="display:none;" />
+            </div>
+        </div>
+      </div>
+  </div>	
 </div>
 <div class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg">
@@ -427,6 +448,8 @@
 new Vue({
   el: "#app",
   data: {
+	message: '<?php echo ((isset($message))?$message:'')?>',
+	msg: '',
 	email: '',
 	user: {usr_type:'',first_name:'',last_name:'',email:'',password:'',sex:'',phone_nat_code:'886',phone_number:'',usr_status:0},
 	chk_password: '',
@@ -445,6 +468,13 @@ new Vue({
   },
   mounted: function () {
 	  var self = this;
+	  if(self.message)
+	  {
+	  	self.msg = jQuery.parseJSON(self.message);
+		$("#alertBtn").trigger("click");
+		//$('html, body').scrollTop(0);
+	  }
+	  
 	  axios.get('/api/get_profile').then(function (response){
 		  console.log(response.data);
 		  
@@ -472,7 +502,8 @@ new Vue({
 			var chk = 1;
 			if(!self.agree && self.user.usr_status<1)
 			{
-				alert('請詳閱使用者條款，並點選同意方框，才能執行下一步驟。')
+				self.msg = {title:'喔喔 錯誤了喔',body:'請詳閱使用者條款，並點選同意方框，才能執行下一步驟。'};
+				$("#alertBtn").trigger("click");
 				chk = 0;
 				$("body,html").scrollTop(0);	
 			}

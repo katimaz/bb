@@ -99,7 +99,7 @@ class WebController extends Controller
 		  {
 			  $user = User::where('email', '=', trim($request->email))->select('id','usr_id','password','usr_status','last_name','first_name','nickname','phone_number','email','remember_token','cookie_id','usr_type','usr_photo')->first();
 			  $password = trim($request->password) . ":" . $user->usr_id;
-
+			  
 			  $request->session()->flush();
 			  if (Auth::attempt(array('email' => trim($request->email), 'password' => $password),((isset($request->remember))?true:false)))
 			  {
@@ -115,9 +115,10 @@ class WebController extends Controller
 					  {
 						Cookie::queue(
 							Cookie::forever('BB_cookie_id', $user->cookie_id)
-						);
-					  }
-				  } else {
+						);	
+					  }		
+				  }else
+				  {
 					  $new_cookie = Utils::v4();
 					  User::where('usr_id',Session::get('usrID'))->update(array('cookie_id'=>$new_cookie));
 					  Cookie::queue(
@@ -166,7 +167,7 @@ class WebController extends Controller
 		$input->usr_id = $account;
 		$input->password = Utils::set_password(trim($request->password),trim($account));
 		$input->usr_status = 0;
-		$input->usr_type = 1;  /* DB usr_type doesn't allow null */
+		$input->usr_type = 0;  /* DB usr_type doesn't allow null */
 		$input->email = trim($request->email);
 
 		$input->save();
@@ -182,8 +183,8 @@ class WebController extends Controller
 			session()->put('uID', $user->id);
 			session()->put('usrID', $user->usr_id);
 			session()->put('usrStatus', $user->usr_status);
-			session()->put('profile', array('first'=>'','last'=>'','nick'=>'','photo'=>''));
-			session()->put('offer', ((isset($user) && $user->$usr_type)?true:false));
+			session()->put('profile', array('first'=>'','last'=>'','nick'=>'','usr_photo'=>''));
+			session()->put('offer', ((isset($user) && $user->usr_type)?true:false));
 		}
 
 		//寄發歡迎加入信件
@@ -230,7 +231,7 @@ class WebController extends Controller
 		if(!file_exists(storage_path()."/files"))
 			mkdir(storage_path()."/files", 0775);
 		if(!file_exists(storage_path()."/files/pic"))
-			mkdir(storage_path()."/files/pic", 0775);
+			mkdir(storage_path()."/files/pic", 0775);	
 		if(!file_exists(storage_path()."/files/pic/avatar"))
 			mkdir(storage_path()."/files/pic/avatar", 0775);
 		if(!file_exists(storage_path()."/files/pic/avatar/photoBig"))
@@ -257,7 +258,7 @@ class WebController extends Controller
 				//chmod(storage_path()."/files/pic/avatar/photoSmall/".$Fn_name, 0775);
 				Utils::ImageResize(storage_path()."/files/pic/avatar/photoSmall/".$Fn_name, storage_path()."/files/pic/avatar/photoSmall/".$Fn_name, 200,200,72);
 				$input['usr_photo'] = $Fn_name;
-				session()->put('usrPhoto', $Fn_name);
+//				session()->put('usrPhoto', $Fn_name);
 			}else
 				return View('web/error_message', array('message' => '錯誤的影像格式，請使用JPG圖檔!', 'goUrl'=>'/register'));
 		}
@@ -266,10 +267,11 @@ class WebController extends Controller
 		if(isset($request->password) && $request->password && $request->password==$request->chk_password)
 			$input['password'] = Utils::set_password(trim($request->password),trim($account));
 
-		session()->put('usr_type', $request->usr_type);
+//		session()->put('usr_type', $request->usr_type);
 		$input['usr_type'] = $request->usr_type;
 		$input['last_name'] = $request->last_name;
 		$input['first_name'] = $request->first_name;
+		$input['nickname'] = $request->nickname;
 		if($user->email_validated)
 			$input['usr_status'] = 1;
 		$input['sex'] = $request->sex;
@@ -283,7 +285,9 @@ class WebController extends Controller
 		}
 		User::where('usr_id',$account)->update($input);
 		
-		$new_user = User::where('usr_id',$account)->select('id','usr_id','usr_status','email','last_name','first_name','nickname','usr_type','referral_from','usr_photo')->first();
+//		$new_user = User::where('usr_id',$account)->select('id','usr_id','usr_status','email','last_name','first_name','nickname','usr_type','referral_from','usr_photo')->first();
+		$new_user = User::where('usr_id',$account)->select('id','usr_id','usr_status','email','last_name','first_name','nickname','usr_type','usr_photo')->first();
+
 		if(!$new_user)
 			return View('web/error', array('message' => '很抱歉，無此帳號權限喔! 請重新登入'));
 		
@@ -342,6 +346,8 @@ class WebController extends Controller
 			$setting = Setting::select('email_veri_comp_subj','email_veri_comp_body')->first();
 			$btn = json_encode(array('url'=>env('APP_URL'),'name'=>'連結幫棒'));
 			Mail::to($new_user->email)->queue(new toMail(env('APP_URL'),$btn,((isset($new_user))?$new_user->first_name:''),((isset($setting) && $setting->email_veri_comp_subj)?$setting->email_veri_comp_subj:'BounBang 幫棒 – 您已完成註冊驗證信'),((isset($setting) && $setting->email_veri_comp_body)?$setting->email_veri_comp_body:'歡迎加入 BounBang 幫棒家族，您已完成電子郵件信箱設定<br />歡迎您由此進入幫棒')));
+
+/*
 			
 			if($new_user->referral_from)
 			{
@@ -352,7 +358,7 @@ class WebController extends Controller
 					Mail::to($referral->email)->queue(new toMail(env('APP_URL'),'',$referral->first_name, $class['title'], str_replace('\n','<br />',str_replace("<NAME>",' '.$new_user->last_name.''.$new_user->first_name.' ', $class['body']))));	
 				}
 			}
-			
+*/			
 			return redirect('/web/map');
 		}else if($new_user->usr_status)
 			return redirect('/web/map');
@@ -664,7 +670,9 @@ class WebController extends Controller
 		if($veri->updated_at<date("Y-m-d H:i:s", strtotime('-1 day')))
 			return View('web/error_message', array('message' => '驗證碼已逾期失效，請重新執行驗證一次', 'goUrl'=>'/web/profile'));
 		
-		$user = User::where('email',$data->email)->select('first_name','last_name','phone_number','usr_id','usr_status','referral_from')->first();
+//		$user = User::where('email',$data->email)->select('first_name','last_name','phone_number','usr_id','usr_status','referral_from')->first();
+		$user = User::where('email',$data->email)->select('first_name','last_name','phone_number','usr_id','usr_status')->first();
+
 		if(!$user)
 			return View('web/error_message', array('message' => 'Email驗證不成功，請重新執行驗證一次', 'goUrl'=>'/web/profile'));
 			
@@ -680,7 +688,8 @@ class WebController extends Controller
 			$setting = Setting::select('email_veri_comp_subj','email_veri_comp_body')->first();
 			$btn = json_encode(array('url'=>env('APP_URL'),'name'=>'連結幫棒'));
 			Mail::to($data->email)->queue(new toMail(env('APP_URL'),$btn,$user->last_name.$user->first_name,((isset($setting) && $setting->email_veri_comp_subj)?$setting->email_veri_comp_subj:'BounBang 幫棒 – 您已完成註冊驗證信'),((isset($setting) && $setting->email_veri_comp_body)?$setting->email_veri_comp_body:'歡迎加入 BounBang 幫棒家族，您已完成電子郵件信箱設定<br />歡迎您由此進入幫棒')));
-			
+
+/*			
 			if($user->referral_from)
 			{
 				$referral = User::where('usr_id',$user->referral_from)->select('first_name','email')->first();
@@ -690,6 +699,7 @@ class WebController extends Controller
 					Mail::to($referral->email)->queue(new toMail(env('APP_URL'),'',$referral->first_name, $class['title'], str_replace('\n','<br />',str_replace("<NAME>",' '.$user->last_name.''.$user->first_name.' ', $class['body']))));	
 				}
 			}
+*/
 			
 			return redirect('/web/map');
 		}else

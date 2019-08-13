@@ -23,6 +23,8 @@
     <link rel="stylesheet" href="{{asset("/css/font-awesome.min.css")}}">
     <link rel="stylesheet" href="{{asset("/css/swiper.min.css")}}">
     <link rel="stylesheet" href="{{asset("/css/style.css")}}">
+    <link rel="stylesheet" href="{{asset("/css/slick-theme.css")}}">
+    <link rel="stylesheet" href="{{asset("/css/slick.css")}}">
     <title>幫棒 您的好幫手</title>
     <!--<link href="/css/app.css" rel="stylesheet">-->
     <script src="{{asset("/js/app.js")}}"></script>

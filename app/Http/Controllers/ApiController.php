@@ -73,7 +73,7 @@ class ApiController extends Controller
 
 	public function get_profile(Request $request)
     {
-		$user = User::where('usr_id',Session::get('usrID'))->select('id','usr_status','first_name','last_name','usr_type', 'open_offer_setting','usr_id','phone_number','phone_nat_code','sex','email','usr_photo','email_validated')->first();;
+		$user = User::where('usr_id',Session::get('usrID'))->select('id','usr_status','first_name','last_name','nickname','usr_type','usr_id','phone_number','phone_nat_code','sex','email','usr_photo','email_validated')->first();
 		if(!$user)
 			return 'error';
 		$zipcodes = Utils::get_area_zipcode();

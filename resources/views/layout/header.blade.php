@@ -20,7 +20,7 @@
 <div class="header {{((isset($home) && $home==1)?'':'fixed')}}">
     <a class="brand" href="/"><img src="{{asset("/images/logo.svg")}}"></a>
     <!--  登入後隱藏 START-->
-    @if(!session()->has('usrID'))
+    @if(!Auth::check())
     <div class="login-arr">
         <a href="<?=URL::to('/')?>/login">登入 / 註冊</a>
     </div>
@@ -112,8 +112,13 @@
         </a>
         <div class="user-box">
             <div class="user-info">
+<!--
                 <div class="user-face"><img src="{{URL::to('/') . '/avatar/small/' . session()->get('usrPhoto')}}"></div>
-                <div class="user-score"><span class="user-name">{{session()->get('usrName')['last'] . session()->get('usrName')['first']}}</span><span class="start"><i class="fa fa-star"
+                <div class="user-score"><span class="user-name">{{session()->get('usrName')['last'] . session()->get('usrName')['first']}}</span>
+-->
+                <div class="user-face"><img :src="((pro && pro.photo)?'{{asset('/avatar/big')}}/'+pro.photo:'{{asset('/images/person-icon.jpg')}}')"></div>
+                <div class="user-score"><span class="user-name" v-text="((pro)?((pro.nick)?pro.nick:pro.last+pro.first):'')"></span>
+                <span class="start"><i class="fa fa-star"
                             aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star"
                             aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star"
                             aria-hidden="true"></i> </span><span class="avg">4.9</span>
@@ -143,4 +148,21 @@
     </div>
     @endif
 </div>
+<script>
+new Vue({
+	el: "#top",
+	data: {
+	  profile: '<?php echo ((Session::has('profile'))?json_encode(Session::get('profile')):'')?>',
+	  pro: ''
+	},
+	mounted: function () {
+		var self = this;
+		if(self.profile)
+		{
+			self.pro = jQuery.parseJSON( self.profile );	
+		}
+	}
+  
+})
+</script>
 <!--頭部結束 -->

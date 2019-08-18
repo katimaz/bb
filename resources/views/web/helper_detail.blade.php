@@ -19,7 +19,7 @@
         </div>
         <div class="helper-box">
           <div class="h-face">
-            <img src="/images/{{$user->usr_photo}}'">
+            <img src="{{url('/avatar/small/' . $user->usr_photo)}}">
           </div>
           <div class="helper-info">
             <span class="user-name">{{$user->last_name}}{{$user->first_name}}</span>

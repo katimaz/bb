@@ -22,6 +22,7 @@ use App\Models\olo_img;
 use App\Models\olo_license_img;
 use App\Models\olo_video;
 use App\Models\olo_food;
+use App\Models\member_favorite;
 use Session;
 use App\User;
 use Auth;
@@ -89,6 +90,23 @@ class AjaxController extends Controller
 
 	}
 
+	public function add_fav(Request $request)
+	{
+		$need_id = $request->need_id;
+		$helper_id = session()->get('uID');
+		$offer_id = $request->offer_id;
+
+		$member_favorite = new member_favorite;
+		$member_favorite->helper_id = $helper_id;
+		$member_favorite->need_id = $need_id;
+		$member_favorite->mem_id = 0;
+		$member_favorite->offer_id = $offer_id;
+		$member_favorite->transaction_id = 0;
+		$member_favorite->save();
+
+		return response()->json([]);
+	}
+
 	public function set_veri_mail(Request $request)
     {
 		$user = User::where('email',$request->id)->select('email_valid_key')->first();
@@ -139,11 +157,11 @@ class AjaxController extends Controller
 
 		$user = User::where('usr_id',Session::get('usrID'))->first();
 		if($user->open_offer_setting == "0") {
-			$where = "(olo.service_type LIKE '*[$main_servicetype,%' OR olo.service_type LIKE '%,$main_servicetype,%' OR olo.service_type LIKE '%,$main_servicetype]*' OR olo.service_type LIKE '*[$main_servicetype]*')";
+			$where = "(olo.service_type = '$main_servicetype')";
 
 			if(isset($sub_servicetype)) {
 				foreach ($sub_servicetype as $key => $value) {
-					$where .= " OR (olo.service_type LIKE '*[$value,%' OR olo.service_type LIKE '%,$value,%' OR olo.service_type LIKE '%,$value]*' OR olo.service_type LIKE '*[$value]*')";
+					$where .= " OR (olo.service_type_sub = '$value') ";
 				}
 			}
 
@@ -164,11 +182,11 @@ class AjaxController extends Controller
 				$loc[$key]['newLabel'] = '<img src="' . URL::to('/') . '/images/' . $value->usr_photo . '" style="border-radius:50%;width:30px;height:30px;margin-top: -95px;border: 2px solid #b30b06;">';
 			}
 		} else {
-			$where = "(nlo.service_type LIKE '*[$main_servicetype,%' OR nlo.service_type LIKE '%,$main_servicetype,%' OR nlo.service_type LIKE '%,$main_servicetype]*' OR nlo.service_type LIKE '*[$main_servicetype]*')";
+			$where = "(olo.service_type = '$main_servicetype')";
 
 			if(isset($sub_servicetype)) {
 				foreach ($sub_servicetype as $key => $value) {
-					$where .= " OR (nlo.service_type LIKE '*[$value,%' OR nlo.service_type LIKE '%,$value,%' OR nlo.service_type LIKE '%,$value]*' OR nlo.service_type LIKE '*[$value]*')";
+					$where .= " OR (olo.service_type_sub = '$value') ";
 				}
 			}
 
@@ -205,11 +223,11 @@ class AjaxController extends Controller
 		// DB::enableQueryLog();
 		$user = User::where('usr_id',Session::get('usrID'))->first();
 		if($user->open_offer_setting == "0") {
-			$where = "(olo.service_type LIKE '*[$main_servicetype,%' OR olo.service_type LIKE '%,$main_servicetype,%' OR olo.service_type LIKE '%,$main_servicetype]*' OR olo.service_type LIKE '*[$main_servicetype]*')";
+			$where = "(olo.service_type = '$main_servicetype')";
 
 			if(isset($sub_servicetype)) {
 				foreach ($sub_servicetype as $key => $value) {
-					$where .= " OR (olo.service_type LIKE '*[$value,%' OR olo.service_type LIKE '%,$value,%' OR olo.service_type LIKE '%,$value]*' OR olo.service_type LIKE '*[$value]*')";
+					$where .= " OR (olo.service_type_sub = '$value') ";
 				}
 			}
 
@@ -227,11 +245,11 @@ class AjaxController extends Controller
 				$loc[$key] = '<div class="list-box"> <div class="list-left"> <span class="b-face"><img src="' . URL::to('/') . '/images/' . $value->usr_photo . '"></span> </div> <a href="' . URL::to('/') . '/web/helper_detail/' . $value->usr_id . '/' . (int)($value->distance * 1000) . '" class="list-right"> <div class="list-name">' . $value->last_name . $value->first_name . '</div> <div  class="list-comm"> <span class="list-start"> <i class="fa fa-star" aria-hidden="true"></i> <i class="fa fa-star" aria-hidden="true"></i> <i class="fa fa-star" aria-hidden="true"></i> <i class="fa fa-star" aria-hidden="true"></i> <i class="fa fa-star" aria-hidden="true"></i> </span> <span class="avg">4.9</span> </div> <div class="list-ds"><span class="show-m">距離：</span>' . (int)($value->distance * 1000) . '公尺</div> <div class="list-dl"><span class="show-m">受雇次數：</span>256次</div > <div class="list-dl"><span class="show-m">工作時數：</span>125/小時</div > <div class="list-dl"><span class="show-m">服務項目：</span>水電工程</div> <div class="list-dl"><span class="show-m">價格：</span>' . $value->price . '/' . $value->price_type . '</div> <div class="list-types"><img src="images/work1.jpg"><img src="images/works.jpg"></div> </a> <div class="list-bt"> <a href="#" class="lask" data-toggle="modal" data-target="#exampleModalLong">詢問</a> <a href="#" class="lhire"  data-toggle="modal" data-target="#exampleModalLong">雇用</a> </div> </div>';
 			}
 		} else {
-			$where = "(nlo.service_type LIKE '*[$main_servicetype,%' OR nlo.service_type LIKE '%,$main_servicetype,%' OR nlo.service_type LIKE '%,$main_servicetype]*' OR nlo.service_type LIKE '*[$main_servicetype]*')";
+			$where = "(olo.service_type = '$main_servicetype')";
 
 			if(isset($sub_servicetype)) {
 				foreach ($sub_servicetype as $key => $value) {
-					$where .= " OR (nlo.service_type LIKE '*[$value,%' OR nlo.service_type LIKE '%,$value,%' OR nlo.service_type LIKE '%,$value]*' OR nlo.service_type LIKE '*[$value]*')";
+					$where .= " OR (olo.service_type_sub = '$value') ";
 				}
 			}
 
@@ -603,8 +621,8 @@ class AjaxController extends Controller
 
 	public function add_olo(Request $request)
 	{
+		$service_type = $request->service_type_main;
 		$service_type_sub = $request->service_type_sub;
-		$service_type = '*[' . $request->service_type_main . ',' . $service_type_sub . ']*';
 		$mar = Member_addr_recode::where('id', '=', $request->address)->get();
 
 		$mem_addr = $mar[0]->city . $mar[0]->nat . $mar[0]->addr;
@@ -631,6 +649,7 @@ class AjaxController extends Controller
 		$olo = new OfferListObj;
 		$olo->mem_id = session()->get('uID');
 		$olo->service_type = $service_type;
+		$olo->service_type_sub = $service_type_sub;
 		$olo->mem_addr = $mem_addr;
 		$olo->lat = $mar[0]->lat;
 		$olo->lng = $mar[0]->lng;

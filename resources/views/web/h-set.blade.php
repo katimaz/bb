@@ -641,6 +641,7 @@
               str = '<div class="ser-list">' + response.offer_title + '<a href="#" class="ser-editb" data-toggle="modal" data-target="#editdesign" data-id="'+ response.id +'">編輯 <i class="fa fa-pencil-square-o" aria-hidden="true"></i></a> <a href="#" class="ser-edit" data-id="'+ response.id +'" >刪除<i class="fa fa-times-circle" aria-hidden="true"></i></a> </div>';
             }
             $('.set-ser').after(str);
+            location.reload();
           }
         });
       })

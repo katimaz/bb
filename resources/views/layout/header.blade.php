@@ -35,7 +35,7 @@
         @if(session()->get('usr_type') == 0)
         <ul class="menu-ul">
             <li>
-                <a href="reservation.html">我的需求</a>
+                <a href="{{URL::to('/')}}/web/management">我的需求</a>
             </li>
             <li>
                 <a href="order.html">訂單狀態</a>
@@ -71,7 +71,7 @@
         @else
         <ul class="menu-ul">
             <li>
-                <a href="job-reservation.html">我的工作<i class="nl-badge">2</i></a>
+                <a href="{{URL::to('/')}}/web/job_manager">我的工作<i class="nl-badge">2</i></a>
             </li>
             <li>
                 <a href="order-statu.html">我的訂單<i class="nl-badge">1</i></a>

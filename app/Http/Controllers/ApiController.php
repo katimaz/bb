@@ -73,7 +73,7 @@ class ApiController extends Controller
 	
 	public function get_profile(Request $request)
     {
-		$user = User::where('usr_id',Session::get('usrID'))->select('id','usr_status','first_name','last_name','open_offer_setting','usr_id','phone_number','phone_nat_code','sex','email','usr_photo','email_validated')->first();
+		$user = User::where('usr_id',Session::get('usrID'))->select('id','usr_status','first_name','last_name','nickname','usr_type','usr_id','phone_number','phone_nat_code','sex','email','usr_photo','email_validated')->first();
 		if(!$user)
 			return 'error';
 		$zipcodes = Utils::get_area_zipcode();
@@ -98,7 +98,7 @@ class ApiController extends Controller
 			$positions[] = array('city'=>'','areas'=>array(),'nat'=>'','zip'=>'','addr'=>'','lat'=>'','lng'=>'');
 		}
 		$user->password = '';
-		$user->open_offer_setting = ((!$user->open_offer_setting)?0:$user->open_offer_setting);
+		$user->usr_type = ((!$user->usr_type) ? 0 : $user->usr_type);
 		$user->sex = ((!$user->sex)?0:$user->sex);
 		$user->phone_nat_code = ((!$user->phone_nat_code)?'886':$user->phone_nat_code);
 		

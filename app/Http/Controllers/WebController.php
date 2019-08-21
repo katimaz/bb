@@ -28,6 +28,7 @@ use App\User;
 use Auth;
 use Cookie;
 use DB;
+use URL;
 
 class WebController extends Controller
 {
@@ -102,7 +103,7 @@ class WebController extends Controller
 				  session()->put('usrID', $user->usr_id);
 				  session()->put('usrStatus', $user->usr_status);
 				  session()->put('profile', array('first'=>$user->first_name,'last'=>$user->last_name,'nick'=>$user->nickname,'photo'=>$user->usr_photo));
-				  session()->put('offer', ((isset($user) && $user->open_offer_setting)?true:false));
+				  session()->put('offer', ((isset($user) && $user->usr_type)?true:false));
 				  
 				  if(isset($user) && $user->cookie_id)
 				  {
@@ -167,6 +168,7 @@ class WebController extends Controller
 		$input->usr_id = $account;
 		$input->password = Utils::set_password(trim($request->password),trim($account));
 		$input->usr_status = 0;
+		$input->usr_type = 0;  /* DB usr_type doesn't allow null */
 		$input->email = trim($request->email);
 		
 		$input->save();
@@ -182,8 +184,8 @@ class WebController extends Controller
 			session()->put('uID', $user->id);
 			session()->put('usrID', $user->usr_id);
 			session()->put('usrStatus', $user->usr_status);
-			session()->put('profile', array('first'=>'','last'=>'','nick'=>'','photo'=>''));
-			session()->put('offer', ((isset($user) && $user->open_offer_setting)?true:false));
+			session()->put('profile', array('first'=>'','last'=>'','nick'=>'','usr_photo'=>''));
+			session()->put('offer', ((isset($user) && $user->usr_type)?true:false));
 		}
 		
 		//寄發歡迎加入信件
@@ -304,9 +306,9 @@ class WebController extends Controller
 		//$input = new User;
 		if(isset($request->password) && $request->password && $request->password==$request->chk_password)
 			$input['password'] = Utils::set_password(trim($request->password),trim($account));
-		
-		
-		$input['open_offer_setting'] = $request->open_offer_setting;
+
+//		session()->put('usr_type', $request->usr_type);
+		$input['usr_type'] = $request->usr_type;
 		$input['last_name'] = $request->last_name;
 		$input['first_name'] = $request->first_name;
 		$input['nickname'] = $request->nickname;
@@ -323,7 +325,9 @@ class WebController extends Controller
 		}
 		User::where('usr_id',$account)->update($input);
 		
-		$new_user = User::where('usr_id',$account)->select('id','usr_id','usr_status','email','last_name','first_name','nickname','open_offer_setting','referral_from','usr_photo')->first();
+//		$new_user = User::where('usr_id',$account)->select('id','usr_id','usr_status','email','last_name','first_name','nickname','usr_type','referral_from','usr_photo')->first();
+		$new_user = User::where('usr_id',$account)->select('id','usr_id','usr_status','email','last_name','first_name','nickname','usr_type','usr_photo')->first();
+
 		if(!$new_user)
 			return redirect()->action('WebController@profile', array('message'=>json_encode(array('title'=>'喔喔 錯誤了 !!','body'=>'很抱歉，無此帳號權限喔! 請重新登入'))));
 		
@@ -375,7 +379,7 @@ class WebController extends Controller
 		session()->put('usrID', $new_user->usr_id);
 		session()->put('usrStatus', $new_user->usr_status);
 		session()->put('profile', array('first'=>$new_user->first_name,'last'=>$new_user->last_name,'nick'=>$new_user->nickname,'photo'=>$new_user->usr_photo));
-		session()->put('offer', ((isset($new_user) && $new_user->open_offer_setting)?true:false));
+		session()->put('offer', ((isset($new_user) && $new_user->usr_type)?true:false));
 		
 		if($new_user->usr_status && $new_user->usr_status!=$user->usr_status)
 		{

@@ -379,7 +379,7 @@ class NewebPay extends Model
 			
 			if($data->Result->TradeStatus==1)
 			{
-				Notify::via('notify','訂單編號 : '.$decode->Result->MerchantOrderNo.' 支付方式 : '.$decode->Result->PaymentType.' 前往查看 : ! <'.env('APP_URL').'/admin/transfer_records?item=newebPay&action=manage'.'|Click here> for details!');
+				Notify::via('notify','訂單編號 : '.$decode->Result->MerchantOrderNo.' 支付方式 : '.$decode->Result->PaymentType.' 前往查看 : ! <'.url('/').'/admin/transfer_records?item=newebPay&action=manage'.'|Click here> for details!');
 				/*$transfer = Newebpay_mpg::join('users','newebpay_mpgs.u_id','=','users.id')
 					->where('newebpay_mpgs.MerchantOrderNo',$decode->Result->MerchantOrderNo)
 					->select('newebpay_mpgs.u_id','newebpay_mpgs.ItemDesc','newebpay_mpgs.Email','users.first_name','users.last_name','users.usr_id')->first();
@@ -437,7 +437,7 @@ class NewebPay extends Model
 				$input['CVSCOMPhone'] = $decode->Result->CVSCOMPhone;
 			}
 			Newebpay_mpg::where('MerchantOrderNo',$decode->Result->MerchantOrderNo)->update($input);
-			Notify::via('notify','訂單付款返回 : '.$decode->Result->MerchantOrderNo.' 支付方式 : '.$decode->Result->PaymentType.' 前往查看 : ! <'.env('APP_URL').'/admin/transfer_records?item=newebPay&action=manage'.'|Click here> for details!');
+			Notify::via('notify','訂單付款返回 : '.$decode->Result->MerchantOrderNo.' 支付方式 : '.$decode->Result->PaymentType.' 前往查看 : ! <'.url('/').'/admin/transfer_records?item=newebPay&action=manage'.'|Click here> for details!');
 		}
 		return $decode;
 	}

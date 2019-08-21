@@ -16,7 +16,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $fillable = array(
-        'usr_id','usr_status','email','first_name','last_name','password','FB_login_token','Google_login_token','Line_login_token','cookie_id','usr_type','usr_photo'
+        'usr_id','usr_status','email','first_name','last_name','password','FB_login_token','Google_login_token','Line_login_token','cookie_id','open_offer_setting','usr_photo'
 	);
 	/**
      * The attributes that should be hidden for arrays.
@@ -39,8 +39,7 @@ class User extends Authenticatable
 			}
 			$input['usr_id'] = $account;
 			$input['usr_status'] = 0;
-//			$input['open_offer_setting'] = 0;
-			$input['usr_type'] = 0;
+			$input['open_offer_setting'] = 0;
 			$input['password'] = Utils::set_password(time(),trim($account));
 			if($input['avatar'])
 			{
@@ -72,16 +71,15 @@ class User extends Authenticatable
         if(!static::where('Google_login_token', $input['Google_login_token'])->orWhere('email',$input['email'])->count())
 		{
             
-			/*$chk=true; 
+			$chk=true; 
 			while($chk==true) {
 				  $account = Utils::create_name_id(time());;
 				  if(!static::where('usr_id', $account)->count())
 					$chk=false;
-			}*/
+			}
 			$input['usr_id'] = $account;
 			$input['usr_status'] = 0;
-//			$input['open_offer_setting'] = 0;
-			$input['usr_type'] = 0;
+			$input['open_offer_setting'] = 0;
 			$input['password'] = Utils::set_password(time(),trim($account));
 			if($input['avatar'])
 			{
@@ -119,8 +117,7 @@ class User extends Authenticatable
 			}
 			$input['usr_id'] = $account;
 			$input['usr_status'] = 0;
-//			$input['open_offer_setting'] = 0;
-			$input['usr_type'] = 0;
+			$input['open_offer_setting'] = 0;
 			$input['password'] = Utils::set_password(time(),trim($account));
 			if($input['avatar'])
 

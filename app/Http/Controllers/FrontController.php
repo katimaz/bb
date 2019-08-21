@@ -19,6 +19,7 @@ use App\Models\NewebPay;
 use App\Models\Newebpay_mpg;
 use App\Models\Invoice;
 use App\Models\Invoice_allowance;
+use App\Models\NeedListObj;
 use App\Models\OfferListObj;
 use App\Models\Users;
 use App\Models\einvoice_info;
@@ -612,6 +613,30 @@ class FrontController extends Controller
 		}
 
 	}
+	// 我的訂單
+	public function job_manager()
+	{
+		$distance = '50';
+
+		$olo = OfferListObj::where('mem_id', '=', session()->get('uID'))->get();
+		$nlos = [];
+		$i = 0;
+		foreach($olo as $key => $value) {
+			$where = " nlo.service_type = '" . $value->service_type . "'";
+			if(isset($value->service_type_sub)) {
+				$where .= " OR nlo.service_type = '" . $value->service_type_sub . "'";
+			}
+
+			$nlo = DB::table('NeedListObj AS nlo')->select(DB::raw("nlo.id, ( 6371 * acos( cos( radians(".$value->lat.") ) * cos( radians( lat ) ) * cos( radians( lng ) - radians(".$value->lng.") ) + sin( radians(".$value->lat.") ) * sin( radians( lat ) ) ) ) AS distance, lat, lng, usr_photo, last_name, first_name, u.usr_id, budget, budget_type, mem_addr, keyword, nlo.service_type, available_daytime_enum, datetime_from, CASE WHEN budget_type = '小時' THEN budget * available_daytime_enum WHEN budget_type = '每件' THEN budget END AS total, '". $value->id . "' AS offer_id"))->whereRaw($where)->join('users AS u', 'nlo.mem_id', '=', 'u.id')->having('distance','<', $distance)->orderBy('distance')->get();
+			if(!empty($nlo)) {
+				$nlos[$i] = $nlo;
+				$i++;
+			}
+		}
+
+		return View('web/job-manager', ['nlos' => $nlos]);
+
+	}
 
 	// job-detail
 	public function job_detail($usr_id = '', $distance = 0)
@@ -626,6 +651,8 @@ class FrontController extends Controller
 		return View('web/job_detail', ['distance' => $distance, 'user' => $user[0], 'nlo' => $nlo]);
 	}
 
+
+	// 驗證
 	public function veri_mail(Request $request)
     {
 		$data = json_decode(Utils::decrypt(base64_decode($request->data), config('bbpro.iv')));
@@ -661,7 +688,7 @@ class FrontController extends Controller
 	{
 		Mail::to('iamgodc@gmail.com')->queue(new toMail(env('APP_URL'), 'test', 'BounBang 幫棒 – 您已完成註冊驗證信', '歡迎加入 BounBang 幫棒家族，您已完成電子郵件信箱設定<br />歡迎您由此進入幫棒'));
 	}
-
+	// 忘記密碼
 	public function set_forgot_passwd(Request $request)
     {
 		$data = json_decode(Utils::decrypt(base64_decode($request->data), config('bbpro.iv')));

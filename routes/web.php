@@ -14,7 +14,7 @@
 Route::get('/', 'WebController@index');
 Route::get('/login', 'WebController@login');
 Route::get('/forgot', function (){ return view('/forgot'); });
-Route::get('/signup', function (){ return view('/signup'); });
+Route::get('/signup', 'WebController@signup');
 Route::get('/adm_login', function (){ return view('admin/adm_login'); });
 Route::get('/error', function (){ return view('admin/error', array('message' => '很抱歉，系統已登出，請重新登入喔!')); });
 
@@ -36,14 +36,16 @@ Route::post('/set_latlng', 'ApiController@set_latlng');
 
 Route::prefix('web')->group(function () {
 
-	//Route::get( 'login', 'WebController@login' );
 	Route::post( 'signup_pt', 'WebController@signup_pt' );
 	Route::get( 'logout', 'WebController@logout' );
 	Route::post( 'login_pt', 'WebController@login_pt' );
-//	Route::post( 'register_pt', 'WebController@register_pt' );
-	Route::post( 'set_forgot_passwd_pt', 'WebController@set_forgot_passwd_pt' );
 	Route::get( 'profile', 'WebController@profile' );
 	Route::post( 'profile_pt', 'WebController@profile_pt' );
+	Route::post( 'set_forgot_passwd_pt', 'WebController@set_forgot_passwd_pt' );
+	Route::get( 'recommend', 'WebController@recommend' );
+	Route::get( 'partners', 'WebController@partners' );
+	Route::get( 'set_qrcode', 'WebController@set_qrcode' );
+	Route::get( 'calendar', 'WebController@calendar' );
 
 	Route::get( 'map', 'FrontController@map' );
 //暫時在這裡，日後要更換h-map的controller到Front

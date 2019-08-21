@@ -14,31 +14,10 @@
           <input type="password" class="form-control" name="password" id="password" v-model="passwd" placeholder="輸入密碼">
       </div>
       <button type="button" class="login-bt" @click="sendform">登入</button>
-      <button type="button" id="alertBtn" data-toggle="modal" data-target="#errorAlertModal" style="display:none;" /></button>
     </form>    
      <a href="/forgot" class="txtbtn"><i class="fa fa-question-circle-o" aria-hidden="true"></i> 忘記密碼 </a>
-     <a href="/signup" class="text-right txtbtn"><i class="fa fa-envelope-o" aria-hidden="true"></i> 使用E-mail註冊 </a>   
+     <a href="/signup" class="text-right txtbtn"><i class="fa fa-envelope-o" aria-hidden="true"></i> 使用E-mail註冊 </a>
    </div>
-   
-   <div class="modal fade" id="errorAlertModal" tabindex="-1" role="dialog" aria-hidden="true">
-      <div class="modal-dialog modal-dialog-centered" role="document">
-          <div class="modal-content">
-            <div class="modal-header">
-                <h5 id="alert_title" class="modal-title"></h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                  <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div id="alert_body" class="modal-body">
-                
-            </div>
-            <div class="modal-footer">
-               <button type="button" class="btn btn-success" data-dismiss="modal">關閉視窗</button>
-            </div>
-        </div>
-      </div>
-  </div>
-  
 <script>
 new Vue({
   el: "#app",
@@ -52,10 +31,12 @@ new Vue({
 	  if(self.message)
 	  {
 	  	var msg = jQuery.parseJSON(self.message);
-		$("#alert_title").text(msg.title);
-		$("#alert_body").text(msg.body);
-		$("#alertBtn").trigger("click");
-		//$('html, body').scrollTop(0);
+		setTimeout(function(){
+			$("#alert_title").text(msg.title);
+			$("#alert_body").text(msg.body);
+			$("#alertBtn").trigger("click");
+		},500);
+		
 	  }
   },
   methods: {

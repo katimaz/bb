@@ -11,8 +11,7 @@
       <span aria-hidden="true">&times;</span>
       </button>
     </div>
-    <div class="pro-box">
-      <form id="mainFrm" action="/web/profile_pt" method="post" enctype="multipart/form-data">
+    <form id="mainFrm" action="/web/profile_pt" method="post" enctype="multipart/form-data">
       @csrf
       	<input type="hidden" name="old_email" v-model="old_email" />
         <input type="hidden" name="count" id="count" v-model="positions.length" />
@@ -29,12 +28,11 @@
             <label  class="col-sm-2 col-form-label">登入身份<i class="text-danger">*</i></label>
             <div class="col-sm-10">
                 <div class="form-check form-check-inline">
-<!-- Modify to merge from Stage0812 -->
-                <input class="form-check-input" type="radio" name="usr_type" value="0" v-model="user.usr_type" id="c" >
+                <input class="form-check-input" type="radio" name="open_offer_setting" value="0" v-model="user.open_offer_setting" id="c" >
                 <label class="form-check-label" for="c">客戶</label>
                 </div>
                 <div class="form-check form-check-inline">
-                <input class="form-check-input" type="radio" name="usr_type" value="1" v-model="user.usr_type" id="h">
+                <input class="form-check-input" type="radio" name="open_offer_setting" value="1" v-model="user.open_offer_setting" id="h">
                 <label class="form-check-label" for="h">好幫手</label>
                 </div>
             </div>
@@ -145,27 +143,8 @@
                 <a class="btn btn-lg btn-success" href="javascript:void(0)" @click="sendform"><i class="fa fa-spinner fa-pulse" v-if="next_sending" aria-hidden="true"></i> @{{((user.usr_status)?'完成':'下一步')}}</a> 
             </div>
         </div>
-      </form>     
-    </div>
+      </form>
   </div>    
-  <!--------Error Dialog---------------------------------------------------------------------------->
-  <div class="modal fade" id="errorAlertModal" tabindex="-1" role="dialog" aria-hidden="true">
-      <div class="modal-dialog modal-dialog-centered" role="document">
-          <div class="modal-content">
-            <div class="modal-header">
-                <h5 id="alert_title" class="modal-title" v-text="msg.title"></h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                  <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div id="alert_body" class="modal-body" v-text="msg.body"></div>
-            <div class="modal-footer">
-               <button type="button" class="btn btn-success" data-dismiss="modal">關閉視窗</button>
-               <button type="button" id="alertBtn" data-toggle="modal" data-target="#errorAlertModal" style="display:none;" />
-            </div>
-        </div>
-      </div>
-  </div>	
 </div>
 <div class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg">
@@ -449,9 +428,8 @@ new Vue({
   el: "#app",
   data: {
 	message: '<?php echo ((isset($message))?$message:'')?>',
-	msg: '',
 	email: '',
-	user: {usr_type:'',first_name:'',last_name:'',email:'',password:'',sex:'',phone_nat_code:'886',phone_number:'',usr_status:0},
+	user: {open_offer_setting:'',first_name:'',last_name:'',email:'',password:'',sex:'',phone_nat_code:'886',phone_number:'',usr_status:0},
 	chk_password: '',
 	old_email: '',
 	is_tomail: '',
@@ -471,8 +449,11 @@ new Vue({
 	  if(self.message)
 	  {
 	  	self.msg = jQuery.parseJSON(self.message);
-		$("#alertBtn").trigger("click");
-		//$('html, body').scrollTop(0);
+		setTimeout(function(){
+			$("#alert_title").text(self.msg.title);
+			$("#alert_body").text(self.msg.body);
+			$("#alertBtn").trigger("click");
+		},500);
 	  }
 	  
 	  axios.get('/api/get_profile').then(function (response){
@@ -502,7 +483,8 @@ new Vue({
 			var chk = 1;
 			if(!self.agree && self.user.usr_status<1)
 			{
-				self.msg = {title:'喔喔 錯誤了喔',body:'請詳閱使用者條款，並點選同意方框，才能執行下一步驟。'};
+				$("#alert_title").text('喔喔 錯誤了喔');
+				$("#alert_body").text('請詳閱使用者條款，並點選同意方框，才能執行下一步驟。');
 				$("#alertBtn").trigger("click");
 				chk = 0;
 				$("body,html").scrollTop(0);	
@@ -648,15 +630,28 @@ new Vue({
 
 $('.file-input').change(function(){
     var curElement = $(this).parent().parent().find('.image');
-    console.log(curElement);
-    var reader = new FileReader();
-
-    reader.onload = function (e) {
-        // get loaded data and render thumbnail.
-        curElement.attr('src', e.target.result);
-    };
-
-    reader.readAsDataURL(this.files[0]);
+	if((this.files[0].type.indexOf('jpeg')==-1) && (this.files[0].type.indexOf('png')==-1) && (this.files[0].type.indexOf('gif')==-1))
+	{
+		$("#alert_title").text('喔喔 錯誤了喔');
+		$("#alert_body").text('影像格式錯誤，請使用JPG, JPEG, PNG, GIF 圖檔。');
+		$("#alertBtn").trigger("click");	
+	}else if((this.files[0].size/1024)>2048)
+	{
+		$("#alert_title").text('喔喔 錯誤了喔');
+		$("#alert_body").text('影像大小請使用小於2M byte圖檔。');
+		$("#alertBtn").trigger("click");	
+	}else
+	{	
+		console.log(curElement);
+		var reader = new FileReader();
+	
+		reader.onload = function (e) {
+			// get loaded data and render thumbnail.
+			curElement.attr('src', e.target.result);
+		};
+	
+		reader.readAsDataURL(this.files[0]);
+	}
 });
 
 var ms_ie = false;

@@ -47,7 +47,7 @@ class AdminController extends Controller
 			$owner = Admin_member::join('adm_groups','adm_members.adm_group','=','adm_groups.id')
 				->where('adm_members.adm_account', '=', trim($request->account))->select('adm_members.id','adm_members.adm_status','adm_members.adm_account','adm_members.adm_password','adm_members.adm_name','adm_members.adm_email','adm_groups.group_id','adm_groups.group_name','adm_groups.group_master','adm_groups.group_manager')->first();
 			if(!$owner || !$owner->adm_status){
-				return View('admin/error', array('message' => '很抱歉，帳密有問題喔!'));
+				return View('admin/error', array('message' => '很抱歉，帳密有問題喔!!'));
 			}else
 			{
 				

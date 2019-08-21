@@ -60,11 +60,7 @@ Route::prefix('web')->group(function () {
 
 	Route::any('certification', 'FrontController@certification');
 	Route::get('job_detail/{u_id}/{distance}', 'FrontController@job_detail');
-    Route::get('h_set', 'FrontController@h_set');
-    Route::get('job_manager', 'FrontController@job_manager');
-
-    Route::get('management', 'MemberController@management');
-    Route::get('ask/{offer_id}/{need_id}', 'MemberController@ask');
+	Route::get('h_set', 'FrontController@h_set');
 });
 
 Route::prefix('admin')->group(function () {
@@ -129,9 +125,7 @@ Route::prefix('api')->group(function () {
 	Route::post('set_helper', 'AjaxController@set_helper');
 	Route::post('get_olo', 'AjaxController@get_olo');
 	Route::post('add_olo', 'AjaxController@add_olo');
-    Route::post('set_olo', 'AjaxController@set_olo');
-
-    Route::post('add_fav', 'AjaxController@add_fav');
+	Route::post('set_olo', 'AjaxController@set_olo');
 });
 
 Route::get('home/big/{filename}', array(function ($filename)

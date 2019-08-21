@@ -11,22 +11,16 @@ class toMail extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public $url;
-	public $btn;
-	public $name;
-	public $subject;
+   	public $subject;
 	public $body;
     /**
      * Create a new message instance.
      *
      * @return void
      */
-    public function __construct($url="",$btn="",$name="",$subject="",$body="")
+    public function __construct($subject="",$body="")
     {
-        $this->url = $url;
-		$this->btn = $btn;
-		$this->name = $name;
-		$this->subject = $subject;
+        $this->subject = $subject;
 		$this->body = $body;
     }
 
@@ -39,9 +33,6 @@ class toMail extends Mailable
     {
         return $this->from(env('MAIL_FROM_NAME'))
 			   ->view('mails.mailService')->with(array(
-				   'url' => $this->url,
-				   'btn' => $this->btn,
-				   'name' => $this->name,
 				   'subject' => $this->subject,
 				   'body' => $this->body
 		));

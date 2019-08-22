@@ -32,7 +32,7 @@ Route::any('/newebPay_creditCancel_url', 'WebController@newebPay_creditCancel_ur
 
 Route::get('/test', 'WebController@test');
 
-Route::post('/set_latlng', 'ApiController@set_latlng');
+Route::post('/set_latlng', 'AjaxController@set_latlng');
 
 Route::prefix('web')->group(function () {
 

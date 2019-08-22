@@ -38,7 +38,7 @@
                 <a href="{{URL::to('/')}}/web/management">我的需求</a>
             </li>
             <li>
-                <a href="order.html">訂單狀態</a>
+                <a href="order.html">我的訂單</a>
             </li>
             <li class="submenu" id="subA">
                 <a href="javascript:void(0)">
@@ -138,9 +138,9 @@
             </div>
             <a class="user-item" href="coupon.html">我的優惠劵</a>
             @if(session()->get('usr_type') == 0)
-            <a class="user-item" href="javascript:void(0)" id="head-change">切換成幫手</a>
+            <a class="user-item" href="javascript:void(0)" id="head-change">切換成好幫手</a>
             @else
-            <a class="user-item" href="javascript:void(0)" id="head-change">切換成會員</a>
+            <a class="user-item" href="javascript:void(0)" id="head-change">切換成客戶</a>
             @endif
             <a class="user-item" href="contact.html">聯絡幫棒</a>
             <a class="user-item" href="{{url('/web/logout')}}">登出</a>

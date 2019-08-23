@@ -17,9 +17,14 @@
                 <span class="b-face fix"><img src="images/5b8cb18be69ac514330441.jpg"></span>
               </div>
               <div class="list-right">
-                <div>林美麗 <span class="list-start pl-2"><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i></span><span class="avg">4.9</span>
+                <div>
+                  林美麗
+                  <span class="list-start pl-2"><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i></span><span class="avg">4.9</span>
                 </div>
-                <span class="mana">距離：800 公尺</span><span class="mana">水電工程：500元  /小時</span><span class="mana">受雇次數：22 次</span><span class="mana">工作時數：125 / 小時</span >
+                <span class="mana">距離：800 公尺</span>
+                <span class="mana">水電工程：500元  /小時</span>
+                <span class="mana">受雇次數：22 次</span>
+                <span class="mana">工作時數：125 / 小時</span >
               </div>
             </div>
           </a>

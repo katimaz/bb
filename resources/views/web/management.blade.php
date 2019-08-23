@@ -29,7 +29,7 @@
             @foreach($value->mf as $h_key => $h_value)
             <div class="incold">
               <span class="b-close"><i class="fa fa-times-circle" aria-hidden="true"></i></span>
-              <div class="mana-link"><a href="ask.html">線上諮詢</a><a href="hire.html" class="hire">雇用</a></div>
+              <div class="mana-link"><a href="/ask/{{$value->id}}/{{$h_value->need_id}}">線上諮詢</a><a href="hire.html" class="hire">雇用</a></div>
               <a href="{{url('/web/helper_detail/' . $h_value->usr_id . '/' . $h_value->distance * 1000)}}" class="list-group-item list-group-item-action flex-column align-items-start">
                 <div class="mana-box">
                   <div class="list-left">

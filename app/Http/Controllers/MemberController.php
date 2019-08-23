@@ -65,6 +65,9 @@ class MemberController extends Controller
 			$lat = '25.0477756';
 			$lng = '121.5127512';
 		}
+
+
+
 		// OfferListObj::select(DB::raw("( 6371 * acos( cos( radians(".$lat.") ) * cos( radians( lat ) ) * cos( radians( lng ) - radians(".$lng.") ) + sin( radians(".$lat.") ) * sin( radians( lat ) ) ) ) AS distance", 'service_type', 'service_type_sub'));
 
 

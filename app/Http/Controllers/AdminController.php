@@ -47,7 +47,7 @@ class AdminController extends Controller
 			$owner = Admin_member::join('adm_groups','adm_members.adm_group','=','adm_groups.id')
 				->where('adm_members.adm_account', '=', trim($request->account))->select('adm_members.id','adm_members.adm_status','adm_members.adm_account','adm_members.adm_password','adm_members.adm_name','adm_members.adm_email','adm_groups.group_id','adm_groups.group_name','adm_groups.group_master','adm_groups.group_manager')->first();
 			if(!$owner || !$owner->adm_status){
-				return View('admin/error', array('message' => '很抱歉，帳密有問題喔!'));
+				return View('admin/error', array('message' => '很抱歉，帳密有問題喔!!'));
 			}else
 			{
 				
@@ -219,7 +219,7 @@ class AdminController extends Controller
 	public function groups(Request $request)
     {
     	//Log::emergency('payload={"text": "{A very important thing has occurred! <https://alert-system.com/alerts/1234|Click here> for details!"}');
-		//Notify::via('notify','訂單編號 : 333<br />支付方式 : 44444<br />前往查看 : ! <'.env('APP_URL').'/admin/transfer_records?item=newebPay&action=manage'.'|Click here> for details!');
+		//Notify::via('notify','訂單編號 : 333<br />支付方式 : 44444<br />前往查看 : ! <'.url('/').'/admin/transfer_records?item=newebPay&action=manage'.'|Click here> for details!');
 		if(!Admin_member::isManager(9))
 		{
 			Log::warning("登入驗證失敗(".Session::get('ownerID')." >> ".basename(url()->current(),".php")." >> ".$_SERVER["REMOTE_ADDR"].")");
@@ -376,7 +376,6 @@ class AdminController extends Controller
 		{
 			$newebPay = new NewebPay();
 			$ezpay = new Ezpay();
-			//$merchant_id = env('newebPay_merchant_id');
 			//dd($request->all());
 			if($action=='mpg_gateway')
 			{
@@ -719,7 +718,7 @@ class AdminController extends Controller
 					//dd($post_data_array);
 					$result = $newebPay->ExportInstruct($post_data_array);
 					$result_data = json_decode($result);
-					//dd($result_data);
+					dd($result_data);
 					if($result_data->Status=='SUCCESS')
 					{
 						$input = new ChargeInstruct;
@@ -864,7 +863,7 @@ class AdminController extends Controller
 		}elseif($item=='invoices')
 		{
 			$ezpay = new EzPay();
-			//$merchant_id = env('ezPay_invoice_merchant_id');
+			$merchant_id = env('ezPay_invoice_merchant_id');
 			if($action=='create')
 			{
 				$validator = Validator::make($request->all(), array(
@@ -927,9 +926,8 @@ class AdminController extends Controller
 					 "NotifyEmail" => "1", //1=通知，0=不通知 
 				); 
 				
-				//dd($request->MerchantID);
 				$url = 'https://cinv.pay2go.com/API/invoice_issue';
-				$result = $ezpay->invoice_post($url, $post_data_array, $request->MerchantID);
+				$result = $ezpay->invoice_post($url, $post_data_array);
 				if($result=='error')
 					return View('admin/error_message', array('message' => '查無此合作商店資料', 'goUrl'=>'/admin/accountings','item'=>$item, 'action'=>$action));
 				
@@ -976,13 +974,16 @@ class AdminController extends Controller
 						$input->QRcodeR = ((isset($deArr->QRcodeR))?$deArr->QRcodeR:'');
 						$input->Comment = $request->Comment;
 						$input->save();
-						
 					}else
 					{
 						$result_data->Status = 'ERROR0001';
 					}	
 				}
-				return redirect('admin/accountings?item='.$item.'&action=manage&message='.(($result_data->Status!='SUCCESS')?$result_data->Message:''));
+				if(isset($request->MerchantID))
+					return redirect('admin/accountings?item='.$item.'&action=transfer&message='.(($result_data->Status!='SUCCESS')?$result_data->Message:''));
+				else
+					return redirect('admin/accountings?item='.$item.'&action=manage&message='.(($result_data->Status!='SUCCESS')?$result_data->Message:''));
+						
 			}elseif($action=='invalid') //發票作廢
 			{
 				$validator = Validator::make($request->all(), array(
@@ -1052,7 +1053,6 @@ class AdminController extends Controller
 					 "Status" => $request->Status,
 					 "BuyerEmail" => $request->BuyerEmail 
 				); 
-				
 				$url = 'https://cinv.pay2go.com/API/allowance_issue';
 				$result = $ezpay->invoice_post($url,$post_data_array);
 				$result_data = json_decode($result['web_info']);
@@ -1363,6 +1363,7 @@ class AdminController extends Controller
 			}
 			$input['first_name'] = $request->first_name;
 			$input['last_name'] = $request->last_name;
+			$input['nickname'] = $request->nickname;
 			$input['phone_nat_code'] = $request->phone_nat_code;
 			$input['phone_number'] = $request->photo_number;
 			$input['usr_status'] = $request->usr_status;
@@ -1616,7 +1617,7 @@ class AdminController extends Controller
 		$mode = (($request->has('mode'))?$request->mode:'');
 		if($mode=='edit')
 		{
-			$user = User::where('usr_id',$request->id)->select('id','usr_id','usr_status','first_name','last_name','email','phone_number','phone_nat_code','email_validated','open_offer_setting','usr_photo','sex','created_at')->first();
+			$user = User::where('usr_id',$request->id)->select('id','usr_id','usr_status','first_name','last_name','nickname','email','phone_number','phone_nat_code','email_validated','open_offer_setting','usr_photo','sex','created_at')->first();
 				
 			if($user->addr)
 				$user->addr = json_decode($user->addr);
@@ -1626,6 +1627,7 @@ class AdminController extends Controller
 			$text = trim($request->text);
 			$users = User::where('first_name',$text)
 				->orWhere('last_name',$text)
+				->orWhere('nickname',$text)
 				->orWhere('usr_id',$text)
 				->orWhere('email',$text)
 				->orWhere('phone_number',$text)
@@ -1636,7 +1638,7 @@ class AdminController extends Controller
 			return array('users'=>((isset($users))?$users:''));
 		}else
 		{
-			$users = User::orderBy('created_at','desc')->select('id','usr_id','usr_status','first_name','last_name','email','phone_number','phone_nat_code','email_validated','created_at')->paginate(30);
+			$users = User::orderBy('created_at','desc')->select('id','usr_id','usr_status','first_name','last_name','nickname','email','phone_number','phone_nat_code','email_validated','FB_login_token','Line_login_token','Google_login_token','created_at')->paginate(30);
 			
 			return array('users'=>((isset($users))?$users:''));
 		}
@@ -2302,13 +2304,13 @@ class AdminController extends Controller
 			$mode = (($request->has('mode'))?$request->get('mode'):'');
 			if(isset($mode) && $mode=='search') //搜尋
 			{
+				$start_date = (($request->has('start_date') && $request->get('start_date'))?$request->get('start_date'):'');
+				$end_date = (($request->has('end_date') && $request->get('end_date')!='')?$request->get('end_date'):'');
+				$status = (($request->has('tradeStatus') && $request->get('tradeStatus')!='')?$request->get('tradeStatus'):'');
+				$text = (($request->has('text') && $request->get('text'))?trim($request->get('text')):'');
+					
 				if($action=='transfer')
 				{
-					$start_date = (($request->has('start_date') && $request->get('start_date'))?$request->get('start_date'):'');
-					$end_date = (($request->has('end_date') && $request->get('end_date')!='')?$request->get('end_date'):'');
-					$status = (($request->has('tradeStatus') && $request->get('tradeStatus')!='')?$request->get('tradeStatus'):'');
-					$text = (($request->has('text') && $request->get('text'))?trim($request->get('text')):'');
-					
 					$search_date = array('start'=>$start_date,'end'=>$end_date);
 					$mpgs = new Newebpay_mpg;
 					$transfers = $mpgs->mpgs_search($search_date, $text, $status); //搜尋交易單資料
@@ -2316,20 +2318,10 @@ class AdminController extends Controller
 					$title = '訂單搜尋管理';	
 				}else
 				{
-					$text = trim($request->text);
-					$invoices = Invoice::where('InvoiceTransNo',$text)
-						->orWhere('TransNum',$text)
-						->orWhere('MerchantOrderNo',$text)
-						->orWhere('Category',$text)
-						->orWhere('BuyerName',$text)
-						->orWhere('BuyerUBN',$text)
-						->orWhere('BuyerEmail',$text)
-						->orWhere('BuyerAddress','like','%'.$text.'%')
-						->orWhere('CarrierNum',$text)
-						->orWhere('LoveCode',$text)
-						->orWhere('PrintFlag',$text)
-						->orWhere('InvoiceNumber',$text)
-						->orderBy('CreateTime','desc')->paginate(30);
+					$inv = new Invoice;
+					
+					$search_date = array('start'=>$start_date,'end'=>$end_date);
+					$invoices = $inv->invoice_search($search_date, $text, $status); //搜尋發票資料
 					$title = '發票搜尋管理';
 				}
 				return array('invoices'=>((isset($invoices))?$invoices:''),'transfers'=>((isset($transfers))?$transfers:''),'title'=>((isset($title))?$title:''));
@@ -2360,56 +2352,32 @@ class AdminController extends Controller
 				$title = '手動開立發票新增';	
 			}elseif($action=='transfer')
 			{
-				$transfers = Newebpay_mpg::join('merchants','newebpay_mpgs.MerchantID','=','merchants.MerchantID')
-					  ->join('users','newebpay_mpgs.u_id','=','users.id')
-					  ->where('TradeStatus',1)
-					  ->select('newebpay_mpgs.MerchantOrderNo','newebpay_mpgs.TradeStatus','newebpay_mpgs.TradeNo','newebpay_mpgs.PaymentType','newebpay_mpgs.Amt','newebpay_mpgs.ItemDesc','newebpay_mpgs.Email','newebpay_mpgs.EscrowBank','newebpay_mpgs.PayTime','newebpay_mpgs.MerchantID','merchants.MemberName','merchants.MerchantName','newebpay_mpgs.FundTime','users.usr_id')
-					  ->orderBy('newebpay_mpgs.created_at','desc')
-					  ->paginate(30);
-					  
-				//$transfers = Newebpay_mpg::orderBy('created_at','desc')->paginate(30);
-				$setting = Setting::select('service_fee')->first();
-				if(isset($transfers))
-				{
-					foreach($transfers as $transfer)
-					{
-						$invo = Invoice::where('TransNum',$transfer->TradeNo)->select('InvoiceStatus')->first();
-						if(isset($invo))
-							$transfer->InvoiceStatus = $invo->InvoiceStatus;
-						else
-							$transfer->InvoiceStatus = 0;
-					}	
-				}
+				$mpgs = new Newebpay_mpg;
+				$start_date = (($request->has('start_date') && $request->get('start_date'))?$request->get('start_date'):'');
+				$end_date = (($request->has('end_date') && $request->get('end_date')!='')?$request->get('end_date'):'');
+				$status = (($request->has('tradeStatus') && $request->get('tradeStatus')!='')?$request->get('tradeStatus'):'');
+				$text = (($request->has('text') && $request->get('text'))?trim($request->get('text')):'');
+					
+				$search_date = array('start'=>$start_date,'end'=>$end_date);
 				
+				$transfers = $mpgs->mpgs_search($search_date, $text, $status); //搜尋交易單資料
+				
+				$setting = Setting::select('service_fee')->first();
 				$title = '訂單開立發票作業';
 			}elseif($action=='manage' || !$action)
 			{	
-				$invoices = Invoice::orderBy('CreateTime','desc')->paginate(30);
-				foreach($invoices as $invoice)
-				{
-					$allowances = Invoice_allowance::join('invoices','invoice_allowances.InvoiceNumber','=','invoices.InvoiceNumber')->where('invoice_allowances.InvoiceNumber',$invoice->InvoiceNumber)->select('invoices.RemainAmt','invoice_allowances.Status')->orderBy('invoice_allowances.created_at','desc')->get();
-					if(isset($allowances) && count($allowances))
-					{
-						$can_allowance = false;
-						foreach($allowances as $allowance)
-						{
-							if(!$allowance->Status)
-								$can_allowance = true;	
-						}
-						
-						$invoice->need_confirm = ((isset($can_allowance) && $can_allowance)?2:1);
-						$invoice->RemainAmt = (($allowances[0]->RemainAmt)?$allowances[0]->RemainAmt:$invoice->TotalAmt);
-						$invoice->allowance = 1;
-					}else
-					{
-						$invoice->need_confirm = 0;
-						$invoice->RemainAmt = $invoice->TotalAmt;
-						$invoice->allowance = 0;
-					}
+				$inv = new Invoice;
+				$start_date = (($request->has('start_date') && $request->get('start_date'))?$request->get('start_date'):'');
+				$end_date = (($request->has('end_date') && $request->get('end_date')!='')?$request->get('end_date'):'');
+				$status = (($request->has('tradeStatus') && $request->get('tradeStatus')!='')?$request->get('tradeStatus'):'');
+				$text = (($request->has('text') && $request->get('text'))?trim($request->get('text')):'');
 					
-				}
+				$search_date = array('start'=>$start_date,'end'=>$end_date);
+				
+				$invoices = $inv->invoice_search($search_date, $text, $status); //搜尋發票資料
+				
 				$title = '發票資料管理';
-			}elseif($action=='detail')
+			}elseif($action=='detail' || $action=='allowance')
 			{
 				$invoice = Invoice::where('InvoiceNumber',$request->id)->first();
 				
@@ -2453,7 +2421,27 @@ class AdminController extends Controller
 				}else
 					$message = '驗證碼不符!!';
 				if($data->Status!='SUCCESS')
-						$message = $data->Message;	
+						$message = $data->Message;
+						
+				$allowances = Invoice_allowance::join('invoices','invoice_allowances.InvoiceNumber','=','invoices.InvoiceNumber')->where('invoice_allowances.InvoiceNumber',$invoice->InvoiceNumber)->select('invoices.RemainAmt','invoice_allowances.Status')->orderBy('invoice_allowances.created_at','desc')->get();
+				if(isset($allowances) && count($allowances))
+				{
+					$can_allowance = false;
+					foreach($allowances as $allowance)
+					{
+						if(!$allowance->Status)
+							$can_allowance = true;	
+					}
+					
+					$invoice->need_confirm = ((isset($can_allowance) && $can_allowance)?2:1);
+					$invoice->RemainAmt = (($allowances[0]->RemainAmt)?$allowances[0]->RemainAmt:$invoice->TotalAmt);
+					$invoice->allowance = 1;
+				}else
+				{
+					$invoice->need_confirm = 0;
+					$invoice->RemainAmt = $invoice->TotalAmt;
+					$invoice->allowance = 0;
+				}			
 				return array('invoice'=>((isset($invoice))?$invoice:''),'message'=>((isset($message))?$message:''));
 				
 			}elseif($action=='confirm')
@@ -2461,6 +2449,8 @@ class AdminController extends Controller
 				$allowances = Invoice_allowance::where('InvoiceNumber',$request->id)->orderBy('Status','asc')->orderBy('created_at','asc')->get();
 				return array('allowances'=>((isset($allowances))?$allowances:''));
 			}
+			
+			//return $request->all();
 			
 			return array('invoices'=>((isset($invoices))?$invoices:''),'create_invoice'=>((isset($create_invoice))?$create_invoice:''),'transfers'=>((isset($transfers))?$transfers:''),'service_fee'=>((isset($setting))?$setting->service_fee:''),'title'=>((isset($title))?$title:''));
 		}

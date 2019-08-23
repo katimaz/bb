@@ -9,14 +9,15 @@
     <div class="alert alert-warning alert-dismissible fade show px-2" v-if="is_tomail" role="alert">
       <strong>信件已送出!</strong>接下來請您前往收取您的信件並更換新密碼。
     </div>
-    <a href="/signup" class="txtbtn"><i class="fa fa-chevron-left" aria-hidden="true"></i> 註冊新的帳號</a></div>
+    <a href="/login" class="txtbtn"><i class="fa fa-chevron-left" aria-hidden="true"></i> 回到上頁登入 </a>
+</div>
 <script>
 new Vue({
   el: "#app",
   data: {
 	email: '',
 	is_tomail: '',
-	sending: ''
+	sending: '',
   },
   methods: {
   	chk_mail: function(value){
@@ -33,8 +34,16 @@ new Vue({
 			self.sending = 1;
 			axios.get('/api/get_forgot_passwd?id='+self.email).then(function (response){
 				console.log(response.data);
-				self.is_tomail = response.data.is_tomail;
-				
+				if(response.data=='error')
+				{
+					self.sending = 0;
+					$("#alert_title").text('喔喔 帳號錯誤了喔');
+					$("#alert_body").text('您的帳號不正確，請重新確認。');
+					$("#alertBtn").trigger("click");		
+				}else
+				{
+					self.is_tomail = response.data.is_tomail;
+				}
 			})
 		  }
 		}else

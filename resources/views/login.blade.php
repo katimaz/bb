@@ -16,7 +16,7 @@
       <button type="button" class="login-bt" @click="sendform">登入</button>
     </form>    
      <a href="/forgot" class="txtbtn"><i class="fa fa-question-circle-o" aria-hidden="true"></i> 忘記密碼 </a>
-     <a href="/signup" class="text-right txtbtn"><i class="fa fa-envelope-o" aria-hidden="true"></i> 使用E-mail註冊 </a>   
+     <a href="/signup" class="text-right txtbtn"><i class="fa fa-envelope-o" aria-hidden="true"></i> 使用E-mail註冊 </a>
    </div>
 <script>
 new Vue({
@@ -24,6 +24,20 @@ new Vue({
   data: {
 	email: '',
 	passwd:'',
+	message: '<?php echo ((isset($message))?$message:'')?>'
+  },
+  mounted: function () {
+	  var self = this;
+	  if(self.message)
+	  {
+	  	var msg = jQuery.parseJSON(self.message);
+		setTimeout(function(){
+			$("#alert_title").text(msg.title);
+			$("#alert_body").text(msg.body);
+			$("#alertBtn").trigger("click");
+		},500);
+		
+	  }
   },
   methods: {
   	sendform: function(){

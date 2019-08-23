@@ -9,3 +9,8 @@ Homestead.json
 Homestead.yaml
 npm-debug.log
 yarn-error.log
+/BB1.pem
+transaction.sql
+member_favorites.sql
+trans_list_objs.sql
+bb1.ppk

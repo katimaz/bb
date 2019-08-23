@@ -26,6 +26,8 @@ use App\Models\einvoice_info;
 use App\Models\collection_info;
 use App\Models\member_notify_setting;
 use App\Models\member_favorite;
+use App\Models\transaction;
+use App\Models\trans_list_obj;
 use Session;
 use App\User;
 use Auth;
@@ -53,7 +55,7 @@ class MemberController extends Controller
 		return View('web/management', ['nlo' => $nlo]);
 	}
 
-	public function ask($offer_id, $need_id = 0)
+	public function ask($offer_id = 0, $need_id = 0)
 	{
 		$lat = Session::get('lat');
 		$lng = Session::get('lng');
@@ -66,7 +68,14 @@ class MemberController extends Controller
 			$lng = '121.5127512';
 		}
 
+		// 檢查transaction
+		if($offer_id == 0 && $need_id == 0) {
 
+		} else {
+			// 調用現有資料
+			$wher = "offer_id = $offer_id AND need_id = $need_id";
+
+		}
 
 		// OfferListObj::select(DB::raw("( 6371 * acos( cos( radians(".$lat.") ) * cos( radians( lat ) ) * cos( radians( lng ) - radians(".$lng.") ) + sin( radians(".$lat.") ) * sin( radians( lat ) ) ) ) AS distance", 'service_type', 'service_type_sub'));
 

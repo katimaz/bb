@@ -156,7 +156,7 @@ class AjaxController extends Controller
 		// DB::enableQueryLog();
 
 		$user = User::where('usr_id',Session::get('usrID'))->first();
-		if($user->open_offer_setting == "0") {
+		if($user->usr_type == "0") {
 			$where = "(olo.service_type = '$main_servicetype')";
 
 			if(isset($sub_servicetype)) {

@@ -528,6 +528,7 @@ class FrontController extends Controller
 		$rs = member_notify_setting::where('mem_id', '=', $mem_id)->get();
 		return View('web/notification', array('datalist' => $rs));
 	}
+
 	// 幫手 身份認證
 	public function certification(Request $request)
 	{
@@ -650,7 +651,6 @@ class FrontController extends Controller
 
 		return View('web/job_detail', ['distance' => $distance, 'user' => $user[0], 'nlo' => $nlo]);
 	}
-
 
 	// 驗證
 	public function veri_mail(Request $request)

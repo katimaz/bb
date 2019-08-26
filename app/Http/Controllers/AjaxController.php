@@ -599,21 +599,24 @@ class AjaxController extends Controller
 				}
 			}
 		}
-		foreach ($olo_food_id as $key => $value) {
-			if($value != 0) {
-				if(isset($food_img[$key])) {
-					olo_food::where('id', $value)->update(['title' => $food_title[$key], 'price' => $food_price[$key], 'img' => $food_img[$key]]);
-				} else {
-					olo_food::where('id', $value)->update(['title' => $food_title[$key], 'price' => $food_price[$key]]);
-				}
-			} else {
-				$olo_food_db = new olo_food;
-				$olo_food_db->img = $food_img[$key];
-				$olo_food_db->title = $food_title[$key];
-				$olo_food_db->price = $food_price[$key];
-				$olo_food_db->olo_id = $olo_id;
-				$olo_food_db->save();
-			}
+
+        if(isset($olo_food_id)) {
+            foreach ($olo_food_id as $key => $value) {
+                if($value != 0) {
+                    if(isset($food_img[$key])) {
+                        olo_food::where('id', $value)->update(['title' => $food_title[$key], 'price' => $food_price[$key], 'img' => $food_img[$key]]);
+                    } else {
+                        olo_food::where('id', $value)->update(['title' => $food_title[$key], 'price' => $food_price[$key]]);
+                    }
+                } else {
+                    $olo_food_db = new olo_food;
+                    $olo_food_db->img = $food_img[$key];
+                    $olo_food_db->title = $food_title[$key];
+                    $olo_food_db->price = $food_price[$key];
+                    $olo_food_db->olo_id = $olo_id;
+                    $olo_food_db->save();
+                }
+            }
 		}
 
 		return response()->json(['success' => true]);

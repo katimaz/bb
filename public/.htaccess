@@ -5,8 +5,8 @@
 
     RewriteEngine On
     #Force SSL
-    RewriteCond %{SERVER_PORT} 80
-    RewriteRule ^(.*)$ https://stage.bounbang.com/$1 [R,L]
+    #RewriteCond %{SERVER_PORT} 80
+    #RewriteRule ^(.*)$ https://stage.bounbang.com/$1 [R,L]
 
 
     # Handle Authorization Header

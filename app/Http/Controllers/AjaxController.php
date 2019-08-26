@@ -411,6 +411,17 @@ class AjaxController extends Controller
 		return response()->json(['olo' => $olo[0], 'olo_license_img' => $olo_license_img, 'olo_img' => $olo_img, 'olo_video' => $olo_video, 'olo_food' => $olo_food]);
 	}
 
+    public function del_olo(Request $request)
+    {
+        olo_food::where('olo_id', $request->id)->delete();
+        olo_video::where('olo_id', $request->id)->delete();
+        olo_img::where('olo_id', $request->id)->delete();
+        olo_license_img::where('olo_id', $request->id)->delete();
+        OfferListObj::where('id', $request->id)->delete();
+
+        return response()->json(['success' => true]);
+    }
+
 	public function set_olo(Request $request)
 	{
 		$olo_id = $request->id;

@@ -130,6 +130,7 @@ Route::prefix('api')->group(function () {
 	Route::post('get_olo', 'AjaxController@get_olo');
 	Route::post('add_olo', 'AjaxController@add_olo');
     Route::post('set_olo', 'AjaxController@set_olo');
+    Route::post('del_olo', 'AjaxController@del_olo');
 
     Route::post('add_fav', 'AjaxController@add_fav');
 });

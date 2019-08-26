@@ -45,7 +45,7 @@
               <div class="showof">
                 <label><i class="fa fa-folder-open-o" aria-hidden="true"></i> 公開好幫手檔案 </label>
                 <p>公開檔案可以讓消費者搜尋到您的服務</p>
-                <input class="toggle" type="checkbox" name="open_offer_setting" value="1" data-checked="{{$user->open_offer_setting}}">
+                <input class="toggle" type="checkbox" name="open_offer_setting" value="1" {{$user->open_offer_setting == '1' ?'checked':''}}>
               </div>
               <div class="helper-jobs">
                 <div class="set-ser">
@@ -553,7 +553,28 @@
           }
         });
       });
-
+        // 刪除服務項目
+        $('.ser-edit').on('click', function () {
+            event.preventDefault();
+            console.log("delete");
+            $.ajax({
+                type: "post",
+                url: "{{url('/api/del_olo')}}",
+                data: {
+                    id: $(this).data('id'),
+                    _token: '{{csrf_token()}}'
+                },
+                dataType: "json",
+                success: function (response) {
+                    if(response.success) {
+                        alert('修改完成');
+                        location.reload();
+                    } else {
+                        alert(response.msg);
+                    }
+                }
+            });
+        });
       // 編輯服務項目
       $('.ser-editb').on('click', function () {
         food_index = 0

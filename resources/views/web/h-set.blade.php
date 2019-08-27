@@ -17,18 +17,26 @@
             <div class="helper-info">
               <span class="user-name">{{$user->last_name . $user->first_name}}</span>
               <span class="start">
-                <i class="fa fa-star" aria-hidden="true"></i>
-                <i class="fa fa-star" aria-hidden="true"></i>
-                <i class="fa fa-star" aria-hidden="true"></i>
-                <i class="fa fa-star" aria-hidden="true"></i>
-                <i class="fa fa-star" aria-hidden="true"></i>
+                  @if($user->customer_avg_rate == 0 || $user->customer_avg_rate == null)
+                      @for($i = 1 ;$i<=5;$i++)
+                        <i class="fa fa-star-o" aria-hidden="true"></i>
+                      @endfor
+                  @elseif($user->customer_avg_rate > 0)
+                      @for($i =1 ;$i<=5;$i++)
+                          @if(floor($user->customer_avg_rate) >= $i)
+                            <i class="fa fa-star" aria-hidden="true"></i>
+                          @else
+                            <i class="fa fa-star-o" aria-hidden="true"></i>
+                          @endif
+                      @endfor
+                  @endif
               </span>
-              <span class="avg">4.9</span>
+              <span class="avg">{{is_null($user->customer_avg_rate)?'0':$user->customer_avg_rate}}</span>
               <div class="feedback">受雇次數：
-                <span class="text-danger">150  </span>次
+                <span class="text-danger">{{is_null($user->total_served_case)?'0':$user->total_served_case}}</span>次
               </div>
               <div class="feedback">總工作時數：
-                <span class="text-danger">240 </span>小時
+                <span class="text-danger">{{is_null($user->total_served_hours)?'0':$user->total_served_hours}}</span>小時
               </div>
               <div class="form-group mt-2">
                 <label><i class="fa fa-map-marker" aria-hidden="true"></i> 選取服務地址</label>
@@ -59,8 +67,21 @@
                 </div>
                 @endforeach
               <div class="jobs-tit">服務評分 <i class="fa fa-star-o" aria-hidden="true"></i> </div>
-              <div class="jobs-all"> 總體服務評分<span class="start-all"><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i>
-                <span class="avg">4.9</span></span>
+              <div class="jobs-all"> 總體服務評分<span class="start-all">
+                      @if($user->customer_avg_rate == 0 || $user->customer_avg_rate == null)
+                          @for($i = 1 ;$i<=5;$i++)
+                              <i class="fa fa-star-o" aria-hidden="true"></i>
+                          @endfor
+                      @elseif($user->customer_avg_rate > 0)
+                          @for($i =1 ;$i<=5;$i++)
+                              @if(floor($user->customer_avg_rate) >= $i)
+                                  <i class="fa fa-star" aria-hidden="true"></i>
+                              @else
+                                  <i class="fa fa-star-o" aria-hidden="true"></i>
+                              @endif
+                          @endfor
+                      @endif
+                <span class="avg">{{is_null($user->customer_avg_rate)?'0':$user->customer_avg_rate}}</span></span>
               </div>
               <div class="start-box">
                 <div class="box-satrt"><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i>
@@ -266,14 +287,16 @@
             <div class="row fix mb-2 olo_license_img"></div>
 
             <div class="mb-2">
-              <input id="file-1" type="file" name="license_img[]" class="form-control-file styled" data-file-upload="" multiple="">
+              <img id="preview_license_img" src=""/>
+              <input id="file-1" onchange="readURL(this,'preview_license_img');" type="file" name="license_img[]" class="form-control-file styled" data-file-upload="" multiple="">
             </div>
 
             <label for="file-1">作品照片</label>
             <div class="row fix mb-2 olo_img">
             </div>
             <div class="mt-2">
-              <input id="file-1" type="file" name="img[]" class="form-control-file styled" data-file-upload="" multiple="">
+              <img id="preview_img" src=""/>
+              <input id="file-1" onchange="readURL(this,'preview_img');" type="file" name="img[]" class="form-control-file styled" data-file-upload="" multiple="">
             </div>
 
             <div class="form-group yotube olo_video">
@@ -312,7 +335,8 @@
           <label>證照照片<span class="text-danger"> （上傳前請遮蓋個資）</span></label>
           <div class="row fix mb-2 olo_license_img"> </div>
           <div class="mb-2">
-            <input id="file-1" type="file" name="license_img[]" class=" form-control-file" data-file-upload="" multiple>
+            <img id="preview_menu_license_img" src=""/>
+            <input id="file-1" onchange="readURL(this,'preview_menu_license_img')" type="file" name="license_img[]" class=" form-control-file" data-file-upload="" multiple>
           </div>
         </form>
 
@@ -359,12 +383,14 @@
           <label>證照照片<span class="text-danger"> （上傳前請遮蓋個資）</span></label>
           <div class="row fix mb-2 olo_license_img"></div>
           <div class="mb-2">
-            <input id="file-1" type="file" name="license_img[]" class=" form-control-file" data-file-upload="" multiple>
+              <img id="preview_design_license_img" src=""/>
+            <input id="file-1" onchange="readURL(this,'preview_design_license_img');" type="file" name="license_img[]" class=" form-control-file" data-file-upload="" multiple>
           </div>
           <label for="file-1">作品照片</label>
           <div class="row fix mb-2 olo_img"> </div>
           <div class="mt-2">
-            <input id="file-1" type="file" name="img[]"  class="form-control-file" data-file-upload="" multiple>
+              <img id="preview_design_img" src=""/>
+            <input id="file-1" onchange="readURL(this,'preview_design_img');" type="file" name="img[]"  class="form-control-file" data-file-upload="" multiple>
           </div>
           <div class="form-group yotube">
             <label class="mt-2">Yotube 影片</label><span class="add-more">新增更多影片 <i class="fa fa-plus-circle" aria-hidden="true"></i></span>
@@ -554,7 +580,7 @@
         });
       });
         // 刪除服務項目
-        $('.ser-edit').on('click', function () {
+        $(document).on("click", ".ser-edit" , function() {
             event.preventDefault();
             console.log("delete");
             $.ajax({
@@ -567,7 +593,7 @@
                 dataType: "json",
                 success: function (response) {
                     if(response.success) {
-                        alert('修改完成');
+                        alert('刪除成功');
                         location.reload();
                     } else {
                         alert(response.msg);
@@ -576,7 +602,9 @@
             });
         });
       // 編輯服務項目
-      $('.ser-editb').on('click', function () {
+
+        $(document).on("click", ".ser-editb" , function() {
+          console.log("ser-editb");
         food_index = 0
         $.ajax({
           type: "post",
@@ -621,7 +649,7 @@
             // 菜單
             $('#menu-list').empty();
             $.each(response.olo_food, function (k, v) {
-              $('#menu-list').append('<div class="row mb-2 old_food" data-id="'+v.id+'" data-index="'+food_index+'"> <div class="b-close"><i class="fa fa-times-circle" aria-hidden="true"></i></div> <div class="form-group col-8"> <input type="text" class="form-control food_title" name="food_title['+food_index+']" value="'+v.title+'" placeholder="料理名稱" required> </div> <div class="form-group col-4"> <input type="text" class="form-control food_price" name="food_price['+food_index+']" value="'+v.price+'" placeholder="售價" required> </div> <div class="col-3"><span class="b-close"><i class="fa fa-times-circle" aria-hidden="true"></i></span> <img src="{{URL::to("/")}}/img/small/'+v.img+'" class="img-fluid old_img"> </div> <div class="col-9 form-inline"><span class="text-success mr-2">料理照片 </span><span><input type="file" name="food_img['+food_index+']" class="form-control-file food_img" required></span></div> </div>')
+              $('#menu-list').append('<div class="row mb-2 old_food" data-id="'+v.id+'" data-index="'+food_index+'"> <div class="b-close"><i class="fa fa-times-circle" aria-hidden="true"></i></div> <div class="form-group col-8"> <input type="text" class="form-control food_title" name="food_title['+food_index+']" value="'+v.title+'" placeholder="料理名稱" required> </div> <div class="form-group col-4"> <input type="text" class="form-control food_price" name="food_price['+food_index+']" value="'+v.price+'" placeholder="售價" required> </div> <div class="col-3"><span class="b-close"><i class="fa fa-times-circle" aria-hidden="true"></i></span> <img src="{{URL::to("/")}}/img/small/'+v.img+'" class="img-fluid old_img"> </div> <div class="col-9 form-inline"><span class="text-success mr-2">料理照片 </span><span><img id="preview_menu_food_img'+food_index+'" src=""/><input type="file" onchange="readURL(this,\'preview_menu_food_img'+food_index+'\')" name="food_img['+food_index+']" class="form-control-file food_img" required></span></div> </div>')
               food_index++;
             })
           }
@@ -679,8 +707,8 @@
           contentType: false,
           dataType: "json",
           success: function (response) {
-            console.log(response);
             alert(response.msg);
+            location.reload();
           }
         });
       })
@@ -692,9 +720,34 @@
         $('.yotube').append('<div class="add-box"><div class="b-close"><i class="fa fa-times-circle" aria-hidden="true"></i></div><input type="text" class="form-control mt-2 yt-video" name="olo_video[]" placeholder="輸入影片網址" data-id="0" /></div>')
       });
       $( ".add-menu" ).on('click', function() {
-        $('#menu-list').append('<div class="row mb-2 old_food" data-id="0" data-index="'+food_index+'"><div class="b-close"><i class="fa fa-times-circle" aria-hidden="true"></i></div><div class="form-group col-8"><input type="text" class="form-control food_title" name="food_title['+food_index+']" placeholder="料理名稱" required></div><div class="form-group col-4"><input type="text" class="form-control food_price" name="food_price['+food_index+']" placeholder="售價" required></div><div class="col-9 form-inline"><span class="text-success mr-2">料理照片 </span><span><input type="file" class="form-control-file food_img" name="food_img['+food_index+']" required></span></div></div>');
+        $('#menu-list').append('<div class="row mb-2 old_food" data-id="0" data-index="'+food_index+'"><div class="b-close"><i class="fa fa-times-circle" aria-hidden="true"></i></div><div class="form-group col-8"><input type="text" class="form-control food_title" name="food_title['+food_index+']" placeholder="料理名稱" required></div><div class="form-group col-4"><input type="text" class="form-control food_price" name="food_price['+food_index+']" placeholder="售價" required></div><div class="col-9 form-inline"><span class="text-success mr-2">料理照片 </span><span><img id="preview_menu_food_img'+food_index+'" src=""/><input type="file" onchange="readURL(this,\'preview_menu_food_img'+food_index+'\')" class="form-control-file food_img" name="food_img['+food_index+']" required></span></div></div>');
         food_index++;
       });
+    });
+
+    $("#address").change(function () {
+        $.ajax({
+            type: "get",
+            url: "{{url('/api/get_office_list')}}",
+            data: {
+                id: $(this).val()
+            },
+            dataType: "json",
+            success: function (responses) {
+                $('.ser-list').remove();
+                responses.offerlist.forEach(function (response, index) {
+                    if(response.class_flag == 0) {
+                        str = '<div class="ser-list">' + response.offer_title + '<a href="#" class="ser-editb" data-toggle="modal" data-target="#editModal" data-id="'+ response.id +'">編輯 <i class="fa fa-pencil-square-o" aria-hidden="true"></i></a> <a href="#" class="ser-edit" data-id="'+ response.id +'" >刪除<i class="fa fa-times-circle" aria-hidden="true"></i></a> </div>';
+                    } else if(response.class_flag == 1) {
+                        str = '<div class="ser-list">' + response.offer_title + '<a href="#" class="ser-editb" data-toggle="modal" data-target="#editfood" data-id="'+ response.id +'">編輯 <i class="fa fa-pencil-square-o" aria-hidden="true"></i></a> <a href="#" class="ser-edit" data-id="'+ response.id +'" >刪除<i class="fa fa-times-circle" aria-hidden="true"></i></a> </div>';
+                    } else {
+                        str = '<div class="ser-list">' + response.offer_title + '<a href="#" class="ser-editb" data-toggle="modal" data-target="#editdesign" data-id="'+ response.id +'">編輯 <i class="fa fa-pencil-square-o" aria-hidden="true"></i></a> <a href="#" class="ser-edit" data-id="'+ response.id +'" >刪除<i class="fa fa-times-circle" aria-hidden="true"></i></a> </div>';
+                    }
+                    $('.set-ser').after(str);
+                });
+            }
+        });
+
     });
 
     $(function () {
@@ -719,6 +772,17 @@
     $('#case').on('change', function () {
       $('#price').show();
     });
+
+    function readURL(input,element) {
+        if (input.files && input.files[0]) {
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                $('#'+element).attr('src', e.target.result)
+                    .width(120).height(100);
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
   </script>
 
 <!-- <script>

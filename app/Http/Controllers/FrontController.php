@@ -479,13 +479,15 @@ class FrontController extends Controller
 	public function helper_detail($usr_id = '', $distance = 0)
 	{
 		// 使用者資訊
-		$user = Users::where('usr_id', $usr_id)->get();
-		// 服務
-		$olo = OfferListObj::where('mem_id', $user[0]->id)->get();
+		$user = Users::where('usr_id', $usr_id)->first();
+        $member_addrs = Member_addr_recode::where('u_id',$user->id)->get();
+        // 服務
+		$olo = OfferListObj::where('mem_id', $member_addrs->first()->id)->get();
+
 		// 評價
 		$service_rate = [];
 
-		return View('web/helper_detail', ['distance' => $distance, 'user' => $user[0], 'olo' => $olo]);
+		return View('web/helper_detail', ['distance' => $distance, 'user' => $user, 'olo' => $olo]);
 	}
 
 	public function h_set()
@@ -501,8 +503,9 @@ class FrontController extends Controller
 		$user = User::where('usr_id', session()->get('usrID'))->first();
 		// 會員地址
 		$member_addr_recode = Member_addr_recode::where('u_id', session()->get('uID'))->get();
-		// 服務設定
-		$OfferListObj = OfferListObj::where('mem_id', session()->get('uID'))->get();
+        // 服務設定
+        $OfferListObj = OfferListObj::where('mem_id',$member_addr_recode->first()->id)->orderby('id')->get();
+
 		// 服務評分…表格再找
 
 		return View('web/h-set', array('user'=>$user, 'member_addr_recode' => $member_addr_recode, 'olo' => $OfferListObj));

@@ -145,6 +145,11 @@ class AjaxController extends Controller
 		return response()->json(['success' => true]);
 	}
 
+    public function get_office_list(Request $request){
+        $OfferListObj = OfferListObj::where('mem_id',$request->id)->orderby('id','desc')->get();
+        return response()->json(['offerlist' => $OfferListObj]);
+    }
+
 	public function search_offer(Request $request)
 	{
 		// 之後要補keyword
@@ -661,7 +666,8 @@ class AjaxController extends Controller
 		}
 
 		$olo = new OfferListObj;
-		$olo->mem_id = session()->get('uID');
+		//$olo->mem_id = session()->get('uID');
+        $olo->mem_id = $request->address;
 		$olo->service_type = $service_type;
 		$olo->service_type_sub = $service_type_sub;
 		$olo->mem_addr = $mem_addr;

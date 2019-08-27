@@ -23,14 +23,27 @@
           </div>
           <div class="helper-info">
             <span class="user-name">{{$user->last_name}}{{$user->first_name}}</span>
-            <span class="start"><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i> </span>
-            <span class="avg">4.9</span>
+            <span class="start">
+                @if($user->customer_avg_rate == 0 || $user->customer_avg_rate == null)
+                    @for($i = 1 ;$i<=5;$i++)
+                        <i class="fa fa-star-o" aria-hidden="true"></i>
+                    @endfor
+                @elseif($user->customer_avg_rate > 0)
+                    @for($i =1 ;$i<=5;$i++)
+                        @if(floor($user->customer_avg_rate) >= $i)
+                            <i class="fa fa-star" aria-hidden="true"></i>
+                        @else
+                            <i class="fa fa-star-o" aria-hidden="true"></i>
+                        @endif
+                    @endfor
+                @endif
+            <span class="avg">{{is_null($user->customer_avg_rate)?'0':$user->customer_avg_rate}}</span>
             <div class="income">
               地點：{{$olo[0]->mem_addr}}
             </div>
             <div class="feedback">距離： <span class="text-danger">{{$distance}}</span>公尺 </div>
-            <div class="feedback">受雇次數：<span class="text-danger">150  </span>次 </div>
-            <div class="feedback">總工作時數：<span class="text-danger">240 </span>小時 </div>
+            <div class="feedback">受雇次數：<span class="text-danger">{{is_null($user->total_served_case)?'0':$user->total_served_case}}  </span>次 </div>
+            <div class="feedback">總工作時數：<span class="text-danger">{{is_null($user->total_served_hours)?'0':$user->total_served_hours}} </span>小時 </div>
             <div class="feedback">身份認證已完成 <span class="text-success"><i class="fa fa-check-circle" aria-hidden="true"></i></span> </div>
             <div class="intro"><p>簡介：{{$user->personal_brief}}</p> </div>
 
@@ -40,7 +53,7 @@
                 <select class="form-control" id="select-tab">
                   <option data-toggle-select-hide=".type-arr" data-toggle-select-show="#type0" selected>全部</option>
                   @foreach($olo as $value)
-                  <option data-toggle-select-hide=".type-arr" data-toggle-select-show="#type1">{{$value->offer_title}}</option>
+                    <option data-toggle-select-hide=".type-arr" data-toggle-select-show="#type1">{{$value->offer_title}}</option>
                   @endforeach
                   <!-- <option data-toggle-select-hide=".type-arr" data-toggle-select-show="#type2">學習</option><option data-toggle-select-hide=".type-arr" data-toggle-select-show="#type3">專業設計</option> -->
                 </select>
@@ -50,11 +63,10 @@
                   @foreach($olo as $value)
                   <span>{{$value->offer_title}}</span>
                   @endforeach
-                  <!-- <span>電腦教學</span><span>室內設計</span> -->
                 </div>
                 <div class="jobs-info">
-                  受雇次數：<span class="text-danger">150</span>次
-                  總工作時數：<span class="text-danger">240 </span> 小時
+                  受雇次數：<span class="text-danger">{{is_null($user->total_served_case)?'0':$user->total_served_case}} </span>次
+                  總工作時數：<span class="text-danger">{{is_null($user->total_served_hours)?'0':$user->total_served_hours}} </span> 小時
                 </div>
                 @foreach($olo as $value)
                 <div class="jobs-item"> {{$value->offer_title}}：<span class="text-danger">{{$value->price}}</span>元 / {{$value->price_type}}起 </div>

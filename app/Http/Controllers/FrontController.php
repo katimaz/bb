@@ -484,6 +484,8 @@ class FrontController extends Controller
         // 服務
 		$olo = OfferListObj::where('mem_id', $member_addrs->first()->id)->get();
 
+		dd($olo);
+
 		// 評價
 		$service_rate = [];
 
@@ -504,8 +506,14 @@ class FrontController extends Controller
 		// 會員地址
 		$member_addr_recode = Member_addr_recode::where('u_id', session()->get('uID'))->get();
         // 服務設定
-        $OfferListObj = OfferListObj::where('mem_id',$member_addr_recode->first()->id)->orderby('id')->get();
-
+        //$OfferListObj = OfferListObj::where('mem_id',$member_addr_recode->first()->id)->orderby('id')->get();
+        $OfferListObj = DB::table('officelistobj')
+            ->leftJoin('olo_foods', 'officelistobj.id', '=', 'olo_foods.olo_id')
+            ->leftJoin('olo_imgs', 'officelistobj.id', '=', 'posts.olo_id')
+            ->leftJoin('olo_license_imgs', 'officelistobj.id', '=', 'posts.olo_id')
+            ->leftJoin('olo_videos', 'officelistobj.id', '=', 'posts.olo_id')
+            ->get();
+        dd($OfferListObj);
 		// 服務評分…表格再找
 
 		return View('web/h-set', array('user'=>$user, 'member_addr_recode' => $member_addr_recode, 'olo' => $OfferListObj));

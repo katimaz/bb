@@ -44,21 +44,28 @@
             <div class="feedback">距離： <span class="text-danger">{{$distance}}</span>公尺 </div>
             <div class="feedback">受雇次數：<span class="text-danger">{{is_null($user->total_served_case)?'0':$user->total_served_case}}  </span>次 </div>
             <div class="feedback">總工作時數：<span class="text-danger">{{is_null($user->total_served_hours)?'0':$user->total_served_hours}} </span>小時 </div>
-            <div class="feedback">身份認證已完成 <span class="text-success"><i class="fa fa-check-circle" aria-hidden="true"></i></span> </div>
+            <div class="feedback">身份認證已完成
+                <span class="text-success">
+                    @if(is_null($user->kyc_validated) || $user->kyc_validated != '1')
+                        <i class="fa fa-times-circle" aria-hidden="true"></i>
+                    @else
+                        <i class="fa fa-check-circle" aria-hidden="true"></i>
+                    @endif
+                </span>
+            </div>
             <div class="intro"><p>簡介：{{$user->personal_brief}}</p> </div>
 
             <div class="helper-jobs">
               <div class="jobs-tit">服務專區 <i class="fa fa-check-square-o" aria-hidden="true"></i> </div>
               <div class="form-group" id="toggle-select">
                 <select class="form-control" id="select-tab">
-                  <option data-toggle-select-hide=".type-arr" data-toggle-select-show="#type0" selected>全部</option>
+                  <option data-toggle-select-hide=".type-arr" data-toggle-select-show="#type3" selected>全部</option>
                   @foreach($olo as $value)
-                    <option data-toggle-select-hide=".type-arr" data-toggle-select-show="#type1">{{$value->offer_title}}</option>
+                    <option data-toggle-select-hide=".type-arr" data-toggle-select-show="#type{{$value->class_flag}}">{{$value->offer_title}}</option>
                   @endforeach
-                  <!-- <option data-toggle-select-hide=".type-arr" data-toggle-select-show="#type2">學習</option><option data-toggle-select-hide=".type-arr" data-toggle-select-show="#type3">專業設計</option> -->
                 </select>
               </div>
-              <div class="type-arr active" id="type0">
+              <div class="type-arr active" id="type3">
                 <div class="job-list">
                   @foreach($olo as $value)
                   <span>{{$value->offer_title}}</span>
@@ -69,79 +76,89 @@
                   總工作時數：<span class="text-danger">{{is_null($user->total_served_hours)?'0':$user->total_served_hours}} </span> 小時
                 </div>
                 @foreach($olo as $value)
-                <div class="jobs-item"> {{$value->offer_title}}：<span class="text-danger">{{$value->price}}</span>元 / {{$value->price_type}}起 </div>
-                <div class="col text-center btnarr">
-                  <a href="#" class="btn btn-warning" data-toggle="modal" data-target="#example-food">雇用</a>
-                  <a href="#" class=" btn btn-success" data-toggle="modal" data-target="#example-food">詢問</a>
-                  <a href="re-helper.html" class=" btn btn-info">推薦</a>
-                </div>
-                <div class="intro">
-                  <p>簡介：{{$value->offer_description}}</p>
-                </div>
-                <div class="row justify-content-center">
-                  <div class="col-md-12 mt-2">
-                    <div class="row fix">
-                      <a href="images/food.jpg" data-toggle="lightbox" data-gallery="food" class="col-4 col-sm-3  mt-2  p-2">
-                          <img src="images/food.jpg" class="img-fluid">
-                          <div class="pic-dis">西湖醋魚<br><span class="text-danger">500</span>元 / 件 </div>
-                      </a>
-                    </div>
-                  </div>
-                </div>
+                    @if($value->class_flag == 1)
+                          <div class="jobs-item"> {{$value->offer_title}}：<span class="text-danger">{{$value->price}}</span>元 / {{$value->price_type}}起 </div>
+                          <div class="col text-center btnarr">
+                              <a href="#" class="btn btn-warning" data-toggle="modal" data-target="#example-food">雇用</a>
+                              <a href="#" class=" btn btn-success" data-toggle="modal" data-target="#example-food">詢問</a>
+                              <a href="re-helper.html" class=" btn btn-info">推薦</a>
+                          </div>
+                          <div class="intro">
+                              <p>簡介：{{$value->offer_description}}</p>
+                          </div>
+                          <div class="row justify-content-center">
+                              <div class="col-md-12 mt-2">
+                                  <div class="row fix">
+                                  <a href="images/food.jpg" data-toggle="lightbox" data-gallery="food" class="col-4 col-sm-3  mt-2  p-2">
+                                      <img src="images/food.jpg" class="img-fluid">
+                                      <div class="pic-dis">西湖醋魚32ss<br><span class="text-danger">500</span>元 / 件 </div>
+                                  </a>
+                                  </div>
+                              </div>
+                          </div>
+                    @endif
                 @endforeach
-                <!-- <div class="jobs-item"> 電腦教學：<span class="text-danger">500</span>元 / 小時 </div>
-                <div class="col text-center btnarr">
-                  <a href="#" class="btn btn-warning" data-toggle="modal" data-target="#exampleModalLong">雇用</a>
-                  <a href="#" class=" btn btn-success" data-toggle="modal" data-target="#exampleModalLong">詢問</a>
-                  <a href="re-helper.html" class=" btn btn btn-info">推薦</a>
-                </div>
-                <div class="intro"><p>簡介：用心經營、責任施工、品質保證 假日、夜間（下午五點後）施工因需提前備料務必提前預約。</p> </div>
-                <div class="jobs-item">最高學歷：台北科技大學資工系 </div>
-                <div class="row justify-content-center">
-                  <div class="col-md-12 mt-2">
-                    <div class="row fix">
-                      <a href="images/works.jpg" data-toggle="lightbox" data-gallery="example-gallery" class="col-4 col-sm-3  mt-2  p-2">
-                          <img src="images/works.jpg" class="img-fluid">
-                          <div class="pic-dis">作品 </div>
-                      </a>
-                      <a href="images/20161005_R030.jpg" data-toggle="lightbox" data-gallery="example-gallery" class="col-4 col-sm-3  mt-2  p-2">
-                          <img src="images/20161005_R030.jpg" class="img-fluid">
-                            <div class="pic-dis">作品 </div>
-                      </a>
-                    </div>
-                  </div>
-                </div>
-                <div class="jobs-item"> 室內設計：<span class="text-danger">15000</span>元/件起 </div>
-                <div class="col text-center btnarr">
-                  <a href="#" class="btn btn-warning" data-toggle="modal" data-target="#example-design">雇用</a>
-                  <a href="#" class=" btn btn-success" data-toggle="modal" data-target="#example-design">詢問</a>
-                  <a href="re-helper.html" class=" btn btn btn-info">推薦</a>
-                </div>
-                <div class="intro"><p>簡介：用心經營、責任施工、品質保證 假日、夜間（下午五點後）施工因需提前備料務必提前預約。</p> </div>
-                <div class="row justify-content-center">
-                  <div class="col-md-12 mt-2">
-                    <div class="row fix">
-                      <a href="images/works.jpg" data-toggle="lightbox" data-gallery="design" class="col-4 col-sm-3  mt-2  p-2">
-                        <img src="images/works.jpg" class="img-fluid">
-                        <div class="pic-dis">證照 </div>
-                      </a>
-                      <a href="http://youtu.be/pmW2af_BaRk" data-toggle="lightbox" data-gallery="design" class="col-4 col-sm-3  mt-2  p-2">
-                        <img src="http://i1.ytimg.com/vi/pmW2af_BaRk/mqdefault.jpg" class="img-fluid">
-                        <div class="pic-dis">影片 </div>
-                      </a>
-                    </div>
-                  </div>
-                </div> -->
+{{--                <div class="jobs-item"> 電腦教學：<span class="text-danger">500</span>元 / 小時 </div>--}}
+{{--                <div class="col text-center btnarr">--}}
+{{--                  <a href="#" class="btn btn-warning" data-toggle="modal" data-target="#exampleModalLong">雇用</a>--}}
+{{--                  <a href="#" class=" btn btn-success" data-toggle="modal" data-target="#exampleModalLong">詢問</a>--}}
+{{--                  <a href="re-helper.html" class=" btn btn btn-info">推薦</a>--}}
+{{--                </div>--}}
+{{--                <div class="intro"><p>簡介：用心經營、責任施工、品質保證 假日、夜間（下午五點後）施工因需提前備料務必提前預約。</p> </div>--}}
+{{--                <div class="jobs-item">最高學歷：台北科技大學資工系 </div>--}}
+{{--                <div class="row justify-content-center">--}}
+{{--                  <div class="col-md-12 mt-2">--}}
+{{--                    <div class="row fix">--}}
+{{--                      <a href="images/works.jpg" data-toggle="lightbox" data-gallery="example-gallery" class="col-4 col-sm-3  mt-2  p-2">--}}
+{{--                          <img src="images/works.jpg" class="img-fluid">--}}
+{{--                          <div class="pic-dis">作品 </div>--}}
+{{--                      </a>--}}
+{{--                      <a href="images/20161005_R030.jpg" data-toggle="lightbox" data-gallery="example-gallery" class="col-4 col-sm-3  mt-2  p-2">--}}
+{{--                          <img src="images/20161005_R030.jpg" class="img-fluid">--}}
+{{--                            <div class="pic-dis">作品 </div>--}}
+{{--                      </a>--}}
+{{--                    </div>--}}
+{{--                  </div>--}}
+{{--                </div>--}}
+{{--                <div class="jobs-item"> 室內設計：<span class="text-danger">15000</span>元/件起 </div>--}}
+{{--                <div class="col text-center btnarr">--}}
+{{--                  <a href="#" class="btn btn-warning" data-toggle="modal" data-target="#example-design">雇用</a>--}}
+{{--                  <a href="#" class=" btn btn-success" data-toggle="modal" data-target="#example-design">詢問</a>--}}
+{{--                  <a href="re-helper.html" class=" btn btn btn-info">推薦</a>--}}
+{{--                </div>--}}
+{{--                <div class="intro"><p>簡介：用心經營、責任施工、品質保證 假日、夜間（下午五點後）施工因需提前備料務必提前預約。</p> </div>--}}
+{{--                <div class="row justify-content-center">--}}
+{{--                  <div class="col-md-12 mt-2">--}}
+{{--                    <div class="row fix">--}}
+{{--                      <a href="images/works.jpg" data-toggle="lightbox" data-gallery="design" class="col-4 col-sm-3  mt-2  p-2">--}}
+{{--                        <img src="images/works.jpg" class="img-fluid">--}}
+{{--                        <div class="pic-dis">證照 </div>--}}
+{{--                      </a>--}}
+{{--                      <a href="http://youtu.be/pmW2af_BaRk" data-toggle="lightbox" data-gallery="design" class="col-4 col-sm-3  mt-2  p-2">--}}
+{{--                        <img src="http://i1.ytimg.com/vi/pmW2af_BaRk/mqdefault.jpg" class="img-fluid">--}}
+{{--                        <div class="pic-dis">影片 </div>--}}
+{{--                      </a>--}}
+{{--                    </div>--}}
+{{--                  </div>--}}
+{{--                </div>--}}
 
                 <div class="jobs-tit">服務評分 <i class="fa fa-star-o" aria-hidden="true"></i> </div>
                 <div class="jobs-all"> 總體服務評分
                   <span class="start-all">
-                    <i class="fa fa-star" aria-hidden="true"></i>
-                    <i class="fa fa-star" aria-hidden="true"></i>
-                    <i class="fa fa-star" aria-hidden="true"></i>
-                    <i class="fa fa-star" aria-hidden="true"></i>
-                    <i class="fa fa-star" aria-hidden="true"></i>
-                    <span class="avg">4.9</span>
+                    @if($user->customer_avg_rate == 0 || $user->customer_avg_rate == null)
+                          @for($i = 1 ;$i<=5;$i++)
+                              <i class="fa fa-star-o" aria-hidden="true"></i>
+                          @endfor
+                      @elseif($user->customer_avg_rate > 0)
+                          @for($i =1 ;$i<=5;$i++)
+                              @if(floor($user->customer_avg_rate) >= $i)
+                                  <i class="fa fa-star" aria-hidden="true"></i>
+                              @else
+                                  <i class="fa fa-star-o" aria-hidden="true"></i>
+                              @endif
+                          @endfor
+                      @endif
+                    <span class="avg">{{is_null($user->customer_avg_rate)?'0':$user->customer_avg_rate}}</span>
                   </span>
                 </div>
                 <div class="start-box">
@@ -233,7 +250,7 @@
         </div>
 
     <div class="type-arr" id="type1">
-      <div class="job-list"> <span> 家常菜</span> </div>
+      <div class="job-list"> <span> 家常菜123</span> </div>
       <div class="jobs-info">受雇次數：<span class="text-danger">115</span>次 </div>
       <div class="jobs-item"> 家常菜：<span class="text-danger">300</span>元 / 件起 </div>
       <div class="col text-center btnarr">
@@ -408,8 +425,8 @@
 
 </div>
 
-<div class="type-arr" id="type2">
-            <div class="job-list"><span>電腦教學</span>
+<div class="type-arr" id="type0">
+            <div class="job-list"><span>電腦教學321</span>
 
             </div>
             <div class="jobs-info">受雇次數：<span class="text-danger">20</span>次  工作時數：<span class="text-danger">30 </span> 小時
@@ -585,7 +602,7 @@
 
 
 </div>
-<div class="type-arr" id="type3">
+<div class="type-arr" id="type2">
             <div class="jobs-item"> 室內設計：<span class="text-danger">15000</span>元/件起
 
             </div>
@@ -1260,7 +1277,7 @@
    $('#endb').val(100-ttb);
    });
    $(function(){
- $("#all-type1,#all-type2,#all-type3").click(function () {
+ $("#all-type0,#all-type1,#all-type2").click(function () {
    $(this).siblings('input:checkbox').not(this).prop('checked', this.checked);
  }); });
 </script>

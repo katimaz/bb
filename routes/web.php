@@ -135,6 +135,8 @@ Route::prefix('api')->group(function () {
     Route::post('add_fav', 'AjaxController@add_fav');
 
     Route::get('get_office_list', 'AjaxController@get_office_list');
+    Route::get('get_office_details', 'AjaxController@get_office_details');
+
 });
 
 Route::get('home/big/{filename}', array(function ($filename)

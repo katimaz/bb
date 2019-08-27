@@ -61,7 +61,7 @@
                 <select class="form-control" id="select-tab">
                   <option data-toggle-select-hide=".type-arr" data-toggle-select-show="#type3" selected>全部</option>
                   @foreach($olo as $value)
-                    <option data-toggle-select-hide=".type-arr" data-toggle-select-show="#type{{$value->class_flag}}">{{$value->offer_title}}</option>
+                    <option data-toggle-select-hide=".type-arr" data-toggle-select-show="#type{{$value->class_flag}}" id="{{$value->id}}">{{$value->offer_title}}</option>
                   @endforeach
                 </select>
               </div>
@@ -76,8 +76,47 @@
                   總工作時數：<span class="text-danger">{{is_null($user->total_served_hours)?'0':$user->total_served_hours}} </span> 小時
                 </div>
                 @foreach($olo as $value)
-                    @if($value->class_flag == 1)
-                          <div class="jobs-item"> {{$value->offer_title}}：<span class="text-danger">{{$value->price}}</span>元 / {{$value->price_type}}起 </div>
+                    @if($value->class_flag == 0)
+                          <div class="jobs-item"> {{$value->offer_title}}：<span class="text-danger">{{is_null($value->price)?'0':$value->price}}</span>元 / {{$value->price_type}} </div>
+                            <div class="col text-center btnarr">
+                                <a href="#" class="btn btn-warning" data-toggle="modal" data-target="#exampleModalLong">雇用</a>
+                                <a href="#" class=" btn btn-success" data-toggle="modal" data-target="#exampleModalLong">詢問</a>
+                                <a href="re-helper.html" class=" btn btn btn-info">推薦</a>
+                            </div>
+                                <div class="intro"><p>簡介：{{$value->offer_description}}</p> </div>
+                                <div class="jobs-item">最高學歷：{{$value->education}}</div>
+                                <div class="row justify-content-center">
+                                    <div class="col-md-12 mt-2">
+                                        <div class="row fix">
+                                            @foreach($license_imgs as $license_img)
+                                                @if($license_img->olo_id == $value->id)
+                                                    <a href="{{URL::to("/")}}/license_img/small/{{$license_img->img}}" data-toggle="lightbox" data-gallery="design" class="col-4 col-sm-3  mt-2  p-2">
+                                                        <img src="{{URL::to("/")}}/license_img/small/{{$license_img->img}}" class="img-fluid">
+                                                        <div class="pic-dis">證照 </div>
+                                                    </a>
+                                                @endif
+                                            @endforeach
+                                            @foreach($imgs as $img)
+                                                @if($img->olo_id == $value->id)
+                                                    <a href="{{URL::to("/")}}/img/small/{{$img->img}}" data-toggle="lightbox" data-gallery="design" class="col-4 col-sm-3  mt-2  p-2">
+                                                    <img src="{{URL::to("/")}}/img/small/{{$img->img}}" class="img-fluid">
+                                                    <div class="pic-dis">作品 </div>
+                                                </a>
+                                                @endif
+                                            @endforeach
+                                            @foreach($videos as $video)
+                                                @if($video->olo_id == $value->id)
+                                                     <a href="{{$video->url}}" data-toggle="lightbox" data-gallery="design" class="col-4 col-sm-3  mt-2  p-2">
+                                                         <img src="http://i1.ytimg.com/vi/pmW2af_BaRk/mqdefault.jpg" class="img-fluid">
+                                                         <div class="pic-dis">影片 </div>
+                                                     </a>
+                                                @endif
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                </div>
+                    @elseif($value->class_flag == 1)
+                          <div class="jobs-item"> {{$value->offer_title}}：<span class="text-danger">{{is_null($value->price)?'0':$value->price}}</span>元 / {{$value->price_type}}起 </div>
                           <div class="col text-center btnarr">
                               <a href="#" class="btn btn-warning" data-toggle="modal" data-target="#example-food">雇用</a>
                               <a href="#" class=" btn btn-success" data-toggle="modal" data-target="#example-food">詢問</a>
@@ -89,59 +128,66 @@
                           <div class="row justify-content-center">
                               <div class="col-md-12 mt-2">
                                   <div class="row fix">
-                                  <a href="images/food.jpg" data-toggle="lightbox" data-gallery="food" class="col-4 col-sm-3  mt-2  p-2">
-                                      <img src="images/food.jpg" class="img-fluid">
-                                      <div class="pic-dis">西湖醋魚32ss<br><span class="text-danger">500</span>元 / 件 </div>
-                                  </a>
+                                      @foreach($license_imgs as $license_img)
+                                          @if($license_img->olo_id == $value->id)
+                                              <a href="{{URL::to("/")}}/license_img/small/{{$license_img->img}}" data-toggle="lightbox" data-gallery="design" class="col-4 col-sm-3  mt-2  p-2">
+                                                  <img src="{{URL::to("/")}}/license_img/small/{{$license_img->img}}" class="img-fluid">
+                                                  <div class="pic-dis">證照 </div>
+                                              </a>
+                                          @endif
+                                      @endforeach
+                                      @foreach($foods as $food)
+                                          @if($food->olo_id == $value->id)
+                                              <a href="{{URL::to("/")}}/img/small/{{$food->img}}" data-toggle="lightbox" data-gallery="food" class="col-4 col-sm-3  mt-2  p-2">
+                                                <img src="{{URL::to("/")}}/img/small/{{$food->img}}" class="img-fluid">
+                                                <div class="pic-dis">{{$food->title}}<br><span class="text-danger">{{is_null($food->price)?'0':$food->price}}</span>元 / 件 </div>
+                                              </a>
+                                          @endif
+                                      @endforeach
+
+                                  </div>
+                              </div>
+                          </div>
+                    @elseif($value->class_flag == 2)
+                          <div class="jobs-item"> {{$value->offer_title}}：<span class="text-danger">{{is_null($value->price)?'0':$value->price}}</span>元/ {{$value->price_type}}起 </div>
+                          <div class="col text-center btnarr">
+                              <a href="#" class="btn btn-warning" data-toggle="modal" data-target="#example-design">雇用</a>
+                              <a href="#" class=" btn btn-success" data-toggle="modal" data-target="#example-design">詢問</a>
+                              <a href="re-helper.html" class=" btn btn btn-info">推薦</a>
+                          </div>
+                          <div class="intro"><p>簡介：{{$value->offer_description}}</p> </div>
+                          <div class="row justify-content-center">
+                              <div class="col-md-12 mt-2">
+                                  <div class="row fix">
+                                      @foreach($license_imgs as $license_img)
+                                          @if($license_img->olo_id == $value->id)
+                                              <a href="{{URL::to("/")}}/license_img/small/{{$license_img->img}}" data-toggle="lightbox" data-gallery="design" class="col-4 col-sm-3  mt-2  p-2">
+                                                        <img src="{{URL::to("/")}}/license_img/small/{{$license_img->img}}" class="img-fluid">
+                                                        <div class="pic-dis">證照 </div>
+                                                    </a>
+                                          @endif
+                                      @endforeach
+                                      @foreach($imgs as $img)
+                                          @if($img->olo_id == $value->id)
+                                              <a href="{{URL::to("/")}}/img/small/{{$img->img}}" data-toggle="lightbox" data-gallery="design" class="col-4 col-sm-3  mt-2  p-2">
+                                                    <img src="{{URL::to("/")}}/img/small/{{$img->img}}" class="img-fluid">
+                                                    <div class="pic-dis">作品 </div>
+                                                </a>
+                                          @endif
+                                      @endforeach
+                                      @foreach($videos as $video)
+                                          @if($video->olo_id == $value->id)
+                                              <a href="{{$video->url}}" data-toggle="lightbox" data-gallery="design" class="col-4 col-sm-3  mt-2  p-2">
+                                                         <img src="http://i1.ytimg.com/vi/pmW2af_BaRk/mqdefault.jpg" class="img-fluid">
+                                                         <div class="pic-dis">影片 </div>
+                                                     </a>
+                                          @endif
+                                      @endforeach
                                   </div>
                               </div>
                           </div>
                     @endif
                 @endforeach
-{{--                <div class="jobs-item"> 電腦教學：<span class="text-danger">500</span>元 / 小時 </div>--}}
-{{--                <div class="col text-center btnarr">--}}
-{{--                  <a href="#" class="btn btn-warning" data-toggle="modal" data-target="#exampleModalLong">雇用</a>--}}
-{{--                  <a href="#" class=" btn btn-success" data-toggle="modal" data-target="#exampleModalLong">詢問</a>--}}
-{{--                  <a href="re-helper.html" class=" btn btn btn-info">推薦</a>--}}
-{{--                </div>--}}
-{{--                <div class="intro"><p>簡介：用心經營、責任施工、品質保證 假日、夜間（下午五點後）施工因需提前備料務必提前預約。</p> </div>--}}
-{{--                <div class="jobs-item">最高學歷：台北科技大學資工系 </div>--}}
-{{--                <div class="row justify-content-center">--}}
-{{--                  <div class="col-md-12 mt-2">--}}
-{{--                    <div class="row fix">--}}
-{{--                      <a href="images/works.jpg" data-toggle="lightbox" data-gallery="example-gallery" class="col-4 col-sm-3  mt-2  p-2">--}}
-{{--                          <img src="images/works.jpg" class="img-fluid">--}}
-{{--                          <div class="pic-dis">作品 </div>--}}
-{{--                      </a>--}}
-{{--                      <a href="images/20161005_R030.jpg" data-toggle="lightbox" data-gallery="example-gallery" class="col-4 col-sm-3  mt-2  p-2">--}}
-{{--                          <img src="images/20161005_R030.jpg" class="img-fluid">--}}
-{{--                            <div class="pic-dis">作品 </div>--}}
-{{--                      </a>--}}
-{{--                    </div>--}}
-{{--                  </div>--}}
-{{--                </div>--}}
-{{--                <div class="jobs-item"> 室內設計：<span class="text-danger">15000</span>元/件起 </div>--}}
-{{--                <div class="col text-center btnarr">--}}
-{{--                  <a href="#" class="btn btn-warning" data-toggle="modal" data-target="#example-design">雇用</a>--}}
-{{--                  <a href="#" class=" btn btn-success" data-toggle="modal" data-target="#example-design">詢問</a>--}}
-{{--                  <a href="re-helper.html" class=" btn btn btn-info">推薦</a>--}}
-{{--                </div>--}}
-{{--                <div class="intro"><p>簡介：用心經營、責任施工、品質保證 假日、夜間（下午五點後）施工因需提前備料務必提前預約。</p> </div>--}}
-{{--                <div class="row justify-content-center">--}}
-{{--                  <div class="col-md-12 mt-2">--}}
-{{--                    <div class="row fix">--}}
-{{--                      <a href="images/works.jpg" data-toggle="lightbox" data-gallery="design" class="col-4 col-sm-3  mt-2  p-2">--}}
-{{--                        <img src="images/works.jpg" class="img-fluid">--}}
-{{--                        <div class="pic-dis">證照 </div>--}}
-{{--                      </a>--}}
-{{--                      <a href="http://youtu.be/pmW2af_BaRk" data-toggle="lightbox" data-gallery="design" class="col-4 col-sm-3  mt-2  p-2">--}}
-{{--                        <img src="http://i1.ytimg.com/vi/pmW2af_BaRk/mqdefault.jpg" class="img-fluid">--}}
-{{--                        <div class="pic-dis">影片 </div>--}}
-{{--                      </a>--}}
-{{--                    </div>--}}
-{{--                  </div>--}}
-{{--                </div>--}}
-
                 <div class="jobs-tit">服務評分 <i class="fa fa-star-o" aria-hidden="true"></i> </div>
                 <div class="jobs-all"> 總體服務評分
                   <span class="start-all">
@@ -259,7 +305,7 @@
         <a href="re-helper.html" class=" btn btn btn-info">推薦</a>
       </div>
       <div class="intro"><p>簡介：用心經營、責任施工、品質保證 假日、夜間（下午五點後）施工因需提前備料務必提前預約。</p>
-    </div>
+        </div>
     <div class="row justify-content-center">
       <div class="col-md-12 mt-2">
         <div class="row fix">
@@ -426,180 +472,180 @@
 </div>
 
 <div class="type-arr" id="type0">
-            <div class="job-list"><span>電腦教學321</span>
+    <div class="job-list"><span>電腦教學321</span></div>
+    <div class="jobs-info">受雇次數：<span class="text-danger">20 </span>次 工作時數：<span class="text-danger">30 </span> 小時</div>
+    <div class="jobs-item"> 電腦教學：<span class="text-danger">500</span>元 / 小時</div>
+    <div class="col text-center btnarr">
+        <a href="#" class="btn btn-warning" data-toggle="modal" data-target="#exampleModalLong">雇用</a>
+        <a href="#" class=" btn btn-success" data-toggle="modal" data-target="#exampleModalLong">詢問</a>
+        <a href="re-helper.html" class=" btn btn btn-info">推薦</a>
+    </div>
+    <div class="intro">
+        <p>簡介：用心經營、責任施工、品質保證 假日、夜間（下午五點後）施工因需提前備料務必提前預約。
+        </p>
+    </div>
+    <div class="jobs-item">最高學歷：台北科技大學資工系
+
+    </div>
+    <div class="row justify-content-center">
+        <div class="col-md-12 mt-2">
+            <div class="row fix">
+
+                <a href="images/works.jpg" data-toggle="lightbox" data-gallery="example-gallery" class="col-4 col-sm-3  mt-2  p-2">
+                    <img src="images/works.jpg" class="img-fluid">
+                    <div class="pic-dis">作品
+
+                    </div>
+                </a>
+                <a href="images/20161005_R030.jpg" data-toggle="lightbox" data-gallery="example-gallery" class="col-4 col-sm-3  mt-2  p-2">
+                    <img src="images/20161005_R030.jpg" class="img-fluid">
+                    <div class="pic-dis">作品
+
+                    </div>
+                </a>
 
             </div>
-            <div class="jobs-info">受雇次數：<span class="text-danger">20</span>次  工作時數：<span class="text-danger">30 </span> 小時
-
-            </div>
-
-              <div class="jobs-item"> 電腦教學：<span class="text-danger">500</span>元 / 小時
-
-              </div>
-              <div class="col text-center btnarr">
-         <a href="#" class="btn btn-warning" data-toggle="modal" data-target="#exampleModalLong">雇用</a>
-         <a href="#" class=" btn btn-success" data-toggle="modal" data-target="#exampleModalLong">詢問</a>
-         <a href="re-helper.html" class=" btn btn btn-info">推薦</a>
-
-
-          </div>
-              <div class="intro"><p>簡介：用心經營、責任施工、品質保證
-假日、夜間（下午五點後）施工因需提前備料務必提前預約。</p>
-
-</div>
-<div class="jobs-item">最高學歷：台北科技大學資工系
-
-</div>
-<div class="row justify-content-center">
-    <div class="col-md-12 mt-2">
-        <div class="row fix">
-
-            <a href="images/works.jpg" data-toggle="lightbox" data-gallery="example-gallery" class="col-4 col-sm-3  mt-2  p-2">
-                <img src="images/works.jpg" class="img-fluid">
-                <div class="pic-dis">作品
-
-                </div>
-            </a>
-            <a href="images/20161005_R030.jpg" data-toggle="lightbox" data-gallery="example-gallery" class="col-4 col-sm-3  mt-2  p-2">
-                <img src="images/20161005_R030.jpg" class="img-fluid">
-                 <div class="pic-dis">作品
-
-                 </div>
-            </a>
-
-
 
         </div>
 
+    </div>
+
+    <div class="jobs-tit">服務評分 <i class="fa fa-star-o" aria-hidden="true"></i>
+
+    </div>
+    <div class="jobs-all"> 學習服務評分<span class="start-all"><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i> <span class="avg">4.9</span></span>
+
+    </div>
+    <div class="start-box">
+        <div class="box-satrt"><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i>
+
+        </div>
+        <div class="box-pros">
+            <div class="progress">
+                <div class="progress-bar bg-warning" role="progressbar" style="width: 95%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">
+
+                </div>
+
+            </div>
+
+        </div>
+        <div class="box-pres">95%
+
+        </div>
+
+    </div>
+    <div class="start-box">
+        <div class="box-satrt"><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i>
+
+        </div>
+        <div class="box-pros">
+            <div class="progress">
+                <div class="progress-bar bg-warning" role="progressbar" style="width: 5%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">
+
+                </div>
+
+            </div>
+
+        </div>
+        <div class="box-pres">5%
+
+        </div>
+
+    </div>
+    <div class="start-box">
+        <div class="box-satrt"><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i>
+
+        </div>
+        <div class="box-pros">
+            <div class="progress">
+                <div class="progress-bar bg-warning" role="progressbar" style="width: 0%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">
+
+                </div>
+
+            </div>
+
+        </div>
+        <div class="box-pres">0%
+
+        </div>
+
+    </div>
+    <div class="start-box">
+        <div class="box-satrt"><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i>
+
+        </div>
+        <div class="box-pros">
+            <div class="progress">
+                <div class="progress-bar bg-warning" role="progressbar" style="width: 0%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">
+
+                </div>
+
+            </div>
+
+        </div>
+        <div class="box-pres">0%
+
+        </div>
+
+    </div>
+    <div class="start-box">
+        <div class="box-satrt"><i class="fa fa-star" aria-hidden="true"></i>
+
+        </div>
+        <div class="box-pros">
+            <div class="progress">
+                <div class="progress-bar bg-warning" role="progressbar" style="width: 0%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">
+
+                </div>
+
+            </div>
+
+        </div>
+        <div class="box-pres">0%
+
+        </div>
 
     </div>
 
+    <div class="comm">共有7則評價 <i class="fa fa-commenting-o" aria-hidden="true"></i>
 
-</div>
+    </div>
+    <div class="comm-list">
+        <div class="comm-face"><img src="images/face.jpg">
 
-      <div class="jobs-tit">服務評分 <i class="fa fa-star-o" aria-hidden="true"></i>
+        </div>
+        <div class="comm-info">
+            <div class="comm-name">吳大偉</div>
+            <div class="comm-date">2019/03/25
 
-      </div>
-      <div class="jobs-all"> 學習服務評分<span class="start-all"><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i> <span class="avg">4.9</span></span>
+            </div>
+            <div class="comm-re">大推~~很專業很細心的服務
 
-      </div>
-<div class="start-box">
-<div class="box-satrt"><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i>
+            </div>
 
-</div><div class="box-pros"><div class="progress">
-  <div class="progress-bar bg-warning" role="progressbar" style="width: 95%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">
+        </div>
 
-  </div>
+    </div>
+    <div class="comm-list">
+        <div class="comm-face"><img src="images/face.jpg">
 
+        </div>
+        <div class="comm-info">
+            <div class="comm-name">吳大偉</div>
+            <div class="comm-date">2019/03/25
 
-</div>
+            </div>
+            <div class="comm-re">大推~~很專業很細心的服務
 
-</div><div class="box-pres">95%
+            </div>
 
-</div>
+        </div>
 
+    </div>
+    <div class="more">
+        <button class="btn btn-sm btn-light">更多評價</button>
 
-</div>
-<div class="start-box">
-<div class="box-satrt"><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i>
-
-</div><div class="box-pros"><div class="progress">
-  <div class="progress-bar bg-warning" role="progressbar" style="width: 5%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">
-
-  </div>
-
-
-</div>
-
-</div><div class="box-pres">5%
-
-</div>
-
-
-</div>
-<div class="start-box">
-<div class="box-satrt"><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i>
-
-</div><div class="box-pros"><div class="progress">
-  <div class="progress-bar bg-warning" role="progressbar" style="width: 0%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">
-
-  </div>
-
-
-</div>
-
-</div><div class="box-pres">0%
-
-</div>
-
-
-</div>
-<div class="start-box">
-<div class="box-satrt"><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i>
-
-</div><div class="box-pros"><div class="progress">
-  <div class="progress-bar bg-warning" role="progressbar" style="width: 0%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">
-
-  </div>
-
-
-</div>
-
-</div><div class="box-pres">0%
-
-</div>
-
-
-</div>
-<div class="start-box">
-<div class="box-satrt"><i class="fa fa-star" aria-hidden="true"></i>
-
-</div><div class="box-pros"><div class="progress">
-  <div class="progress-bar bg-warning" role="progressbar" style="width: 0%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">
-
-  </div>
-
-
-</div>
-
-</div><div class="box-pres">0%
-
-</div>
-
-
-</div>
-
-<div class="comm">共有7則評價 <i class="fa fa-commenting-o" aria-hidden="true"></i>
-
-</div>
-<div class="comm-list">
-  <div class="comm-face"><img src="images/face.jpg">
-
-  </div><div class="comm-info"><div class="comm-name">吳大偉</div ><div class="comm-date">2019/03/25
-
-  </div><div class="comm-re">大推~~很專業很細心的服務
-
-  </div>
-
-  </div>
-
-  </div>
-  <div class="comm-list">
-  <div class="comm-face"><img src="images/face.jpg">
-
-  </div><div class="comm-info"><div class="comm-name">吳大偉</div ><div class="comm-date">2019/03/25
-
-  </div><div class="comm-re">大推~~很專業很細心的服務
-
-  </div>
-
-  </div>
-
-  </div>
- <div class="more"> <button class="btn btn-sm btn-light">更多評價</button>
-
- </div>
-
+    </div>
 
 </div>
 <div class="type-arr" id="type2">
@@ -1226,6 +1272,108 @@
       $hideElements.slideUp();
       $showElements.slideDown();
 
+        $.ajax({
+            type: "get",
+            url: "{{url('/api/get_office_details')}}",
+            data: {
+                id: $this.attr('id')
+            },
+            dataType: "json",
+            success: function (responses) {
+                console.log(responses);
+                if(responses['olo'][0]['class_flag'] == 0){
+                    $('#type0').find('.job-list').find('span').text(responses['olo'][0]['offer_title']);
+                    $('#type0').find('.jobs-info').find('span').first().text(responses['user']['total_served_case'] == null?'0':responses['user']['total_served_case'] );
+                    $('#type0').find('.jobs-info').find('span').last().text(responses['user']['total_served_hours'] == null?'0':responses['user']['total_served_hours'] );
+                    $('#type0').find('.jobs-info').next('div').html(responses['olo'][0]['offer_title']+':<span class="text-danger">'+(responses['olo'][0]['price'] == null ?'0':responses['olo'][0]['price'])+'</span>元 /'+responses['olo'][0]['price_type']);
+                    $('#type0').find('.intro').text('簡介：'+responses['olo'][0]['offer_description']);
+                    $('#type0').find('.intro').next('div').text('最高學歷：'+responses['olo'][0]['education']);
+
+                    var str ='';
+                    if(responses['license_imgs'].length > 0){
+                        responses['license_imgs'].forEach(function(element) {
+                            str+= '<a href="{{URL::to("/")}}/license_img/small/'+element.img+'" data-toggle="lightbox" data-gallery="design" class="col-4 col-sm-3  mt-2  p-2">\n' +
+                            '            <img src="{{URL::to("/")}}/license_img/small/'+element.img+'" class="img-fluid">\n' +
+                            '            <div class="pic-dis">證照 </div>\n' +
+                            '        </a>'
+                        });
+                    }
+                    if(responses['imgs'].length > 0){
+                        responses['imgs'].forEach(function(element) {
+                            str+= '<a href="{{URL::to("/")}}/img/small/'+element.img+'" data-toggle="lightbox" data-gallery="design" class="col-4 col-sm-3  mt-2  p-2">\n' +
+                                '            <img src="{{URL::to("/")}}/img/small/'+element.img+'" class="img-fluid">\n' +
+                                '            <div class="pic-dis">作品 </div>\n' +
+                                '        </a>'
+                        });
+                    }
+                    if(responses['videos'].length > 0){
+                        responses['videos'].forEach(function(element) {
+                            str+= '<a href="'+element.url+'" data-toggle="lightbox" data-gallery="design" class="col-4 col-sm-3  mt-2  p-2">\n' +
+                                '            <img src="http://i1.ytimg.com/vi/pmW2af_BaRk/mqdefault.jpg" class="img-fluid">\n' +
+                                '            <div class="pic-dis">影片 </div>\n' +
+                                '        </a>'
+                        });
+                    }
+                    $('#type0').find('.fix').html(str);
+
+                }else if(responses['olo'][0]['class_flag'] == 1){
+                    console.log(responses['olo'][0]['class_flag']);
+                    $('#type1').find('.job-list').find('span').text(responses['olo'][0]['offer_title']);
+                    $('#type1').find('.jobs-info').find('span').first().text(responses['user']['total_served_case'] == null?'0':responses['user']['total_served_case'] );
+                    $('#type1').find('.jobs-info').next('div').html(responses['olo'][0]['offer_title']+':<span class="text-danger">'+(responses['olo'][0]['price'] == null ?'0':responses['olo'][0]['price'])+'</span>元 / 起');
+                    $('#type1').find('.intro').text('簡介：'+responses['olo'][0]['offer_description']);
+
+                    var str ='';
+                    if(responses['license_imgs'].length > 0){
+                        responses['license_imgs'].forEach(function(element) {
+                            str+= '<a href="{{URL::to("/")}}/license_img/small/'+element.img+'" data-toggle="lightbox" data-gallery="design" class="col-4 col-sm-3  mt-2  p-2">\n' +
+                                '            <img src="{{URL::to("/")}}/license_img/small/'+element.img+'" class="img-fluid">\n' +
+                                '            <div class="pic-dis">證照 </div>\n' +
+                                '        </a>'
+                        });
+                    }
+                    if(responses['foods'].length > 0){
+                        responses['foods'].forEach(function(element) {
+                            str+= '<a href="{{URL::to("/")}}/img/small/'+element.img+'" data-toggle="lightbox" data-gallery="design" class="col-4 col-sm-3  mt-2  p-2">\n' +
+                                '            <img src="{{URL::to("/")}}/img/small/'+element.img+'" class="img-fluid">\n' +
+                                '            <div class="pic-dis">'+element.title+'<br><span class="text-danger">'+element.price+'</span>元 / 件</div>\n' +
+                                '        </a>'
+                        });
+                    }
+                    $('#type1').find('.fix').html(str);
+                }else if(responses['olo'][0]['class_flag'] == 2){
+                    console.log(responses['olo'][0]['class_flag']);
+                    $('#type2').find('.jobs-item').html(responses['olo'][0]['offer_title']+':<span class="text-danger">'+(responses['olo'][0]['price'] == null ?'0':responses['olo'][0]['price'])+'</span>元 /'+responses['olo'][0]['price_type']);
+                    $('#type2').find('.intro').text('簡介：'+responses['olo'][0]['offer_description']);
+                    var str ='';
+                    if(responses['license_imgs'].length > 0){
+                        responses['license_imgs'].forEach(function(element) {
+                            str+= '<a href="{{URL::to("/")}}/license_img/small/'+element.img+'" data-toggle="lightbox" data-gallery="design" class="col-4 col-sm-3  mt-2  p-2">\n' +
+                                '            <img src="{{URL::to("/")}}/license_img/small/'+element.img+'" class="img-fluid">\n' +
+                                '            <div class="pic-dis">證照 </div>\n' +
+                                '        </a>'
+                        });
+                    }
+                    if(responses['imgs'].length > 0){
+                        responses['imgs'].forEach(function(element) {
+                            str+= '<a href="{{URL::to("/")}}/img/small/'+element.img+'" data-toggle="lightbox" data-gallery="design" class="col-4 col-sm-3  mt-2  p-2">\n' +
+                                '            <img src="{{URL::to("/")}}/img/small/'+element.img+'" class="img-fluid">\n' +
+                                '            <div class="pic-dis">作品 </div>\n' +
+                                '        </a>'
+                        });
+                    }
+                    if(responses['videos'].length > 0){
+                        responses['videos'].forEach(function(element) {
+                            str+= '<a href="'+element.url+'" data-toggle="lightbox" data-gallery="design" class="col-4 col-sm-3  mt-2  p-2">\n' +
+                                '            <img src="http://i1.ytimg.com/vi/pmW2af_BaRk/mqdefault.jpg" class="img-fluid">\n' +
+                                '            <div class="pic-dis">影片 </div>\n' +
+                                '        </a>'
+                        });
+                    }
+                    $('#type2').find('.fix').html(str);
+                }
+            }
+        });
     });
   });
 	 $(function () {

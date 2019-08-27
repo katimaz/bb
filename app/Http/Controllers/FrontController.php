@@ -1,5 +1,9 @@
 <?php
 namespace App\Http\Controllers;
+use App\Models\olo_food;
+use App\Models\olo_img;
+use App\Models\olo_license_img;
+use App\Models\olo_video;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Utils\Utils;
@@ -483,13 +487,25 @@ class FrontController extends Controller
         $member_addrs = Member_addr_recode::where('u_id',$user->id)->get();
         // 服務
 		$olo = OfferListObj::where('mem_id', $member_addrs->first()->id)->get();
+        $member_ids = [];
+		foreach($member_addrs as $member_addr){
+            array_push($member_ids ,$member_addr->id);
+        }
 
-		dd($olo);
+        $lists = OfferListObj::wherein('mem_id', $member_ids)->get();
+        $list_ids = [];
+        foreach($lists as $list){
+            array_push($list_ids ,$list->id);
+        }
 
+        $foods = olo_food::wherein('olo_id',$list_ids)->get();
+        $imgs = olo_img::wherein('olo_id',$list_ids)->get();
+        $license_imgs = olo_license_img::wherein('olo_id',$list_ids)->get();
+        $videos = olo_video::wherein('olo_id',$list_ids)->get();
 		// 評價
 		$service_rate = [];
 
-		return View('web/helper_detail', ['distance' => $distance, 'user' => $user, 'olo' => $olo]);
+		return View('web/helper_detail', ['distance' => $distance, 'user' => $user, 'olo' => $olo,'foods' => $foods,'imgs' => $imgs,'license_imgs' => $license_imgs,'videos' => $videos]);
 	}
 
 	public function h_set()
@@ -506,14 +522,8 @@ class FrontController extends Controller
 		// 會員地址
 		$member_addr_recode = Member_addr_recode::where('u_id', session()->get('uID'))->get();
         // 服務設定
-        //$OfferListObj = OfferListObj::where('mem_id',$member_addr_recode->first()->id)->orderby('id')->get();
-        $OfferListObj = DB::table('officelistobj')
-            ->leftJoin('olo_foods', 'officelistobj.id', '=', 'olo_foods.olo_id')
-            ->leftJoin('olo_imgs', 'officelistobj.id', '=', 'posts.olo_id')
-            ->leftJoin('olo_license_imgs', 'officelistobj.id', '=', 'posts.olo_id')
-            ->leftJoin('olo_videos', 'officelistobj.id', '=', 'posts.olo_id')
-            ->get();
-        dd($OfferListObj);
+        $OfferListObj = OfferListObj::where('mem_id',$member_addr_recode->first()->id)->orderby('id')->get();
+
 		// 服務評分…表格再找
 
 		return View('web/h-set', array('user'=>$user, 'member_addr_recode' => $member_addr_recode, 'olo' => $OfferListObj));

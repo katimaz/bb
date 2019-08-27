@@ -145,6 +145,18 @@ class AjaxController extends Controller
 		return response()->json(['success' => true]);
 	}
 
+    public function get_office_details(Request $request){
+
+        $user = User::where('usr_id',Session::get('usrID'))->first();
+        $olo = OfferListObj::where('id', $request->id)->get();
+        $foods = olo_food::where('olo_id',$request->id)->get();
+        $imgs = olo_img::where('olo_id',$request->id)->get();
+        $license_imgs = olo_license_img::where('olo_id',$request->id)->get();
+        $videos = olo_video::where('olo_id',$request->id)->get();
+
+        return response()->json(['user'=>$user,'olo' => $olo,'foods' => $foods,'imgs' => $imgs,'license_imgs' => $license_imgs,'videos' => $videos]);
+    }
+
     public function get_office_list(Request $request){
         $OfferListObj = OfferListObj::where('mem_id',$request->id)->orderby('id','desc')->get();
         return response()->json(['offerlist' => $OfferListObj]);

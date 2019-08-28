@@ -1285,7 +1285,7 @@
                     $('#type0').find('.job-list').find('span').text(responses['olo'][0]['offer_title']);
                     $('#type0').find('.jobs-info').find('span').first().text(responses['user']['total_served_case'] == null?'0':responses['user']['total_served_case'] );
                     $('#type0').find('.jobs-info').find('span').last().text(responses['user']['total_served_hours'] == null?'0':responses['user']['total_served_hours'] );
-                    $('#type0').find('.jobs-info').next('div').html(responses['olo'][0]['offer_title']+':<span class="text-danger">'+(responses['olo'][0]['price'] == null ?'0':responses['olo'][0]['price'])+'</span>元 /'+responses['olo'][0]['price_type']);
+                    $('#type0').find('.jobs-info').next('div').html(responses['olo'][0]['offer_title']+':<span class="text-danger">'+(responses['olo'][0]['price'] == null ?'0':responses['olo'][0]['price'])+'</span>元 /'+responses['olo'][0]['price_type'] == null ?'':responses['olo'][0]['price_type']);
                     $('#type0').find('.intro').text((responses['olo'][0]['offer_description']==null)?'簡介：':'簡介：'+responses['olo'][0]['offer_description']);
                     $('#type0').find('.intro').next('div').text(responses['olo'][0]['education'] == null? '最高學歷：':'最高學歷：'+responses['olo'][0]['education']);
 
@@ -1343,7 +1343,7 @@
                     $('#type1').find('.fix').html(str);
                 }else if(responses['olo'][0]['class_flag'] == 2){
                     console.log(responses['olo'][0]['class_flag']);
-                    $('#type2').find('.jobs-item').html(responses['olo'][0]['offer_title']+':<span class="text-danger">'+(responses['olo'][0]['price'] == null ?'0':responses['olo'][0]['price'])+'</span>元 /'+responses['olo'][0]['price_type']);
+                    $('#type2').find('.jobs-item').html(responses['olo'][0]['offer_title']+':<span class="text-danger">'+(responses['olo'][0]['price'] == null ?'0':responses['olo'][0]['price'])+'</span>元 /'+responses['olo'][0]['price_type'] == null ? '' : responses['olo'][0]['price_type']);
                     $('#type2').find('.intro').text((responses['olo'][0]['offer_description'] == null) ? '簡介：':'簡介：'+responses['olo'][0]['offer_description']);
                     var str ='';
                     if(responses['license_imgs'].length > 0){

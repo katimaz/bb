@@ -480,13 +480,14 @@ class FrontController extends Controller
 
 	}
 
-	public function helper_detail($usr_id = '', $distance = 0)
+	public function helper_detail($usr_id = '', $distance = 0, $member_addrs_id = 0)
 	{
 		// 使用者資訊
 		$user = Users::where('usr_id', $usr_id)->first();
         $member_addrs = Member_addr_recode::where('u_id',$user->id)->get();
         // 服務
-		$olo = OfferListObj::where('mem_id', $member_addrs->first()->id)->get();
+		$olo = OfferListObj::where('mem_id', $member_addrs_id)->get();
+		
         $member_ids = [];
 		foreach($member_addrs as $member_addr){
             array_push($member_ids ,$member_addr->id);

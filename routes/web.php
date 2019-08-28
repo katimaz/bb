@@ -53,7 +53,7 @@ Route::prefix('web')->group(function () {
 
 	Route::get( 'list', 'FrontController@list' );
 
-	Route::get('helper_detail/{u_id}/{distance}', 'FrontController@helper_detail');
+	Route::get('helper_detail/{u_id}/{distance}/{address}', 'FrontController@helper_detail');
 	Route::get('einvoice_info', 'FrontController@einvoice_info');
 	Route::get('collection_info', 'FrontController@collection_info');
 	Route::get('set_notify', 'FrontController@set_notify');

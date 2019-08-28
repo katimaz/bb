@@ -133,7 +133,7 @@
                   <div class="box-pres">0%</div>
                 </div>
                 <a type="" class="btn btn-lg btn-success mt-4 float-right" id="btn-send">更新設定</a>
-                <a href="{{URL::to('/')}}/web/helper_detail/{{session()->get('usrID')}}/0" class="btn btn-lg btn-warning mt-4 mr-2 float-right">預覧</a>
+                <a id="preview" href="{{URL::to('/')}}/web/helper_detail/{{session()->get('usrID')}}/0/{{$member_addr_recode->first()->id}}" class="btn btn-lg btn-warning mt-4 mr-2 float-right">預覧</a>
               </div>
             </div>
           </form>
@@ -747,7 +747,10 @@
                 });
             }
         });
-
+        $usrId= "{{session()->get('usrID')}}"
+        $url = "{{URL::to('/')}}"
+        $member_addr_id = $(this).val();
+        $("#preview").attr("href",$url+"/web/helper_detail/"+$usrId+'/0/'+$member_addr_id);
     });
 
     $(function () {

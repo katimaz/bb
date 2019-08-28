@@ -83,8 +83,8 @@
                                 <a href="#" class=" btn btn-success" data-toggle="modal" data-target="#exampleModalLong">詢問</a>
                                 <a href="re-helper.html" class=" btn btn btn-info">推薦</a>
                             </div>
-                                <div class="intro"><p>簡介：{{$value->offer_description}}</p> </div>
-                                <div class="jobs-item">最高學歷：{{$value->education}}</div>
+                                <div class="intro"><p>簡介：{{is_null($value->offer_description)?'':$value->offer_description}}</p> </div>
+                                <div class="jobs-item">最高學歷：{{is_null($value->education)?'':$value->education}}</div>
                                 <div class="row justify-content-center">
                                     <div class="col-md-12 mt-2">
                                         <div class="row fix">
@@ -123,7 +123,7 @@
                               <a href="re-helper.html" class=" btn btn-info">推薦</a>
                           </div>
                           <div class="intro">
-                              <p>簡介：{{$value->offer_description}}</p>
+                              <p>簡介：{{is_null($value->offer_description)?'':$value->offer_description}}</p>
                           </div>
                           <div class="row justify-content-center">
                               <div class="col-md-12 mt-2">
@@ -155,7 +155,7 @@
                               <a href="#" class=" btn btn-success" data-toggle="modal" data-target="#example-design">詢問</a>
                               <a href="re-helper.html" class=" btn btn btn-info">推薦</a>
                           </div>
-                          <div class="intro"><p>簡介：{{$value->offer_description}}</p> </div>
+                          <div class="intro"><p>簡介：{{is_null($value->offer_description)?'':$value->offer_description}}</p> </div>
                           <div class="row justify-content-center">
                               <div class="col-md-12 mt-2">
                                   <div class="row fix">
@@ -1286,8 +1286,8 @@
                     $('#type0').find('.jobs-info').find('span').first().text(responses['user']['total_served_case'] == null?'0':responses['user']['total_served_case'] );
                     $('#type0').find('.jobs-info').find('span').last().text(responses['user']['total_served_hours'] == null?'0':responses['user']['total_served_hours'] );
                     $('#type0').find('.jobs-info').next('div').html(responses['olo'][0]['offer_title']+':<span class="text-danger">'+(responses['olo'][0]['price'] == null ?'0':responses['olo'][0]['price'])+'</span>元 /'+responses['olo'][0]['price_type']);
-                    $('#type0').find('.intro').text('簡介：'+responses['olo'][0]['offer_description']);
-                    $('#type0').find('.intro').next('div').text('最高學歷：'+responses['olo'][0]['education']);
+                    $('#type0').find('.intro').text((responses['olo'][0]['offer_description']==null)?'簡介：':'簡介：'+responses['olo'][0]['offer_description']);
+                    $('#type0').find('.intro').next('div').text(responses['olo'][0]['education'] == null? '最高學歷：':'最高學歷：'+responses['olo'][0]['education']);
 
                     var str ='';
                     if(responses['license_imgs'].length > 0){
@@ -1317,11 +1317,11 @@
                     $('#type0').find('.fix').html(str);
 
                 }else if(responses['olo'][0]['class_flag'] == 1){
-                    console.log(responses['olo'][0]['class_flag']);
+                    console.log(responses['olo'][0]);
                     $('#type1').find('.job-list').find('span').text(responses['olo'][0]['offer_title']);
                     $('#type1').find('.jobs-info').find('span').first().text(responses['user']['total_served_case'] == null?'0':responses['user']['total_served_case'] );
                     $('#type1').find('.jobs-info').next('div').html(responses['olo'][0]['offer_title']+':<span class="text-danger">'+(responses['olo'][0]['price'] == null ?'0':responses['olo'][0]['price'])+'</span>元 / 起');
-                    $('#type1').find('.intro').text('簡介：'+responses['olo'][0]['offer_description']);
+                    $('#type1').find('.intro').text((responses['olo'][0]['offer_description'] == null) ?'簡介：':'簡介：'+responses['olo'][0]['offer_description']);
 
                     var str ='';
                     if(responses['license_imgs'].length > 0){
@@ -1344,7 +1344,7 @@
                 }else if(responses['olo'][0]['class_flag'] == 2){
                     console.log(responses['olo'][0]['class_flag']);
                     $('#type2').find('.jobs-item').html(responses['olo'][0]['offer_title']+':<span class="text-danger">'+(responses['olo'][0]['price'] == null ?'0':responses['olo'][0]['price'])+'</span>元 /'+responses['olo'][0]['price_type']);
-                    $('#type2').find('.intro').text('簡介：'+responses['olo'][0]['offer_description']);
+                    $('#type2').find('.intro').text((responses['olo'][0]['offer_description'] == null) ? '簡介：':'簡介：'+responses['olo'][0]['offer_description']);
                     var str ='';
                     if(responses['license_imgs'].length > 0){
                         responses['license_imgs'].forEach(function(element) {

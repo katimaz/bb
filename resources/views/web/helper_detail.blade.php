@@ -11,7 +11,7 @@
   <div class="container">
     <div class=" offset-md-2 col-md-8">
       <div class="pay-box fix">
-        <div class="add-cellect" title="加入首選">
+        <div class="add-cellect {{(count($member_fav) >0) ?'':'active'}}" mem_id ="{{$olo[0]->mem_id}}" fav ="{{count($member_fav) > 0 ? 'TRUE': 'FALSE'}}" title="加入首選">
           <i class="fa fa-heart" aria-hidden="true"></i>
         </div>
         <div class="added">
@@ -1417,7 +1417,6 @@
                 $('#example-food').find('.modal-title').html('<img src="images/wbell.svg">'+responses['olo'][0]['offer_title']+'雇用(詢問)設定');
                 $('#example-food').find('.modal-body').find('p:nth-child(1)').html("<span class=\"text-success\">關鍵字：</span>"+responses['olo'][0]['service_type'])
                 $('#example-food').find('.modal-body').find('p:nth-child(2)').html("<span class=\"text-success\"><i class=\"fa fa-check-square-o\" aria-hidden=\"true\"></i> 服務類別：</span>"+responses['olo'][0]['offer_title'])
-                console.log(responses['foods']);
 //                $clone = $('#example-food').find('#food_menu').find('.f-menu').clone();
 //                console.log($clone);
 //                $('#example-food').find('#food_menu').html($clone);
@@ -1457,6 +1456,28 @@
             }
         });
     });
+
+    $('.add-cellect').on('click',function(){
+        $fav = $(this).attr('fav');
+        $.ajax({
+            type: "get",
+            url: "{{url('/api/add_favorites')}}",
+            data: {
+                mem_id: $(this).attr('mem_id'),
+                fav:$fav
+            },
+            dataType: "json",
+            success: function (responses) {
+                if($fav == 'TRUE'){
+                    $('.add-cellect ').addClass('active');
+                    $('.add-cellect').attr('fav',"FALSE");
+                }else{
+                    $('.add-cellect ').removeClass('active')
+                    $('.add-cellect').attr('fav',"TRUE");
+                }
+            }
+        });
+      });
 
     $('#select-tab').on('change', function () {
       var $this = $('option:selected', this);

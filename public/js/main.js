@@ -123,7 +123,7 @@ $( "a.inc-box" ).on('click', function() {
 	$(this).find('i').toggleClass('fa fa-plus  fa fa-minus')
 });  
 
-$( ".add-cellect  " ).on('click', function() {
+$( ".  " ).on('click', function() {
 	$(this).addClass('active');
 	$('.added').show(0).delay(1000).hide(0);
 });  

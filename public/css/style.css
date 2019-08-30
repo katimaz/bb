@@ -1662,8 +1662,7 @@ input[type='checkbox']:checked.toggle:after {
 	}
 .add-cellect.active{
 	color: #CCC;
-	pointer-events: none;
-cursor: default;
+    cursor: pointer;
 }
 .added{
 	position: absolute;

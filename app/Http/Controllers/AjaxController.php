@@ -107,6 +107,25 @@ class AjaxController extends Controller
 		return response()->json([]);
 	}
 
+    public function add_favorites(Request $request)
+    {
+        if($request->fav == 'TRUE'){
+            member_favorite::where('helper_id',session()->get('uID'))
+                ->where('mem_id',$request->mem_id)->delete();
+        }else{
+            $member_favorite = new member_favorite;
+            $member_favorite->helper_id = session()->get('uID');
+            $member_favorite->ontflag = 3;
+            $member_favorite->mem_id = $request->mem_id;
+            $member_favorite->need_id = 0;
+            $member_favorite->offer_id = 0;
+            $member_favorite->transaction_id = 0;
+            $member_favorite->save();
+        }
+
+        return response()->json([]);
+    }
+
 	public function set_veri_mail(Request $request)
     {
 		$user = User::where('email',$request->id)->select('email_valid_key')->first();

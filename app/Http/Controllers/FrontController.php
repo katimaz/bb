@@ -1,5 +1,6 @@
 <?php
 namespace App\Http\Controllers;
+use App\Models\member_favorite;
 use App\Models\olo_food;
 use App\Models\olo_img;
 use App\Models\olo_license_img;
@@ -505,8 +506,8 @@ class FrontController extends Controller
         $videos = olo_video::wherein('olo_id',$list_ids)->get();
 		// 評價
 		$service_rate = [];
-
-		return View('web/helper_detail', ['distance' => $distance, 'user' => $user, 'olo' => $olo,'foods' => $foods,'imgs' => $imgs,'license_imgs' => $license_imgs,'videos' => $videos]);
+        $member_fav = member_favorite::where('helper_id',$user->id)->where('mem_id',$member_addrs_id)->get();
+		return View('web/helper_detail', ['distance' => $distance,'member_fav' => $member_fav, 'user' => $user, 'olo' => $olo,'foods' => $foods,'imgs' => $imgs,'license_imgs' => $license_imgs,'videos' => $videos]);
 	}
 
 	public function h_set()

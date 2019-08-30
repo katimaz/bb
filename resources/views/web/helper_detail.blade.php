@@ -37,6 +37,7 @@
                         @endif
                     @endfor
                 @endif
+            </span>
             <span class="avg">{{is_null($user->customer_avg_rate)?'0':$user->customer_avg_rate}}</span>
             <div class="income">
               地點：{{$olo[0]->mem_addr}}
@@ -78,13 +79,15 @@
                 @foreach($olo as $value)
                     @if($value->class_flag == 0)
                           <div class="jobs-item"> {{$value->offer_title}}：<span class="text-danger">{{is_null($value->price)?'0':$value->price}}</span>元 / {{$value->price_type}} </div>
-                            <div class="col text-center btnarr">
-                                <a href="#" class="btn btn-warning normal_hire" data-toggle="modal" data-target="#exampleModalLong" olo_id="{{$value->id}}">雇用</a>
-                                <a href="#" class=" btn btn-success normal_hire" data-toggle="modal" data-target="#exampleModalLong" olo_id="{{$value->id}}">詢問</a>
-                                <a href="re-helper.html" class=" btn btn btn-info">推薦</a>
-                            </div>
+{{--                            <div class="col text-center btnarr">--}}
+{{--                                <a href="#" class="btn btn-warning normal_hire" data-toggle="modal" data-target="#exampleModalLong" olo_id="{{$value->id}}">雇用</a>--}}
+{{--                                <a href="#" class=" btn btn-success normal_hire" data-toggle="modal" data-target="#exampleModalLong" olo_id="{{$value->id}}">詢問</a>--}}
+{{--                                <a href="re-helper.html" class=" btn btn btn-info">推薦</a>--}}
+{{--                            </div>--}}
                                 <div class="intro"><p>簡介：{{is_null($value->offer_description)?'':$value->offer_description}}</p> </div>
-                                <div class="jobs-item">最高學歷：{{is_null($value->education)?'':$value->education}}</div>
+                                @if($value->offer_title == "小孩讀伴玩" || $value->offer_title == "課業讀伴")
+                                    <div class="jobs-item">最高學歷：{{is_null($value->education)?'':$value->education}}</div>
+                                @endif
                                 <div class="row justify-content-center">
                                     <div class="col-md-12 mt-2">
                                         <div class="row fix">
@@ -117,11 +120,11 @@
                                 </div>
                     @elseif($value->class_flag == 1)
                           <div class="jobs-item"> {{$value->offer_title}}：<span class="text-danger">{{is_null($value->price)?'0':$value->price}}</span>元 / {{$value->price_type}}起 </div>
-                          <div class="col text-center btnarr">
-                              <a href="#" class="btn btn-warning food_hire" data-toggle="modal" data-target="#example-food" olo_id="{{$value->id}}">雇用</a>
-                              <a href="#" class=" btn btn-success food_hire" data-toggle="modal" data-target="#example-food" olo_id="{{$value->id}}">詢問</a>
-                              <a href="re-helper.html" class=" btn btn-info">推薦</a>
-                          </div>
+{{--                          <div class="col text-center btnarr">--}}
+{{--                              <a href="#" class="btn btn-warning food_hire" data-toggle="modal" data-target="#example-food" olo_id="{{$value->id}}">雇用</a>--}}
+{{--                              <a href="#" class=" btn btn-success food_hire" data-toggle="modal" data-target="#example-food" olo_id="{{$value->id}}">詢問</a>--}}
+{{--                              <a href="re-helper.html" class=" btn btn-info">推薦</a>--}}
+{{--                          </div>--}}
                           <div class="intro">
                               <p>簡介：{{is_null($value->offer_description)?'':$value->offer_description}}</p>
                           </div>
@@ -150,11 +153,11 @@
                           </div>
                     @elseif($value->class_flag == 2)
                           <div class="jobs-item"> {{$value->offer_title}}：<span class="text-danger">{{is_null($value->price)?'0':$value->price}}</span>元/ {{$value->price_type}}起 </div>
-                          <div class="col text-center btnarr">
-                              <a href="#" class="btn btn-warning design_hire" data-toggle="modal" data-target="#example-design" olo_id="{{$value->id}}">雇用</a>
-                              <a href="#" class=" btn btn-success design_hire" data-toggle="modal" data-target="#example-design" olo_id="{{$value->id}}">詢問</a>
-                              <a href="re-helper.html" class=" btn btn btn-info">推薦</a>
-                          </div>
+{{--                          <div class="col text-center btnarr">--}}
+{{--                              <a href="#" class="btn btn-warning design_hire" data-toggle="modal" data-target="#example-design" olo_id="{{$value->id}}">雇用</a>--}}
+{{--                              <a href="#" class=" btn btn-success design_hire" data-toggle="modal" data-target="#example-design" olo_id="{{$value->id}}">詢問</a>--}}
+{{--                              <a href="re-helper.html" class=" btn btn btn-info">推薦</a>--}}
+{{--                          </div>--}}
                           <div class="intro"><p>簡介：{{is_null($value->offer_description)?'':$value->offer_description}}</p> </div>
                           <div class="row justify-content-center">
                               <div class="col-md-12 mt-2">
@@ -207,103 +210,103 @@
                     <span class="avg">{{is_null($user->customer_avg_rate)?'0':$user->customer_avg_rate}}</span>
                   </span>
                 </div>
-                <div class="start-box">
-                  <div class="box-satrt">
-                    <i class="fa fa-star" aria-hidden="true"></i>
-                    <i class="fa fa-star" aria-hidden="true"></i>
-                    <i class="fa fa-star" aria-hidden="true"></i>
-                    <i class="fa fa-star" aria-hidden="true"></i>
-                    <i class="fa fa-star" aria-hidden="true"></i>
-                  </div>
-                  <div class="box-pros">
-                    <div class="progress">
-                      <div class="progress-bar bg-warning" role="progressbar" style="width: 95%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"> </div>
-                    </div>
-                  </div>
-                  <div class="box-pres">95% </div>
-                </div>
-                <div class="start-box">
-                  <div class="box-satrt">
-                    <i class="fa fa-star" aria-hidden="true"></i>
-                    <i class="fa fa-star" aria-hidden="true"></i>
-                    <i class="fa fa-star" aria-hidden="true"></i>
-                    <i class="fa fa-star" aria-hidden="true"></i>
-                  </div>
-                  <div class="box-pros">
-                    <div class="progress">
-                      <div class="progress-bar bg-warning" role="progressbar" style="width: 5%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"></div>
-                    </div>
-                  </div>
-                  <div class="box-pres">5% </div>
-                </div>
-                <div class="start-box">
-                  <div class="box-satrt">
-                    <i class="fa fa-star" aria-hidden="true"></i>
-                    <i class="fa fa-star" aria-hidden="true"></i>
-                    <i class="fa fa-star" aria-hidden="true"></i>
-                  </div>
-                  <div class="box-pros">
-                    <div class="progress">
-                      <div class="progress-bar bg-warning" role="progressbar" style="width: 0%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"> </div>
-                    </div>
-                  </div>
-                <div class="box-pres">0% </div>
-              </div>
-              <div class="start-box">
-                <div class="box-satrt">
-                  <i class="fa fa-star" aria-hidden="true"></i>
-                  <i class="fa fa-star" aria-hidden="true"></i>
-                </div>
-                <div class="box-pros">
-                  <div class="progress">
-                    <div class="progress-bar bg-warning" role="progressbar" style="width: 0%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"> </div>
-                  </div>
-                </div>
-              <div class="box-pres">0% </div>
-            </div>
-            <div class="start-box">
-              <div class="box-satrt"><i class="fa fa-star" aria-hidden="true"></i> </div>
-              <div class="box-pros">
-                <div class="progress">
-                  <div class="progress-bar bg-warning" role="progressbar" style="width: 0%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"> </div>
-                </div>
-              </div>
-            <div class="box-pres">0% </div>
-          </div>
+{{--                <div class="start-box">--}}
+{{--                  <div class="box-satrt">--}}
+{{--                    <i class="fa fa-star" aria-hidden="true"></i>--}}
+{{--                    <i class="fa fa-star" aria-hidden="true"></i>--}}
+{{--                    <i class="fa fa-star" aria-hidden="true"></i>--}}
+{{--                    <i class="fa fa-star" aria-hidden="true"></i>--}}
+{{--                    <i class="fa fa-star" aria-hidden="true"></i>--}}
+{{--                  </div>--}}
+{{--                  <div class="box-pros">--}}
+{{--                    <div class="progress">--}}
+{{--                      <div class="progress-bar bg-warning" role="progressbar" style="width: 95%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"> </div>--}}
+{{--                    </div>--}}
+{{--                  </div>--}}
+{{--                  <div class="box-pres">95% </div>--}}
+{{--                </div>--}}
+{{--                <div class="start-box">--}}
+{{--                  <div class="box-satrt">--}}
+{{--                    <i class="fa fa-star" aria-hidden="true"></i>--}}
+{{--                    <i class="fa fa-star" aria-hidden="true"></i>--}}
+{{--                    <i class="fa fa-star" aria-hidden="true"></i>--}}
+{{--                    <i class="fa fa-star" aria-hidden="true"></i>--}}
+{{--                  </div>--}}
+{{--                  <div class="box-pros">--}}
+{{--                    <div class="progress">--}}
+{{--                      <div class="progress-bar bg-warning" role="progressbar" style="width: 5%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"></div>--}}
+{{--                    </div>--}}
+{{--                  </div>--}}
+{{--                  <div class="box-pres">5% </div>--}}
+{{--                </div>--}}
+{{--                <div class="start-box">--}}
+{{--                  <div class="box-satrt">--}}
+{{--                    <i class="fa fa-star" aria-hidden="true"></i>--}}
+{{--                    <i class="fa fa-star" aria-hidden="true"></i>--}}
+{{--                    <i class="fa fa-star" aria-hidden="true"></i>--}}
+{{--                  </div>--}}
+{{--                  <div class="box-pros">--}}
+{{--                    <div class="progress">--}}
+{{--                      <div class="progress-bar bg-warning" role="progressbar" style="width: 0%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"> </div>--}}
+{{--                    </div>--}}
+{{--                  </div>--}}
+{{--                <div class="box-pres">0% </div>--}}
+{{--              </div>--}}
+{{--              <div class="start-box">--}}
+{{--                <div class="box-satrt">--}}
+{{--                  <i class="fa fa-star" aria-hidden="true"></i>--}}
+{{--                  <i class="fa fa-star" aria-hidden="true"></i>--}}
+{{--                </div>--}}
+{{--                <div class="box-pros">--}}
+{{--                  <div class="progress">--}}
+{{--                    <div class="progress-bar bg-warning" role="progressbar" style="width: 0%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"> </div>--}}
+{{--                  </div>--}}
+{{--                </div>--}}
+{{--              <div class="box-pres">0% </div>--}}
+{{--            </div>--}}
+{{--            <div class="start-box">--}}
+{{--              <div class="box-satrt"><i class="fa fa-star" aria-hidden="true"></i> </div>--}}
+{{--              <div class="box-pros">--}}
+{{--                <div class="progress">--}}
+{{--                  <div class="progress-bar bg-warning" role="progressbar" style="width: 0%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"> </div>--}}
+{{--                </div>--}}
+{{--              </div>--}}
+{{--            <div class="box-pres">0% </div>--}}
+{{--          </div>--}}
 
-          <div class="comm">共有13則評價 <i class="fa fa-commenting-o" aria-hidden="true"></i> </div>
-          <div class="comm-list">
-            <div class="comm-face">
-              <img src="images/face.jpg">
-            </div>
-            <div class="comm-info">
-              <div class="comm-name">吳大偉</div >
-              <div class="comm-date">2019/03/25 </div>
-              <div class="comm-re">大推~~很專業很細心的服務 </div>
-            </div>
-          </div>
-          <div class="comm-list">
-            <div class="comm-face">
-              <img src="images/face.jpg">
-            </div>
-            <div class="comm-info">
-              <div class="comm-name">吳大偉</div >
-              <div class="comm-date">2019/03/25 </div>
-              <div class="comm-re">大推~~很專業很細心的服務 </div>
-            </div>
-          </div>
-          <div class="more"> <button class="btn btn-sm btn-light">更多評價</button> </div>
+{{--          <div class="comm">共有13則評價 <i class="fa fa-commenting-o" aria-hidden="true"></i> </div>--}}
+{{--          <div class="comm-list">--}}
+{{--            <div class="comm-face">--}}
+{{--              <img src="images/face.jpg">--}}
+{{--            </div>--}}
+{{--            <div class="comm-info">--}}
+{{--              <div class="comm-name">吳大偉</div >--}}
+{{--              <div class="comm-date">2019/03/25 </div>--}}
+{{--              <div class="comm-re">大推~~很專業很細心的服務 </div>--}}
+{{--            </div>--}}
+{{--          </div>--}}
+{{--          <div class="comm-list">--}}
+{{--            <div class="comm-face">--}}
+{{--              <img src="images/face.jpg">--}}
+{{--            </div>--}}
+{{--            <div class="comm-info">--}}
+{{--              <div class="comm-name">吳大偉</div >--}}
+{{--              <div class="comm-date">2019/03/25 </div>--}}
+{{--              <div class="comm-re">大推~~很專業很細心的服務 </div>--}}
+{{--            </div>--}}
+{{--          </div>--}}
+{{--          <div class="more"> <button class="btn btn-sm btn-light">更多評價</button> </div>--}}
         </div>
 
     <div class="type-arr" id="type1">
       <div class="job-list"> <span> 家常菜123</span> </div>
       <div class="jobs-info">受雇次數：<span class="text-danger">115</span>次 </div>
       <div class="jobs-item"> 家常菜：<span class="text-danger">300</span>元 / 件起 </div>
-      <div class="col text-center btnarr">
-        <a href="#" class="btn btn-warning" data-toggle="modal" data-target="#example-food">雇用</a>
-        <a href="#" class=" btn btn-success" data-toggle="modal" data-target="#example-food">詢問</a>
-        <a href="re-helper.html" class=" btn btn btn-info">推薦</a>
-      </div>
+{{--      <div class="col text-center btnarr">--}}
+{{--        <a href="#" class="btn btn-warning" data-toggle="modal" data-target="#example-food">雇用</a>--}}
+{{--        <a href="#" class=" btn btn-success" data-toggle="modal" data-target="#example-food">詢問</a>--}}
+{{--        <a href="re-helper.html" class=" btn btn btn-info">推薦</a>--}}
+{{--      </div>--}}
       <div class="intro"><p>簡介：用心經營、責任施工、品質保證 假日、夜間（下午五點後）施工因需提前備料務必提前預約。</p>
         </div>
     <div class="row justify-content-center">
@@ -348,124 +351,123 @@
 
 
 
-  <div class="jobs-tit">服務評分 <i class="fa fa-star-o" aria-hidden="true"></i> </div>
-  <div class="jobs-all"> 居家服務評分<span class="start-all"><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i> <span class="avg">4.9</span></span> </div>
-<div class="start-box">
-<div class="box-satrt"><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i>
+{{--  <div class="jobs-tit">服務評分 <i class="fa fa-star-o" aria-hidden="true"></i> </div>--}}
+{{--  <div class="jobs-all"> 居家服務評分<span class="start-all"><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i> <span class="avg">4.9</span></span> </div>--}}
+{{--<div class="start-box">--}}
+{{--<div class="box-satrt"><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i>--}}
 
-</div><div class="box-pros"><div class="progress">
-  <div class="progress-bar bg-warning" role="progressbar" style="width: 95%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">
+{{--</div><div class="box-pros"><div class="progress">--}}
+{{--  <div class="progress-bar bg-warning" role="progressbar" style="width: 95%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">--}}
 
-  </div>
-
-
-</div>
-
-</div><div class="box-pres">95%
-
-</div>
+{{--  </div>--}}
 
 
-</div>
-<div class="start-box">
-<div class="box-satrt"><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i>
+{{--</div>--}}
 
-</div><div class="box-pros"><div class="progress">
-  <div class="progress-bar bg-warning" role="progressbar" style="width: 5%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">
+{{--</div>--}}
+{{--<div class="box-pres">95%--}}
 
-  </div>
+{{--</div>--}}
 
 
-</div>
+{{--</div>--}}
+{{--<div class="start-box">--}}
+{{--<div class="box-satrt"><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i>--}}
 
-</div><div class="box-pres">5%
+{{--</div><div class="box-pros"><div class="progress">--}}
+{{--  <div class="progress-bar bg-warning" role="progressbar" style="width: 5%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">--}}
 
-</div>
+{{--  </div>--}}
+{{--</div>--}}
 
+{{--</div><div class="box-pres">5%--}}
 
-</div>
-<div class="start-box">
-<div class="box-satrt"><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i>
-
-</div><div class="box-pros"><div class="progress">
-  <div class="progress-bar bg-warning" role="progressbar" style="width: 0%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">
-
-  </div>
+{{--</div>--}}
 
 
-</div>
+{{--</div>--}}
+{{--<div class="start-box">--}}
+{{--<div class="box-satrt"><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i>--}}
 
-</div><div class="box-pres">0%
+{{--</div><div class="box-pros"><div class="progress">--}}
+{{--  <div class="progress-bar bg-warning" role="progressbar" style="width: 0%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">--}}
 
-</div>
-
-
-</div>
-<div class="start-box">
-<div class="box-satrt"><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i>
-
-</div><div class="box-pros"><div class="progress">
-  <div class="progress-bar bg-warning" role="progressbar" style="width: 0%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">
-
-  </div>
+{{--  </div>--}}
 
 
-</div>
+{{--</div>--}}
 
-</div><div class="box-pres">0%
+{{--</div><div class="box-pres">0%--}}
 
-</div>
-
-
-</div>
-<div class="start-box">
-<div class="box-satrt"><i class="fa fa-star" aria-hidden="true"></i>
-
-</div><div class="box-pros"><div class="progress">
-  <div class="progress-bar bg-warning" role="progressbar" style="width: 0%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">
-
-  </div>
+{{--</div>--}}
 
 
-</div>
+{{--</div>--}}
+{{--<div class="start-box">--}}
+{{--<div class="box-satrt"><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i>--}}
 
-</div><div class="box-pres">0%
+{{--</div><div class="box-pros"><div class="progress">--}}
+{{--  <div class="progress-bar bg-warning" role="progressbar" style="width: 0%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">--}}
 
-</div>
+{{--  </div>--}}
 
 
-</div>
+{{--</div>--}}
 
-<div class="comm">共有6則評價 <i class="fa fa-commenting-o" aria-hidden="true"></i>
+{{--</div><div class="box-pres">0%--}}
 
-</div>
-<div class="comm-list">
-  <div class="comm-face"><img src="images/face.jpg">
+{{--</div>--}}
 
-  </div><div class="comm-info"><div class="comm-name">吳大偉</div ><div class="comm-date">2019/03/25
 
-  </div><div class="comm-re">大推~~很專業很細心的服務
+{{--</div>--}}
+{{--<div class="start-box">--}}
+{{--<div class="box-satrt"><i class="fa fa-star" aria-hidden="true"></i>--}}
 
-  </div>
+{{--</div><div class="box-pros"><div class="progress">--}}
+{{--  <div class="progress-bar bg-warning" role="progressbar" style="width: 0%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">--}}
 
-  </div>
+{{--  </div>--}}
 
-  </div>
-  <div class="comm-list">
-  <div class="comm-face"><img src="images/face.jpg">
 
-  </div><div class="comm-info"><div class="comm-name">吳大偉</div ><div class="comm-date">2019/03/25
+{{--</div>--}}
 
-  </div><div class="comm-re">大推~~很專業很細心的服務
+{{--</div><div class="box-pres">0%--}}
 
-  </div>
+{{--</div>--}}
 
-  </div>
 
-  </div>
- <div class="more"> <button class="btn btn-sm btn-light">更多評價</button>
+{{--</div>--}}
 
- </div>
+{{--<div class="comm">共有6則評價 <i class="fa fa-commenting-o" aria-hidden="true"></i>--}}
+
+{{--</div>--}}
+{{--<div class="comm-list">--}}
+{{--  <div class="comm-face"><img src="images/face.jpg">--}}
+
+{{--  </div><div class="comm-info"><div class="comm-name">吳大偉</div ><div class="comm-date">2019/03/25--}}
+
+{{--  </div><div class="comm-re">大推~~很專業很細心的服務--}}
+
+{{--  </div>--}}
+
+{{--  </div>--}}
+
+{{--  </div>--}}
+{{--  <div class="comm-list">--}}
+{{--  <div class="comm-face"><img src="images/face.jpg">--}}
+
+{{--  </div><div class="comm-info"><div class="comm-name">吳大偉</div ><div class="comm-date">2019/03/25--}}
+
+{{--  </div><div class="comm-re">大推~~很專業很細心的服務--}}
+
+{{--  </div>--}}
+
+{{--  </div>--}}
+
+{{--  </div>--}}
+{{-- <div class="more"> <button class="btn btn-sm btn-light">更多評價</button>--}}
+
+{{-- </div>--}}
 
 
 </div>
@@ -474,11 +476,11 @@
     <div class="job-list"><span>電腦教學</span></div>
     <div class="jobs-info">受雇次數：<span class="text-danger">20 </span>次 工作時數：<span class="text-danger">30 </span> 小時</div>
     <div class="jobs-item"> 電腦教學：<span class="text-danger">500</span>元 / 小時</div>
-    <div class="col text-center btnarr">
-        <a href="#" class="btn btn-warning" data-toggle="modal" data-target="#exampleModalLong">雇用</a>
-        <a href="#" class=" btn btn-success" data-toggle="modal" data-target="#exampleModalLong">詢問</a>
-        <a href="re-helper.html" class=" btn btn btn-info">推薦</a>
-    </div>
+{{--    <div class="col text-center btnarr">--}}
+{{--        <a href="#" class="btn btn-warning" data-toggle="modal" data-target="#exampleModalLong">雇用</a>--}}
+{{--        <a href="#" class=" btn btn-success" data-toggle="modal" data-target="#exampleModalLong">詢問</a>--}}
+{{--        <a href="re-helper.html" class=" btn btn btn-info">推薦</a>--}}
+{{--    </div>--}}
     <div class="intro">
         <p>簡介：用心經營、責任施工、品質保證 假日、夜間（下午五點後）施工因需提前備料務必提前預約。
         </p>
@@ -509,155 +511,151 @@
 
     </div>
 
-    <div class="jobs-tit">服務評分 <i class="fa fa-star-o" aria-hidden="true"></i>
+{{--    <div class="jobs-tit">服務評分 <i class="fa fa-star-o" aria-hidden="true"></i>--}}
 
-    </div>
-    <div class="jobs-all"> 學習服務評分<span class="start-all"><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i> <span class="avg">4.9</span></span>
+{{--    </div>--}}
+{{--    <div class="jobs-all"> 學習服務評分<span class="start-all"><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i> <span class="avg">4.9</span></span>--}}
 
-    </div>
-    <div class="start-box">
-        <div class="box-satrt"><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i>
+{{--    </div>--}}
+{{--    <div class="start-box">--}}
+{{--        <div class="box-satrt"><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i>--}}
 
-        </div>
-        <div class="box-pros">
-            <div class="progress">
-                <div class="progress-bar bg-warning" role="progressbar" style="width: 95%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">
+{{--        </div>--}}
+{{--        <div class="box-pros">--}}
+{{--            <div class="progress">--}}
+{{--                <div class="progress-bar bg-warning" role="progressbar" style="width: 95%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">--}}
 
-                </div>
+{{--                </div>--}}
 
-            </div>
+{{--            </div>--}}
 
-        </div>
-        <div class="box-pres">95%
+{{--        </div>--}}
+{{--        <div class="box-pres">95%--}}
 
-        </div>
+{{--        </div>--}}
 
-    </div>
-    <div class="start-box">
-        <div class="box-satrt"><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i>
+{{--    </div>--}}
+{{--    <div class="start-box">--}}
+{{--        <div class="box-satrt"><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i>--}}
 
-        </div>
-        <div class="box-pros">
-            <div class="progress">
-                <div class="progress-bar bg-warning" role="progressbar" style="width: 5%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">
+{{--        </div>--}}
+{{--        <div class="box-pros">--}}
+{{--            <div class="progress">--}}
+{{--                <div class="progress-bar bg-warning" role="progressbar" style="width: 5%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">--}}
 
-                </div>
+{{--                </div>--}}
 
-            </div>
+{{--            </div>--}}
 
-        </div>
-        <div class="box-pres">5%
+{{--        </div>--}}
+{{--        <div class="box-pres">5%--}}
 
-        </div>
+{{--        </div>--}}
 
-    </div>
-    <div class="start-box">
-        <div class="box-satrt"><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i>
+{{--    </div>--}}
+{{--    <div class="start-box">--}}
+{{--        <div class="box-satrt"><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i>--}}
 
-        </div>
-        <div class="box-pros">
-            <div class="progress">
-                <div class="progress-bar bg-warning" role="progressbar" style="width: 0%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">
+{{--        </div>--}}
+{{--        <div class="box-pros">--}}
+{{--            <div class="progress">--}}
+{{--                <div class="progress-bar bg-warning" role="progressbar" style="width: 0%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">--}}
 
-                </div>
+{{--                </div>--}}
 
-            </div>
+{{--            </div>--}}
 
-        </div>
-        <div class="box-pres">0%
+{{--        </div>--}}
+{{--        <div class="box-pres">0%--}}
 
-        </div>
+{{--        </div>--}}
 
-    </div>
-    <div class="start-box">
-        <div class="box-satrt"><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i>
+{{--    </div>--}}
+{{--    <div class="start-box">--}}
+{{--        <div class="box-satrt"><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i>--}}
 
-        </div>
-        <div class="box-pros">
-            <div class="progress">
-                <div class="progress-bar bg-warning" role="progressbar" style="width: 0%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">
+{{--        </div>--}}
+{{--        <div class="box-pros">--}}
+{{--            <div class="progress">--}}
+{{--                <div class="progress-bar bg-warning" role="progressbar" style="width: 0%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">--}}
 
-                </div>
+{{--                </div>--}}
 
-            </div>
+{{--            </div>--}}
 
-        </div>
-        <div class="box-pres">0%
+{{--        </div>--}}
+{{--        <div class="box-pres">0%--}}
 
-        </div>
+{{--        </div>--}}
 
-    </div>
-    <div class="start-box">
-        <div class="box-satrt"><i class="fa fa-star" aria-hidden="true"></i>
+{{--    </div>--}}
+{{--    <div class="start-box">--}}
+{{--        <div class="box-satrt"><i class="fa fa-star" aria-hidden="true"></i>--}}
 
-        </div>
-        <div class="box-pros">
-            <div class="progress">
-                <div class="progress-bar bg-warning" role="progressbar" style="width: 0%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">
+{{--        </div>--}}
+{{--        <div class="box-pros">--}}
+{{--            <div class="progress">--}}
+{{--                <div class="progress-bar bg-warning" role="progressbar" style="width: 0%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">--}}
 
-                </div>
+{{--                </div>--}}
 
-            </div>
+{{--            </div>--}}
 
-        </div>
-        <div class="box-pres">0%
+{{--        </div>--}}
+{{--        <div class="box-pres">0%--}}
 
-        </div>
+{{--        </div>--}}
 
-    </div>
+{{--    </div>--}}
 
-    <div class="comm">共有7則評價 <i class="fa fa-commenting-o" aria-hidden="true"></i>
+{{--    <div class="comm">共有7則評價 <i class="fa fa-commenting-o" aria-hidden="true"></i>--}}
 
-    </div>
-    <div class="comm-list">
-        <div class="comm-face"><img src="images/face.jpg">
+{{--    </div>--}}
+{{--    <div class="comm-list">--}}
+{{--        <div class="comm-face"><img src="images/face.jpg">--}}
 
-        </div>
-        <div class="comm-info">
-            <div class="comm-name">吳大偉</div>
-            <div class="comm-date">2019/03/25
+{{--        </div>--}}
+{{--        <div class="comm-info">--}}
+{{--            <div class="comm-name">吳大偉</div>--}}
+{{--            <div class="comm-date">2019/03/25--}}
 
-            </div>
-            <div class="comm-re">大推~~很專業很細心的服務
+{{--            </div>--}}
+{{--            <div class="comm-re">大推~~很專業很細心的服務--}}
 
-            </div>
+{{--            </div>--}}
 
-        </div>
+{{--        </div>--}}
 
-    </div>
-    <div class="comm-list">
-        <div class="comm-face"><img src="images/face.jpg">
+{{--    </div>--}}
+{{--    <div class="comm-list">--}}
+{{--        <div class="comm-face"><img src="images/face.jpg">--}}
 
-        </div>
-        <div class="comm-info">
-            <div class="comm-name">吳大偉</div>
-            <div class="comm-date">2019/03/25
+{{--        </div>--}}
+{{--        <div class="comm-info">--}}
+{{--            <div class="comm-name">吳大偉</div>--}}
+{{--            <div class="comm-date">2019/03/25--}}
 
-            </div>
-            <div class="comm-re">大推~~很專業很細心的服務
+{{--            </div>--}}
+{{--            <div class="comm-re">大推~~很專業很細心的服務--}}
 
-            </div>
+{{--            </div>--}}
 
-        </div>
+{{--        </div>--}}
 
-    </div>
-    <div class="more">
-        <button class="btn btn-sm btn-light">更多評價</button>
+{{--    </div>--}}
+{{--    <div class="more">--}}
+{{--        <button class="btn btn-sm btn-light">更多評價</button>--}}
 
-    </div>
+{{--    </div>--}}
 
 </div>
 <div class="type-arr" id="type2">
-            <div class="jobs-item"> 室內設計：<span class="text-danger">15000</span>元/件起
-
-            </div>
-    <div class="col text-center btnarr">
-         <a href="#" class="btn btn-warning" data-toggle="modal" data-target="#example-design">雇用</a>
-         <a href="#" class=" btn btn-success" data-toggle="modal" data-target="#example-design">詢問</a>
-         <a href="re-helper.html" class=" btn btn btn-info">推薦</a>
-
-
-          </div>
+            <div class="jobs-item"> 室內設計：<span class="text-danger">15000</span>元/件起</div>
+{{--    <div class="col text-center btnarr">--}}
+{{--         <a href="#" class="btn btn-warning" data-toggle="modal" data-target="#example-design">雇用</a>--}}
+{{--         <a href="#" class=" btn btn-success" data-toggle="modal" data-target="#example-design">詢問</a>--}}
+{{--         <a href="re-helper.html" class=" btn btn btn-info">推薦</a>--}}
+{{--    </div>--}}
            <div class="intro"><p>簡介：用心經營、責任施工、品質保證
 假日、夜間（下午五點後）施工因需提前備料務必提前預約。</p>
 
@@ -688,128 +686,128 @@
 
 </div>
 
-      <div class="jobs-tit">服務評分 <i class="fa fa-star-o" aria-hidden="true"></i>
+{{--      <div class="jobs-tit">服務評分 <i class="fa fa-star-o" aria-hidden="true"></i>--}}
 
-      </div>
-      <div class="jobs-all"> 學習服務評分<span class="start-all"><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i> <span class="avg">4.9</span></span>
+{{--      </div>--}}
+{{--      <div class="jobs-all"> 學習服務評分<span class="start-all"><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i> <span class="avg">4.9</span></span>--}}
 
-      </div>
-<div class="start-box">
-<div class="box-satrt"><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i>
+{{--      </div>--}}
+{{--<div class="start-box">--}}
+{{--<div class="box-satrt"><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i>--}}
 
-</div><div class="box-pros"><div class="progress">
-  <div class="progress-bar bg-warning" role="progressbar" style="width: 95%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">
+{{--</div><div class="box-pros"><div class="progress">--}}
+{{--  <div class="progress-bar bg-warning" role="progressbar" style="width: 95%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">--}}
 
-  </div>
-
-
-</div>
-
-</div><div class="box-pres">95%
-
-</div>
+{{--  </div>--}}
 
 
-</div>
-<div class="start-box">
-<div class="box-satrt"><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i>
+{{--</div>--}}
 
-</div><div class="box-pros"><div class="progress">
-  <div class="progress-bar bg-warning" role="progressbar" style="width: 5%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">
+{{--</div><div class="box-pres">95%--}}
 
-  </div>
+{{--</div>--}}
 
 
-</div>
+{{--</div>--}}
+{{--<div class="start-box">--}}
+{{--<div class="box-satrt"><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i>--}}
 
-</div><div class="box-pres">5%
+{{--</div><div class="box-pros"><div class="progress">--}}
+{{--  <div class="progress-bar bg-warning" role="progressbar" style="width: 5%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">--}}
 
-</div>
-
-
-</div>
-<div class="start-box">
-<div class="box-satrt"><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i>
-
-</div><div class="box-pros"><div class="progress">
-  <div class="progress-bar bg-warning" role="progressbar" style="width: 0%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">
-
-  </div>
+{{--  </div>--}}
 
 
-</div>
+{{--</div>--}}
 
-</div><div class="box-pres">0%
+{{--</div><div class="box-pres">5%--}}
 
-</div>
-
-
-</div>
-<div class="start-box">
-<div class="box-satrt"><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i>
-
-</div><div class="box-pros"><div class="progress">
-  <div class="progress-bar bg-warning" role="progressbar" style="width: 0%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">
-
-  </div>
+{{--</div>--}}
 
 
-</div>
+{{--</div>--}}
+{{--<div class="start-box">--}}
+{{--<div class="box-satrt"><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i>--}}
 
-</div><div class="box-pres">0%
+{{--</div><div class="box-pros"><div class="progress">--}}
+{{--  <div class="progress-bar bg-warning" role="progressbar" style="width: 0%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">--}}
 
-</div>
-
-
-</div>
-<div class="start-box">
-<div class="box-satrt"><i class="fa fa-star" aria-hidden="true"></i>
-
-</div><div class="box-pros"><div class="progress">
-  <div class="progress-bar bg-warning" role="progressbar" style="width: 0%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">
-
-  </div>
+{{--  </div>--}}
 
 
-</div>
+{{--</div>--}}
 
-</div><div class="box-pres">0%
+{{--</div><div class="box-pres">0%--}}
 
-</div>
+{{--</div>--}}
 
 
-</div>
+{{--</div>--}}
+{{--<div class="start-box">--}}
+{{--<div class="box-satrt"><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i>--}}
 
-<div class="comm">共有7則評價 <i class="fa fa-commenting-o" aria-hidden="true"></i>
+{{--</div><div class="box-pros"><div class="progress">--}}
+{{--  <div class="progress-bar bg-warning" role="progressbar" style="width: 0%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">--}}
 
-</div>
-<div class="comm-list">
-  <div class="comm-face"><img src="images/face.jpg">
+{{--  </div>--}}
 
-  </div><div class="comm-info"><div class="comm-name">吳大偉</div ><div class="comm-date">2019/03/25
 
-  </div><div class="comm-re">大推~~很專業很細心的服務
+{{--</div>--}}
 
-  </div>
+{{--</div><div class="box-pres">0%--}}
 
-  </div>
+{{--</div>--}}
 
-  </div>
-  <div class="comm-list">
-  <div class="comm-face"><img src="images/face.jpg">
 
-  </div><div class="comm-info"><div class="comm-name">吳大偉</div ><div class="comm-date">2019/03/25
+{{--</div>--}}
+{{--<div class="start-box">--}}
+{{--<div class="box-satrt"><i class="fa fa-star" aria-hidden="true"></i>--}}
 
-  </div><div class="comm-re">大推~~很專業很細心的服務
+{{--</div><div class="box-pros"><div class="progress">--}}
+{{--  <div class="progress-bar bg-warning" role="progressbar" style="width: 0%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">--}}
 
-  </div>
+{{--  </div>--}}
 
-  </div>
 
-  </div>
- <div class="more"> <button class="btn btn-sm btn-light">更多評價</button>
+{{--</div>--}}
 
- </div>
+{{--</div><div class="box-pres">0%--}}
+
+{{--</div>--}}
+
+
+{{--</div>--}}
+
+{{--<div class="comm">共有7則評價 <i class="fa fa-commenting-o" aria-hidden="true"></i>--}}
+
+{{--</div>--}}
+{{--<div class="comm-list">--}}
+{{--  <div class="comm-face"><img src="images/face.jpg">--}}
+
+{{--  </div><div class="comm-info"><div class="comm-name">吳大偉</div ><div class="comm-date">2019/03/25--}}
+
+{{--  </div><div class="comm-re">大推~~很專業很細心的服務--}}
+
+{{--  </div>--}}
+
+{{--  </div>--}}
+
+{{--  </div>--}}
+{{--  <div class="comm-list">--}}
+{{--  <div class="comm-face"><img src="images/face.jpg">--}}
+
+{{--  </div><div class="comm-info"><div class="comm-name">吳大偉</div ><div class="comm-date">2019/03/25--}}
+
+{{--  </div><div class="comm-re">大推~~很專業很細心的服務--}}
+
+{{--  </div>--}}
+
+{{--  </div>--}}
+
+{{--  </div>--}}
+{{-- <div class="more"> <button class="btn btn-sm btn-light">更多評價</button>--}}
+
+{{-- </div>--}}
 
 
 </div>
@@ -1289,8 +1287,6 @@
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">&times;</span>
           </button>
-
-
         </div>
         <div class="modal-body">
             <p><span class="text-success">關鍵字：</span>加壓馬逹安裝</p>
@@ -1479,12 +1475,18 @@
             dataType: "json",
             success: function (responses) {
                 if(responses['olo'][0]['class_flag'] == 0){
+                    console.log(responses['olo'][0]);
                     $('#type0').find('.job-list').find('span').text(responses['olo'][0]['offer_title']);
-                    $('#type0').find('.jobs-info').find('span').first().text(responses['user']['total_served_case'] == null?'0':responses['user']['total_served_case'] );
-                    $('#type0').find('.jobs-info').find('span').last().text(responses['user']['total_served_hours'] == null?'0':responses['user']['total_served_hours'] );
-                    $('#type0').find('.jobs-info').next('div').html(responses['olo'][0]['offer_title']+':<span class="text-danger">'+(responses['olo'][0]['price'] == null ?'0':responses['olo'][0]['price'])+'</span>元 /'+responses['olo'][0]['price_type'] == null ?'':responses['olo'][0]['price_type']);
-                    $('#type0').find('.intro').text((responses['olo'][0]['offer_description']==null)?'簡介：':'簡介：'+responses['olo'][0]['offer_description']);
-                    $('#type0').find('.intro').next('div').text(responses['olo'][0]['education'] == null? '最高學歷：':'最高學歷：'+responses['olo'][0]['education']);
+                    $('#type0').find('.jobs-info').find('span').first().text((responses['user']['total_served_case'] == null?'0':responses['user']['total_served_case']));
+                    $('#type0').find('.jobs-info').find('span').last().text((responses['user']['total_served_hours'] == null?'0':responses['user']['total_served_hours']));
+                    $('#type0').find('.jobs-info').next('div').html(responses['olo'][0]['offer_title']+': <span class="text-danger">'+(responses['olo'][0]['price'] == null ?'0':responses['olo'][0]['price'])+'</span>元 / ' +(responses['olo'][0]['price_type'] == null ?'':responses['olo'][0]['price_type']));
+                    $('#type0').find('.intro').text((responses['olo'][0]['offer_description']==null?'簡介：':'簡介：'+responses['olo'][0]['offer_description']));
+                    if(responses['olo'][0]['offer_title'] == "小孩讀伴玩" || responses['olo'][0]['offer_title'] =="課業讀伴"){
+                        $('#type0').find('.intro').next('div').show();
+                        $('#type0').find('.intro').next('div').text((responses['olo'][0]['education'] == null? '最高學歷：':'最高學歷：'+responses['olo'][0]['education']));
+                    }else{
+                        $('#type0').find('.intro').next('div').hide();
+                    }
 
                     $('#type0').find('.btnarr').find('a.btn-warning').attr("olo_id", $this.attr('id'));
                     $('#type0').find('.btnarr').find('a.btn-warning').addClass("normal_hire");
@@ -1520,8 +1522,8 @@
 
                 }else if(responses['olo'][0]['class_flag'] == 1){
                     $('#type1').find('.job-list').find('span').text(responses['olo'][0]['offer_title']);
-                    $('#type1').find('.jobs-info').find('span').first().text(responses['user']['total_served_case'] == null?'0':responses['user']['total_served_case'] );
-                    $('#type1').find('.jobs-info').next('div').html(responses['olo'][0]['offer_title']+':<span class="text-danger">'+(responses['olo'][0]['price'] == null ?'0':responses['olo'][0]['price'])+'</span>元 / 起');
+                    $('#type1').find('.jobs-info').find('span').first().text((responses['user']['total_served_case'] == null?'0':responses['user']['total_served_case']) );
+                    $('#type1').find('.jobs-info').next('div').html(responses['olo'][0]['offer_title']+': <span class="text-danger">'+(responses['olo'][0]['price'] == null ?'0':responses['olo'][0]['price'])+'</span>元 / 起');
                     $('#type1').find('.intro').text((responses['olo'][0]['offer_description'] == null) ?'簡介：':'簡介：'+responses['olo'][0]['offer_description']);
                     $('#type1').find('.btnarr').find('a.btn-warning').attr("olo_id", $this.attr('id'));
                     $('#type1').find('.btnarr').find('a.btn-warning').addClass("food_hire");
@@ -1547,7 +1549,8 @@
                     }
                     $('#type1').find('.fix').html(str);
                 }else if(responses['olo'][0]['class_flag'] == 2){
-                    $('#type2').find('.jobs-item').html(responses['olo'][0]['offer_title']+':<span class="text-danger">'+(responses['olo'][0]['price'] == null ?'0':responses['olo'][0]['price'])+'</span>元 /'+responses['olo'][0]['price_type'] == null ? '' : responses['olo'][0]['price_type']);
+                    console.log(responses['olo'][0]['offer_title']);
+                    $('#type2').find('.jobs-item').html(responses['olo'][0]['offer_title']+': <span class="text-danger">'+(responses['olo'][0]['price'] == null ? '0':responses['olo'][0]['price'])+'</span>元 / '+(responses['olo'][0]['price_type'] == null ? '' : responses['olo'][0]['price_type']));
                     $('#type2').find('.intro').text((responses['olo'][0]['offer_description'] == null) ? '簡介：':'簡介：'+responses['olo'][0]['offer_description']);
                     $('#type2').find('.btnarr').find('a.btn-warning').attr("olo_id", $this.attr('id'));
                     $('#type2').find('.btnarr').find('a.btn-warning').addClass("design_hire");

@@ -662,15 +662,13 @@ class AjaxController extends Controller
 		//
 		$class_flag = 0;
 
-		if(isset($request->service_type_sub) && $request->service_type_sub == '美味家常菜') {
-			$class_flag = 1;
-		}
-		if($request->service_type_main == '創意市集' || $request->service_type_main == '二手平台') {
-			$class_flag = 0;
-		}
-		if($request->service_type_main == '專業設計' || $request->service_type_main == '文字工作' || $request->service_type_main == '專業顧問') {
-			$class_flag = 2;
-		}
+        if($request->service_type_main == '專業設計' || $request->service_type_main == '文字工作' || $request->service_type_main == '專業顧問') {
+            $class_flag = 2;
+        }elseif( ($request->service_type_main == '家務' && $request->service_type_sub == '美味家常菜') || $request->service_type_main == '創意市集' || $request->service_type_main == '二手平台') {
+            $class_flag = 1;
+        }else{
+            $class_flag = 0;
+        }
 
 		$offer_title = $request->service_type_main;
 		if(isset($request->service_type_sub)) {

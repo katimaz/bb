@@ -83,55 +83,54 @@
                       @endif
                 <span class="avg">{{is_null($user->customer_avg_rate)?'0':$user->customer_avg_rate}}</span></span>
               </div>
-              <div class="start-box">
-                <div class="box-satrt"><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i>
-                </div>
-                <div class="box-pros">
-                  <div class="progress">
-                    <div class="progress-bar bg-warning" role="progressbar" style="width: 95%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"></div>
-                  </div>
-                </div>
-                <div class="box-pres">95%</div>
-              </div>
-              <div class="start-box">
-                <div class="box-satrt">
-                  <i class="fa fa-star" aria-hidden="true"></i>
-                  <i class="fa fa-star" aria-hidden="true"></i>
-                  <i class="fa fa-star" aria-hidden="true"></i>
-                  <i class="fa fa-star" aria-hidden="true"></i>
-                </div>
-                <div class="box-pros">
-                  <div class="progress">
-                    <div class="progress-bar bg-warning" role="progressbar" style="width: 5%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"></div>
-                  </div>
-                </div>
-                <div class="box-pres">5%</div>
-              </div>
-              <div class="start-box">
-                <div class="box-satrt"><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i></div>
-                <div class="box-pros">
-                  <div class="progress">
-                <div class="progress-bar bg-warning" role="progressbar" style="width: 0%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"></div>
-                </div></div><div class="box-pres">0%</div>
-              </div>
-              <div class="start-box">
-                <div class="box-satrt"><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i></div>
-                <div class="box-pros">
-                  <div class="progress">
-                    <div class="progress-bar bg-warning" role="progressbar" style="width: 0%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"></div>
-                  </div>
-                </div>
-                <div class="box-pres">0%</div>
-                </div>
-                <div class="start-box">
-                  <div class="box-satrt"><i class="fa fa-star" aria-hidden="true"></i></div>
-                  <div class="box-pros">
-                    <div class="progress">
-                      <div class="progress-bar bg-warning" role="progressbar" style="width: 0%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"></div>
-                    </div>
-                  </div>
-                  <div class="box-pres">0%</div>
-                </div>
+{{--              <div class="start-box">--}}
+{{--                <div class="box-satrt"><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i></div>--}}
+{{--                <div class="box-pros">--}}
+{{--                  <div class="progress">--}}
+{{--                    <div class="progress-bar bg-warning" role="progressbar" style="width: 95%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"></div>--}}
+{{--                  </div>--}}
+{{--                </div>--}}
+{{--                <div class="box-pres">95%</div>--}}
+{{--              </div>--}}
+{{--              <div class="start-box">--}}
+{{--                <div class="box-satrt">--}}
+{{--                  <i class="fa fa-star" aria-hidden="true"></i>--}}
+{{--                  <i class="fa fa-star" aria-hidden="true"></i>--}}
+{{--                  <i class="fa fa-star" aria-hidden="true"></i>--}}
+{{--                  <i class="fa fa-star" aria-hidden="true"></i>--}}
+{{--                </div>--}}
+{{--                <div class="box-pros">--}}
+{{--                  <div class="progress">--}}
+{{--                    <div class="progress-bar bg-warning" role="progressbar" style="width: 5%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"></div>--}}
+{{--                  </div>--}}
+{{--                </div>--}}
+{{--                <div class="box-pres">5%</div>--}}
+{{--              </div>--}}
+{{--              <div class="start-box">--}}
+{{--                <div class="box-satrt"><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i></div>--}}
+{{--                <div class="box-pros">--}}
+{{--                  <div class="progress">--}}
+{{--                <div class="progress-bar bg-warning" role="progressbar" style="width: 0%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"></div>--}}
+{{--                </div></div><div class="box-pres">0%</div>--}}
+{{--              </div>--}}
+{{--              <div class="start-box">--}}
+{{--                <div class="box-satrt"><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i></div>--}}
+{{--                <div class="box-pros">--}}
+{{--                  <div class="progress">--}}
+{{--                    <div class="progress-bar bg-warning" role="progressbar" style="width: 0%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"></div>--}}
+{{--                  </div>--}}
+{{--                </div>--}}
+{{--                <div class="box-pres">0%</div>--}}
+{{--              </div>--}}
+{{--                <div class="start-box">--}}
+{{--                  <div class="box-satrt"><i class="fa fa-star" aria-hidden="true"></i></div>--}}
+{{--                  <div class="box-pros">--}}
+{{--                    <div class="progress">--}}
+{{--                      <div class="progress-bar bg-warning" role="progressbar" style="width: 0%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"></div>--}}
+{{--                    </div>--}}
+{{--                  </div>--}}
+{{--                  <div class="box-pres">0%</div>--}}
+{{--                </div>--}}
                 <a type="" class="btn btn-lg btn-success mt-4 float-right" id="btn-send">更新設定</a>
                 <a id="preview" href="{{URL::to('/')}}/web/helper_detail/{{session()->get('usrID')}}/0/{{$member_addr_recode->first()->id}}" class="btn btn-lg btn-warning mt-4 mr-2 float-right">預覧</a>
               </div>
@@ -158,18 +157,17 @@
             <div class="form-group" id="toggle-select">
               <label for="exampleInputPassword1"><i class="fa fa-check-square-o" aria-hidden="true"></i> 服務類別</label>
               <select class="form-control" name="service_type_main">
-                <option data-toggle-select-hide=".type-arr" data-toggle-select-show="#type1" selected="">居家服務</option>
-                <option data-toggle-select-hide=".type-arr" data-toggle-select-show="#type2">健康美容</option>
-                <option data-toggle-select-hide=".type-arr" data-toggle-select-show="#type3">學習</option>
-                <option data-toggle-select-hide=".type-arr" data-toggle-select-show="#type4">代辦代購</option>
-                <option data-toggle-select-hide=".type-arr" data-toggle-select-show="#type5">活動設計</option>
-                <option data-toggle-select-hide=".type-arr" data-toggle-select-show="#type6">專業設計</option>
-                <option data-toggle-select-hide=".type-arr" data-toggle-select-show="#type7">文字工作</option>
-                <option data-toggle-select-hide=".type-arr" data-toggle-select-show="#type8">專業顧問</option>
-                <option data-toggle-select-hide=".type-arr" data-toggle-select-show="#type9">旅遊</option>
-                <option data-toggle-select-hide=".type-arr" data-toggle-select-show="#type10">創意市集</option>
-                <option data-toggle-select-hide=".type-arr" data-toggle-select-show="#type11">二手平台</option>
-                <option data-toggle-select-hide=".type-arr" data-toggle-select-show="#type12">其他</option>
+                  <option data-toggle-select-hide=".type-arr" data-toggle-select-show="#type1" selected="">家務</option>
+                  <option data-toggle-select-hide=".type-arr" data-toggle-select-show="#type2">健康美容</option>
+                  <option data-toggle-select-hide=".type-arr" data-toggle-select-show="#type3">學習</option>
+                  <option data-toggle-select-hide=".type-arr" data-toggle-select-show="#type4">代辦</option>
+                  <option data-toggle-select-hide=".type-arr" data-toggle-select-show="#type5">活動設計</option>
+                  <option data-toggle-select-hide=".type-arr" data-toggle-select-show="#type6">旅遊</option>
+                  <option data-toggle-select-hide=".type-arr" data-toggle-select-show="#type7">創意市集</option>
+                  <option data-toggle-select-hide=".type-arr" data-toggle-select-show="#type8">二手平台</option>
+                  <option data-toggle-select-hide=".type-arr" data-toggle-select-show="#type9">專業設計</option>
+                  <option data-toggle-select-hide=".type-arr" data-toggle-select-show="#type10">文字工作</option>
+                  <option data-toggle-select-hide=".type-arr" data-toggle-select-show="#type11">專業顧問</option>
               </select>
             </div>
             <div class="type-arr active" id="type1">
@@ -181,9 +179,9 @@
               <label for="check-3">水電工程</label>
               <input id="check-4" type="checkbox" class="service_type_sub" name="service_type_sub" value="小孩讀伴玩">
               <label for="check-4">小孩讀伴玩</label>
-              <input id="check-5" type="checkbox" class="service_type_sub" name="service_type_sub" value="銀髮族照護">
+              <input id="check-5" type="checkbox" class="service_type_sub" name="service_type_sub" value="銀髮族陪伴">
               <label for="check-5">銀髮族照護</label>
-              <input id="check-6" type="checkbox" class="service_type_sub" name="service_type_sub" value="照顧">
+              <input id="check-6" type="checkbox" class="service_type_sub" name="service_type_sub" value="寵物美容">
               <label for="check-6">寵物美容/照顧</label>
               <input id="check-7" type="checkbox" class="service_type_sub" name="service_type_sub" value="汽車美容">
               <label for="check-7">洗車/汽車美容</label>
@@ -197,9 +195,6 @@
               <label for="check-11">管家服務</label>
               <input id="check-12" type="checkbox" class="service_type_sub" name="service_type_sub" value="月子媽媽">
               <label for="check-12">月子媽媽</label>
-              <input id="check-13" type="checkbox" class="service_type_sub" name="service_type_sub" value="其他">
-              <label for="check-13">其他</label>
-
             </div>
             <div class="type-arr" id="type2">
               <input id="check-14" type="checkbox" class="service_type_sub" name="service_type_sub" value="美容">
@@ -216,8 +211,6 @@
               <label for="check-19">舞蹈</label>
               <input id="check-20" type="checkbox" class="service_type_sub" name="service_type_sub" value="游泳">
               <label for="check-20">游泳</label>
-              <input id="check-21" type="checkbox" class="service_type_sub" name="service_type_sub" value="其他">
-              <label for="check-21">其他</label>
             </div>
             <div class="type-arr" id="type3">
               <input id="check-22" type="checkbox" class="service_type_sub" name="service_type_sub" value="課業伴讀">
@@ -236,9 +229,77 @@
               <label for="check-28">才藝培養</label>
               <input id="check-29" type="checkbox" class="service_type_sub" name="service_type_sub" value="電腦教學">
               <label for="check-29">電腦教學</label>
-              <input id="check-30" type="checkbox" class="service_type_sub" name="service_type_sub" value="其他">
-              <label for="check-30">其他</label>
             </div>
+              <div class="type-arr" id="type4">
+                  <input id="check-31" type="checkbox" class="service_type_sub" name="service_type_sub" value="代辦服務">
+                  <label for="check-31">代辦服務</label>
+                  <input id="check-32" type="checkbox" class="service_type_sub" name="service_type_sub" value="外送服務">
+                  <label for="check-32">外送服務</label>
+                  <input id="check-33" type="checkbox" class="service_type_sub" name="service_type_sub" value="臨時工">
+                  <label for="check-33">臨時工</label>
+                  <input id="check-34" type="checkbox" class="service_type_sub" name="service_type_sub" value="搬家">
+                  <label for="check-34">搬家</label>
+              </div>
+              <div class="type-arr" id="type5">
+                  <input id="check-36" type="checkbox" class="service_type_sub" name="service_type_sub" value="婚禮顧問">
+                  <label for="check-36">婚禮顧問</label>
+                  <input id="check-37" type="checkbox" class="service_type_sub" name="service_type_sub" value="新娘秘書">
+                  <label for="check-37">新娘秘書</label>
+                  <input id="check-38" type="checkbox" class="service_type_sub" name="service_type_sub" value="活動攝影">
+                  <label for="check-38">活動攝影</label>
+                  <input id="check-39" type="checkbox" class="service_type_sub" name="service_type_sub" value="活動主持">
+                  <label for="check-39">活動主持</label>
+                  <input id="check-40" type="checkbox" class="service_type_sub" name="service_type_sub" value="活動商演">
+                  <label for="check-40">活動商演</label>
+                  <input id="check-41" type="checkbox" class="service_type_sub" name="service_type_sub" value="器材租借">
+                  <label for="check-41">器材租借</label>
+              </div>
+              <div class="type-arr" id="type6">
+                  <input id="check-42" type="checkbox" class="service_type_sub" name="service_type_sub" value="旅遊諮詢">
+                  <label for="check-42">旅遊諮詢</label>
+                  <input id="check-43" type="checkbox" class="service_type_sub" name="service_type_sub" value="當地導遊">
+                  <label for="check-43">當地導遊</label>
+                  <input id="check-44" type="checkbox" class="service_type_sub" name="service_type_sub" value="包車旅遊">
+                  <label for="check-44">包車旅遊</label>
+                  <input id="check-45" type="checkbox" class="service_type_sub" name="service_type_sub" value="其他">
+                  <label for="check-45">其他</label>
+              </div>
+              <div class="type-arr" id="type9">
+                  <input id="check-46" type="checkbox" class="service_type_sub" name="service_type_sub" value="音樂創作">
+                  <label for="check-46">音樂創作</label>
+                  <input id="check-47" type="checkbox" class="service_type_sub" name="service_type_sub" value="廣告設計">
+                  <label for="check-47">廣告設計</label>
+                  <input id="check-48" type="checkbox" class="service_type_sub" name="service_type_sub" value="動畫設計">
+                  <label for="check-48">動畫設計</label>
+                  <input id="check-49" type="checkbox" class="service_type_sub" name="service_type_sub" value="網頁與APP">
+                  <label for="check-49">網頁與APP</label>
+                  <input id="check-50" type="checkbox" class="service_type_sub" name="service_type_sub" value="室內設計">
+                  <label for="check-50">室內設計</label>
+              </div>
+              <div class="type-arr" id="type10">
+                  <input id="check-52" type="checkbox" class="service_type_sub" name="service_type_sub" value="翻譯">
+                  <label for="check-52">翻譯</label>
+                  <input id="check-53" type="checkbox" class="service_type_sub" name="service_type_sub" value="部落客">
+                  <label for="check-53">部落客</label>
+                  <input id="check-54" type="checkbox" class="service_type_sub" name="service_type_sub" value="專題報導">
+                  <label for="check-54">專題報導</label>
+                  <input id="check-55" type="checkbox" class="service_type_sub" name="service_type_sub" value="文字撰寫">
+                  <label for="check-55">文字撰寫</label>
+              </div>
+              <div class="type-arr" id="type11">
+                  <input id="check-57" type="checkbox" class="service_type_sub" name="service_type_sub" value="會計">
+                  <label for="check-57">會計</label>
+                  <input id="check-58" type="checkbox" class="service_type_sub" name="service_type_sub" value="法律">
+                  <label for="check-58">法律</label>
+                  <input id="check-59" type="checkbox" class="service_type_sub" name="service_type_sub" value="理財">
+                  <label for="check-59">理財</label>
+                  <input id="check-60" type="checkbox" class="service_type_sub" name="service_type_sub" value="資訊">
+                  <label for="check-60">資訊</label>
+                  <input id="check-61" type="checkbox" class="service_type_sub" name="service_type_sub" value="代書">
+                  <label for="check-61">代書</label>
+                  <input id="check-62" type="checkbox" class="service_type_sub" name="service_type_sub" value="教育訓練">
+                  <label for="check-62">教育訓練</label>
+              </div>
           </form>
         </div>
         <div class="modal-footer">
@@ -364,12 +425,12 @@
           <input type="hidden" name="id" class="id">
           <div class="form-group">
             <label>計價方式</label>
-            <input id='case' type="radio" name='price_type' value="每件" />
-            <label for="case">每件</label>
-            <input id='xhour' type="radio" name='price_type' value="小時" />
-            <label for="xhour">每小時</label>
-            <input id='quote' type="radio" name='price_type' value="報價" />
-            <label for="quote">依報價</label>
+              <input id="designcase" type="radio" class="price_type case" name="price_type" value="每件">
+              <label for="designcase">每件</label>
+              <input id="designhour" type="radio" class="price_type hour" name="price_type" value="小時">
+              <label for="designhour">每小時</label>
+              <input id="designquote" type="radio" class="price_type quote" name="price_type" value="報價">
+              <label for="designquote">依報價</label>
           </div>
           <div class="form-group" id="price">
             <label>服務價格</label>
@@ -604,7 +665,6 @@
       // 編輯服務項目
 
         $(document).on("click", ".ser-editb" , function() {
-          console.log("ser-editb");
         food_index = 0
         $.ajax({
           type: "post",
@@ -616,21 +676,34 @@
           dataType: "json",
           success: function (response) {
             var olo = response.olo;
+            console.log(olo);
             // id
             $('.id').val(olo.id);
             $('.offer_title').text(olo.offer_title);
             // 計價方式
             if(olo.price_type == '每件') {
-              $('.case').prop('checked', true);
+                $('.case').prop('checked', true);
             } else if(olo.price_type == '小時') {
-              $('.hour').prop('checked', true);
+                $('.hour').prop('checked', true);
+            }else if(olo.price_type == '報價') {
+                $('.quote').prop('checked', true);
             }
             // 服務價格
-            $('.price').val(olo.price);
+              if(olo.price_type == '報價') {
+                  $('#price').hide();
+              }else{
+                  $('#price').show();
+                  $('.price').val(olo.price);
+              }
+
             // 服務簡介
             $('.offer_description').text(olo.offer_description);
             // 學歷
-            $('.education').val(olo.education);
+              if(olo.offer_title == "小孩讀伴玩" || olo.offer_title == "課業讀伴"){
+                  $('.education').val(olo.education);
+              }else{
+                  $('.education').hidden();
+              }
             // 證照
             $('.olo_license_img').empty()
             $.each(response.olo_license_img, function(k, v) {
@@ -769,10 +842,10 @@
     $(document).on('click', '.b-close', function() {
         $(this).parent().remove();
     });
-    $('#quote').on('change', function () {
+    $('.quote').on('click', function () {
       $('#price').hide();
     });
-    $('#case').on('change', function () {
+    $('.case,.hour').on('click', function () {
       $('#price').show();
     });
 

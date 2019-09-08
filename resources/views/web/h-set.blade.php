@@ -700,9 +700,10 @@
             $('.offer_description').text(olo.offer_description);
             // 學歷
               if(olo.offer_title == "小孩讀伴玩" || olo.offer_title == "課業讀伴"){
+                  $('.education').parent('div').show();
                   $('.education').val(olo.education);
               }else{
-                  $('.education').hidden();
+                  $('.education').parent('div').hide();
               }
             // 證照
             $('.olo_license_img').empty()

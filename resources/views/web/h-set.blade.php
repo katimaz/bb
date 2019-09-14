@@ -601,6 +601,10 @@
                     alert('價格必填');
                     return false;
                 }
+                if(!$.isNumeric($('.food_price', this).val())) {
+                    alert('價格必需是數字');
+                    return false;
+                }
                 if($('.food_img', this).get(0).files.length == 0 && $('.old_img', this).attr('src') == undefined ) {
                     alert('照片必填');
                     return false;
@@ -664,6 +668,10 @@
           if($('.food_price', this).val() == '') {
             alert('價格必填');
             return false;
+          }
+          if(!$.isNumeric($('.food_price', this).val())) {
+              alert('價格必需是數字');
+              return false;
           }
           if($('.food_img', this).get(0).files.length == 0 && $('.old_img', this).attr('src') == undefined ) {
             alert('照片必填');

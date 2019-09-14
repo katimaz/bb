@@ -62,7 +62,7 @@
                 </div>
                 @foreach($olo as $key => $value)
                 <div class="ser-list">{{$value->offer_title}}
-                  <a href="#" class="ser-editb" data-toggle="modal" @if($value->class_flag == 0) data-target='#editModal' @elseif($value->class_flag == 1) data-target='#editfood' @else data-target='#editdesign' @endif data-id="{{$value->id}}">編輯 <i class="fa fa-pencil-square-o" aria-hidden="true"></i></a>
+                  <a href="#" class="ser-editb" data-toggle="modal" @if($value->class_flag == 0) data-target='#editModal' @elseif($value->class_flag == 1) @if($value->offer_title =='美味家常菜') data-target='#editfood' @else data-target='#edititem' @endif @else data-target='#editdesign' @endif data-id="{{$value->id}}">編輯 <i class="fa fa-pencil-square-o" aria-hidden="true"></i></a>
                   <a href="#" class="ser-edit" data-id="{{$value->id}}" >刪除<i class="fa fa-times-circle" aria-hidden="true"></i></a>
                 </div>
                 @endforeach
@@ -344,7 +344,7 @@
               <input type="text" class="form-control education" name="education" placeholder="">
             </div>
 
-            <label>證照照片<span class="text-danger"> （上傳前請遮蓋個資）</span></label>
+            <label id="student_img">證照照片<span class="text-danger"> （上傳前請遮蓋個資）</span></label>
             <div class="row fix mb-2 olo_license_img"></div>
 
             <div class="mb-2">
@@ -372,8 +372,41 @@
       </div>
     </div>
   </div>
+<!-- 文創、二手編輯 -->
+<div class="modal fade" id="edititem" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel"><span class="offer_title"></span>設定</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form action="" id="form-item">
+          <input type="hidden" name="id" class="id">
+          <a href="#" class="add-item">新增商品 <i class="fa fa-plus-circle" aria-hidden="true"></i></a>
+          <div id="item-list">
+          </div>
+          <div class="form-group">
+            <label> 商品簡介</label>
+            <textarea class="form-control offer_description" name="offer_description"></textarea>
+          </div>
+          <div class="form-group yotube olo_video">
+            <label class="mt-2">Yotube 影片</label><span class="add-more">新增更多影片 <i class="fa fa-plus-circle" aria-hidden="true"></i></span>
+          </div>
+        </form>
 
-<!-- 家常菜、文創、二手編輯 -->
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">關閉視窗</button>
+        <button type="button" class="btn btn-success" id="btn-send-item">儲存設定</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 家常菜 -->
 <div class="modal fade" id="editfood" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
@@ -398,6 +431,9 @@
           <div class="mb-2">
             <img id="preview_menu_license_img" src=""/>
             <input id="file-1" onchange="readURL(this,'preview_menu_license_img')" type="file" name="license_img[]" class=" form-control-file" data-file-upload="" multiple>
+          </div>
+          <div class="form-group yotube olo_video">
+            <label class="mt-2">Yotube 影片</label><span class="add-more">新增更多影片 <i class="fa fa-plus-circle" aria-hidden="true"></i></span>
           </div>
         </form>
 
@@ -524,6 +560,70 @@
           }
         });
       });
+        // 送出商品
+        $('#btn-send-item').on('click', function () {
+            var formdata = new FormData($('#form-item')[0]);
+            formdata.append('_token', '{{csrf_token()}}');
+            var old_video = [];
+            var olo_video = [];
+            $('#form-item .yt-video').each(function () {
+                if($(this).data('id') != '0') {
+                    // old_video.push($(this).data('id'));
+                    formdata.append('old_video[]', $(this).data('id'));
+                }
+                formdata.append('olo_video_id[]', $(this).data('id'));
+                // olo_video.push($(this).data('id'));
+            })
+            var old_license_img = [];
+            var olo_license_img = [];
+            $('#form-item .old_license_img').each(function () {
+                if($(this).data('id') != '0') {
+                    // old_video.push($(this).data('id'));
+                    formdata.append('old_license_img[]', $(this).data('id'));
+                }
+                // formdata.append('olo_video_id[]', $(this).data('id'));
+                // olo_video.push($(this).data('id'));
+            })
+            var old_food = [];
+            var olo_img = [];
+            $('#form-item .old_food').each(function () {
+
+                if($(this).data('id') != '0') {
+                    // old_video.push($(this).data('id'));
+                    formdata.append('old_food['+$(this).data('index')+']', $(this).data('id'));
+                }
+                formdata.append('olo_food_id['+$(this).data('index')+']', $(this).data('id'));
+                if($('.food_title', this).val() == '') {
+                    alert('標題必填');
+                    return false;
+                }
+                if($('.food_price', this).val() == '') {
+                    alert('價格必填');
+                    return false;
+                }
+                if($('.food_img', this).get(0).files.length == 0 && $('.old_img', this).attr('src') == undefined ) {
+                    alert('照片必填');
+                    return false;
+                }
+            })
+
+            $.ajax({
+                type: "post",
+                url: "{{url('/api/set_olo')}}",
+                data: formdata,
+                processData: false,
+                contentType: false,
+                dataType: "json",
+                success: function (response) {
+                    if(response.success) {
+                        alert('修改完成');
+                        location.reload();
+                    } else {
+                        alert(response.msg);
+                    }
+                }
+            });
+        });
       // 送出家常菜
       $('#btn-send-food').on('click', function () {
         var formdata = new FormData($('#form-food')[0]);
@@ -700,9 +800,11 @@
             $('.offer_description').text(olo.offer_description);
             // 學歷
               if(olo.offer_title == "小孩讀伴玩" || olo.offer_title == "課業讀伴"){
+                  $('#student_img').html("證照照片或學生證<span class=\"text-danger\"> （上傳前請遮蓋個資）</span>");
                   $('.education').parent('div').show();
                   $('.education').val(olo.education);
               }else{
+                  $('#student_img').html("證照照片<span class=\"text-danger\"> （上傳前請遮蓋個資）</span>");
                   $('.education').parent('div').hide();
               }
             // 證照
@@ -726,6 +828,12 @@
               $('#menu-list').append('<div class="row mb-2 old_food" data-id="'+v.id+'" data-index="'+food_index+'"> <div class="b-close"><i class="fa fa-times-circle" aria-hidden="true"></i></div> <div class="form-group col-8"> <input type="text" class="form-control food_title" name="food_title['+food_index+']" value="'+v.title+'" placeholder="料理名稱" required> </div> <div class="form-group col-4"> <input type="text" class="form-control food_price" name="food_price['+food_index+']" value="'+v.price+'" placeholder="售價" required> </div> <div class="col-3"><span class="b-close"><i class="fa fa-times-circle" aria-hidden="true"></i></span> <img src="{{URL::to("/")}}/img/small/'+v.img+'" class="img-fluid old_img"> </div> <div class="col-9 form-inline"><span class="text-success mr-2">料理照片 </span><span><img id="preview_menu_food_img'+food_index+'" src=""/><input type="file" onchange="readURL(this,\'preview_menu_food_img'+food_index+'\')" name="food_img['+food_index+']" class="form-control-file food_img" required></span></div> </div>')
               food_index++;
             })
+              food_index = 0
+              $('#item-list').empty();
+              $.each(response.olo_food, function (k, v) {
+                  $('#item-list').append('<div class="row mb-2 old_food" data-id="'+v.id+'" data-index="'+food_index+'"> <div class="b-close"><i class="fa fa-times-circle" aria-hidden="true"></i></div> <div class="form-group col-8"> <input type="text" class="form-control food_title" name="food_title['+food_index+']" value="'+v.title+'" placeholder="料理名稱" required> </div> <div class="form-group col-4"> <input type="text" class="form-control food_price" name="food_price['+food_index+']" value="'+v.price+'" placeholder="售價" required> </div> <div class="col-3"><span class="b-close"><i class="fa fa-times-circle" aria-hidden="true"></i></span> <img src="{{URL::to("/")}}/img/small/'+v.img+'" class="img-fluid old_img"> </div> <div class="col-9 form-inline"><span class="text-success mr-2">料理照片 </span><span><img id="preview_menu_food_img'+food_index+'" src=""/><input type="file" onchange="readURL(this,\'preview_menu_food_img'+food_index+'\')" name="food_img['+food_index+']" class="form-control-file food_img" required></span></div> </div>')
+                  food_index++;
+              })
           }
         });
       })
@@ -791,11 +899,15 @@
       if ($(window).width() < 991) {$('.header,.search-frame').removeClass('fixed')  }
 
       $( ".add-more" ).on('click', function() {
-        $('.yotube').append('<div class="add-box"><div class="b-close"><i class="fa fa-times-circle" aria-hidden="true"></i></div><input type="text" class="form-control mt-2 yt-video" name="olo_video[]" placeholder="輸入影片網址" data-id="0" /></div>')
+          $('.yotube').append('<div class="add-box"><div class="b-close"><i class="fa fa-times-circle" aria-hidden="true"></i></div><input type="text" class="form-control mt-2 yt-video" name="olo_video[]" placeholder="輸入影片網址" data-id="0" /></div>')
       });
       $( ".add-menu" ).on('click', function() {
-        $('#menu-list').append('<div class="row mb-2 old_food" data-id="0" data-index="'+food_index+'"><div class="b-close"><i class="fa fa-times-circle" aria-hidden="true"></i></div><div class="form-group col-8"><input type="text" class="form-control food_title" name="food_title['+food_index+']" placeholder="料理名稱" required></div><div class="form-group col-4"><input type="text" class="form-control food_price" name="food_price['+food_index+']" placeholder="售價" required></div><div class="col-9 form-inline"><span class="text-success mr-2">料理照片 </span><span><img id="preview_menu_food_img'+food_index+'" src=""/><input type="file" onchange="readURL(this,\'preview_menu_food_img'+food_index+'\')" class="form-control-file food_img" name="food_img['+food_index+']" required></span></div></div>');
-        food_index++;
+          $('#menu-list').append('<div class="row mb-2 old_food" data-id="0" data-index="'+food_index+'"><div class="b-close"><i class="fa fa-times-circle" aria-hidden="true"></i></div><div class="form-group col-8"><input type="text" class="form-control food_title" name="food_title['+food_index+']" placeholder="料理名稱" required></div><div class="form-group col-4"><input type="text" class="form-control food_price" name="food_price['+food_index+']" placeholder="售價" required></div><div class="col-9 form-inline"><span class="text-success mr-2">料理照片 </span><span><img id="preview_menu_food_img'+food_index+'" src=""/><input type="file" onchange="readURL(this,\'preview_menu_food_img'+food_index+'\')" class="form-control-file food_img" name="food_img['+food_index+']" required></span></div></div>');
+          food_index++;
+      });
+      $( ".add-item" ).on('click', function() {
+          $('#item-list').append('<div class="row mb-2 old_food" data-id="0" data-index="'+food_index+'"><div class="b-close"><i class="fa fa-times-circle" aria-hidden="true"></i></div><div class="form-group col-8"><input type="text" class="form-control food_title" name="food_title['+food_index+']" placeholder="商品名稱" required></div><div class="form-group col-4"><input type="text" class="form-control food_price" name="food_price['+food_index+']" placeholder="售價" required></div><div class="col-9 form-inline"><span class="text-success mr-2">商品照片 </span><span><img id="preview_menu_food_img'+food_index+'" src=""/><input type="file" onchange="readURL(this,\'preview_menu_food_img'+food_index+'\')" class="form-control-file food_img" name="food_img['+food_index+']" required></span></div></div>');
+          food_index++;
       });
     });
 

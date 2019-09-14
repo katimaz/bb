@@ -119,7 +119,11 @@
                                     </div>
                                 </div>
                     @elseif($value->class_flag == 1)
-                          <div class="jobs-item"> {{$value->offer_title}}：<span class="text-danger">{{is_null($value->price)?'0':$value->price}}</span>元 / {{$value->price_type}}起 </div>
+                        @foreach($min_food_prices as $min_food_price)
+                              @if($min_food_price->olo_id == $value->id)
+                                <div class="jobs-item"> {{$value->offer_title}}：<span class="text-danger">{{is_null($min_food_price->min_price)?'0':$min_food_price->min_price}}</span>元 / {{$value->price_type}}起 </div>
+                              @endif
+                        @endforeach
 {{--                          <div class="col text-center btnarr">--}}
 {{--                              <a href="#" class="btn btn-warning food_hire" data-toggle="modal" data-target="#example-food" olo_id="{{$value->id}}">雇用</a>--}}
 {{--                              <a href="#" class=" btn btn-success food_hire" data-toggle="modal" data-target="#example-food" olo_id="{{$value->id}}">詢問</a>--}}
@@ -152,7 +156,11 @@
                               </div>
                           </div>
                     @elseif($value->class_flag == 2)
-                          <div class="jobs-item"> {{$value->offer_title}}：<span class="text-danger">{{is_null($value->price)?'0':$value->price}}</span>元/ {{$value->price_type}}起 </div>
+                        @if($value->price_type == '報價')
+                              <div class="jobs-item"> {{$value->offer_title}}：{{'依'.$value->price_type}} </div>
+                        @else
+                              <div class="jobs-item"> {{$value->offer_title}}：<span class="text-danger">{{is_null($value->price)?'0':$value->price}}</span>元/ {{$value->price_type}}起 </div>
+                        @endif
 {{--                          <div class="col text-center btnarr">--}}
 {{--                              <a href="#" class="btn btn-warning design_hire" data-toggle="modal" data-target="#example-design" olo_id="{{$value->id}}">雇用</a>--}}
 {{--                              <a href="#" class=" btn btn-success design_hire" data-toggle="modal" data-target="#example-design" olo_id="{{$value->id}}">詢問</a>--}}
@@ -1544,7 +1552,7 @@
                 }else if(responses['olo'][0]['class_flag'] == 1){
                     $('#type1').find('.job-list').find('span').text(responses['olo'][0]['offer_title']);
                     $('#type1').find('.jobs-info').find('span').first().text((responses['user']['total_served_case'] == null?'0':responses['user']['total_served_case']) );
-                    $('#type1').find('.jobs-info').next('div').html(responses['olo'][0]['offer_title']+': <span class="text-danger">'+(responses['olo'][0]['price'] == null ?'0':responses['olo'][0]['price'])+'</span>元 / 起');
+                    $('#type1').find('.jobs-info').next('div').html(responses['olo'][0]['offer_title']+': <span class="text-danger">'+(responses['min_food_price'][0]['min_price'] == null ?'0':responses['min_food_price'][0]['min_price'])+'</span>元 / 起');
                     $('#type1').find('.intro').text((responses['olo'][0]['offer_description'] == null) ?'簡介：':'簡介：'+responses['olo'][0]['offer_description']);
                     $('#type1').find('.btnarr').find('a.btn-warning').attr("olo_id", $this.attr('id'));
                     $('#type1').find('.btnarr').find('a.btn-warning').addClass("food_hire");
@@ -1570,8 +1578,12 @@
                     }
                     $('#type1').find('.fix').html(str);
                 }else if(responses['olo'][0]['class_flag'] == 2){
-                    console.log(responses['olo'][0]['offer_title']);
-                    $('#type2').find('.jobs-item').html(responses['olo'][0]['offer_title']+': <span class="text-danger">'+(responses['olo'][0]['price'] == null ? '0':responses['olo'][0]['price'])+'</span>元 / '+(responses['olo'][0]['price_type'] == null ? '' : responses['olo'][0]['price_type']));
+                    if(responses['olo'][0]['price_type'] == '報價'){
+                        $('#type2').find('.jobs-item').html(responses['olo'][0]['offer_title']+':'+(responses['olo'][0]['price_type'] == null ? '' : ' 依'+responses['olo'][0]['price_type']));
+                    }else{
+                        $('#type2').find('.jobs-item').html(responses['olo'][0]['offer_title']+': <span class="text-danger">'+(responses['olo'][0]['price'] == null ? '0':responses['olo'][0]['price'])+'</span>元 / '+(responses['olo'][0]['price_type'] == null ? '' : responses['olo'][0]['price_type']));
+                    }
+
                     $('#type2').find('.intro').text((responses['olo'][0]['offer_description'] == null) ? '簡介：':'簡介：'+responses['olo'][0]['offer_description']);
                     $('#type2').find('.btnarr').find('a.btn-warning').attr("olo_id", $this.attr('id'));
                     $('#type2').find('.btnarr').find('a.btn-warning').addClass("design_hire");

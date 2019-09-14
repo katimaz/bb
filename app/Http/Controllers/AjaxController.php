@@ -172,8 +172,13 @@ class AjaxController extends Controller
         $imgs = olo_img::where('olo_id',$request->id)->get();
         $license_imgs = olo_license_img::where('olo_id',$request->id)->get();
         $videos = olo_video::where('olo_id',$request->id)->get();
+        $min_food_price = DB::table('olo_foods')
+            ->select(DB::raw('min(price) as min_price, olo_id'))
+            ->where('olo_id', $request->id)
+            ->groupBy('olo_id')
+            ->get();
 
-        return response()->json(['user'=>$user,'olo' => $olo,'foods' => $foods,'imgs' => $imgs,'license_imgs' => $license_imgs,'videos' => $videos]);
+        return response()->json(['user'=>$user,'olo' => $olo,'foods' => $foods,'imgs' => $imgs,'license_imgs' => $license_imgs,'videos' => $videos,'min_food_price' => $min_food_price]);
     }
 
     public function get_office_list(Request $request){
@@ -502,7 +507,7 @@ class AjaxController extends Controller
 				$file = $value;
 				$file_name = strtolower($value->getClientOriginalName());
 				$subDot = strtolower($value->getClientOriginalExtension());
-				if($subDot == 'jpeg' || $subDot == 'jpg' || $subDot == 'JPG') {
+				if($subDot == 'jpeg' || $subDot == 'jpg' || $subDot == 'JPG' || $subDot == 'png'|| $subDot == 'PNG') {
 					$Fn_name = Utils::getFileName($file_name.$time, $subDot);
 					$path = storage_path()."/files/pic/license_img/photoBig/";
 					$value->move($path, $Fn_name);
@@ -519,7 +524,7 @@ class AjaxController extends Controller
 					$olo_license_img_db->save();
 				} else {
 					// return View('web/error_message', array('message' => '錯誤的影像格式，請使用JPG圖檔!', 'goUrl'=>'/register'));
-					return response()->json(['success' => false, 'msg' => '錯誤的影像格式，請使用JPG圖檔!']);
+					return response()->json(['success' => false, 'msg' => '錯誤的影像格式，請使用JPG & PNG圖檔!']);
 				}
 			}
 		}
@@ -550,7 +555,7 @@ class AjaxController extends Controller
 				$file = $value;
 				$file_name = strtolower($value->getClientOriginalName());
 				$subDot = strtolower($value->getClientOriginalExtension());
-				if($subDot == 'jpeg' || $subDot == 'jpg' || $subDot == 'JPG') {
+				if($subDot == 'jpeg' || $subDot == 'jpg' || $subDot == 'JPG' || $subDot == 'png'|| $subDot == 'PNG') {
 					$Fn_name = Utils::getFileName($file_name.$time, $subDot);
 					$path = storage_path()."/files/pic/img/photoBig/";
 					$value->move($path, $Fn_name);
@@ -567,7 +572,7 @@ class AjaxController extends Controller
 					$olo_img_db->img = $Fn_name;
 					$olo_img_db->save();
 				} else {
-					return response()->json(['success' => false, 'msg' => '錯誤的影像格式，請使用JPG圖檔!']);
+					return response()->json(['success' => false, 'msg' => '錯誤的影像格式，請使用JPG & PNG圖檔!']);
 				}
 			}
 		}
@@ -628,7 +633,7 @@ class AjaxController extends Controller
 				$file = $value;
 				$file_name = strtolower($value->getClientOriginalName());
 				$subDot = strtolower($value->getClientOriginalExtension());
-				if($subDot == 'jpeg' || $subDot == 'jpg' || $subDot == 'JPG') {
+				if($subDot == 'jpeg' || $subDot == 'jpg' || $subDot == 'JPG' || $subDot == 'png'|| $subDot == 'PNG') {
 					$Fn_name = Utils::getFileName($file_name.$time, $subDot);
 					$path = storage_path()."/files/pic/img/photoBig/";
 					$value->move($path, $Fn_name);
@@ -642,7 +647,7 @@ class AjaxController extends Controller
 
 					$food_img[$key] = $Fn_name;
 				} else {
-					return response()->json(['success' => false, 'msg' => '錯誤的影像格式，請使用JPG圖檔!']);
+					return response()->json(['success' => false, 'msg' => '錯誤的影像格式，請使用JPG & PNG圖檔!']);
 				}
 			}
 		}

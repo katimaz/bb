@@ -501,13 +501,18 @@ class FrontController extends Controller
         }
 
         $foods = olo_food::wherein('olo_id',$list_ids)->get();
+        $min_food_prices = DB::table('olo_foods')
+            ->select(DB::raw('min(price) as min_price, olo_id'))
+            ->wherein('olo_id', $list_ids)
+            ->groupBy('olo_id')
+            ->get();
         $imgs = olo_img::wherein('olo_id',$list_ids)->get();
         $license_imgs = olo_license_img::wherein('olo_id',$list_ids)->get();
         $videos = olo_video::wherein('olo_id',$list_ids)->get();
 		// 評價
 		$service_rate = [];
         $member_fav = member_favorite::where('helper_id',$user->id)->where('mem_id',$member_addrs_id)->get();
-		return View('web/helper_detail', ['distance' => $distance,'member_fav' => $member_fav, 'user' => $user, 'olo' => $olo,'foods' => $foods,'imgs' => $imgs,'license_imgs' => $license_imgs,'videos' => $videos]);
+		return View('web/helper_detail', ['distance' => $distance,'member_fav' => $member_fav, 'user' => $user, 'olo' => $olo,'foods' => $foods,'imgs' => $imgs,'license_imgs' => $license_imgs,'videos' => $videos,'min_food_prices' => $min_food_prices]);
 	}
 
 	public function h_set()
